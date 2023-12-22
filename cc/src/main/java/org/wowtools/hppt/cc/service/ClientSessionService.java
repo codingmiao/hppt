@@ -1,22 +1,19 @@
 package org.wowtools.hppt.cc.service;
 
 import com.google.protobuf.ByteString;
-import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Response;
 import org.wowtools.hppt.cc.StartCc;
 import org.wowtools.hppt.common.protobuf.ProtoMessage;
 import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.Constant;
+import org.wowtools.hppt.common.util.HttpUtil;
 
-import java.net.URI;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -27,7 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ClientSessionService {
 
     private static final HttpClient httpClient = HttpClient.newHttpClient();
-    private static final URI talkUri = URI.create(StartCc.config.serverUrl + "/talk?c=" + StartCc.loginCode);
+    private static final String talkUri = StartCc.config.serverUrl + "/talk?c=";
     private static long sleepTime = StartCc.config.initSleepTime - StartCc.config.addSleepTime;
     private static long noSleepLimitTime = 0;
     private static final AtomicBoolean sleeping = new AtomicBoolean(false);
@@ -228,45 +225,26 @@ public class ClientSessionService {
         }
 
         log.debug("发送数据 bytesPbs {} commands {} 字节数 {}", bytesPbList.size(), commandList.size(), requestBody.length);
-        HttpRequest.BodyPublisher body = requestBody.length == 0 ?
-                HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofByteArray(requestBody);
-        HttpRequest request = HttpRequest.newBuilder()
-                .version(HttpClient.Version.HTTP_1_1)
-                .uri(talkUri)
-                .POST(body)
-                .build();
 
-        HttpResponse<byte[]> response = null;
-        for (int i = 0; i < 3; i++) {
-            try {
-                if (log.isDebugEnabled()) {
-                    long t = System.currentTimeMillis();
-                    response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
-                    log.debug("发送http请求耗时 {}", System.currentTimeMillis() - t);
-                } else {
-                    response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
-                }
-                break;
-            } catch (InterruptedException e) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException ex) {
-                }
-            }
-        }
-        if (null == response) {
-            throw new InterruptedException();
+        Response response;
+        if (log.isDebugEnabled()) {
+            long t = System.currentTimeMillis();
+            response = HttpUtil.doPost(talkUri + StartCc.loginCode, requestBody);
+            log.debug("发送http请求耗时 {}", System.currentTimeMillis() - t);
+        } else {
+            response = HttpUtil.doPost(talkUri + StartCc.loginCode, requestBody);
         }
 
+
+        byte[] responseBody;
         try {
-            if ("not_login".equals(response.headers().firstValue("err").get())) {
+            if ("not_login".equals(response.headers().get("err"))) {
                 StartCc.login();
             }
-        } catch (Exception e) {
+            responseBody = response.body().bytes();
+        } finally {
+            response.close();
         }
-
-        //响应结果转protobuf再从pbf中取出来加入对应的队列中
-        byte[] responseBody = response.body();
 
         ProtoMessage.MessagePb rMessagePb;
         try {

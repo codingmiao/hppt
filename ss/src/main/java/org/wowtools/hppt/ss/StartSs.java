@@ -11,6 +11,8 @@ import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.ss.pojo.SsConfig;
 import org.wowtools.hppt.ss.servlet.*;
 
+import java.io.File;
+
 /**
  * @author liuyu
  * @date 2023/11/25
@@ -20,7 +22,7 @@ public class StartSs {
     public static final SsConfig config;
 
     static {
-        Configurator.initialize(null, ResourcesReader.getRootPath(StartSs.class) + "/log4j2.xml");
+        Configurator.reconfigure(new File(ResourcesReader.getRootPath(StartSs.class) + "/log4j2.xml").toURI());
 
         try {
             config = Constant.ymlMapper.readValue(ResourcesReader.readStr(StartSs.class, "ss.yml"), SsConfig.class);

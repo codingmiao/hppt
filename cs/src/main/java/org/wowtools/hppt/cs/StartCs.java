@@ -15,6 +15,8 @@ import org.wowtools.hppt.cs.servlet.LoginServlet;
 import org.wowtools.hppt.cs.servlet.TalkServlet;
 import org.wowtools.hppt.cs.servlet.TimeServlet;
 
+import java.io.File;
+
 /**
  * @author liuyu
  * @date 2023/12/20
@@ -25,7 +27,7 @@ public class StartCs {
     public static CsConfig config;
 
     static {
-        Configurator.initialize(null, ResourcesReader.getRootPath(StartCs.class) + "/log4j2.xml");
+        Configurator.reconfigure(new File(ResourcesReader.getRootPath(StartCs.class) + "/log4j2.xml").toURI());
         try {
             config = Constant.ymlMapper.readValue(ResourcesReader.readStr(StartCs.class, "cs.yml"), CsConfig.class);
         } catch (Exception e) {
