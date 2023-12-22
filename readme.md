@@ -54,7 +54,7 @@ cc
     - cc.yml
     - log4j2.xml
 ```
-
+修改cc.yml
 ```yaml
 # 客户端id，每个cc.jar用一个，不要重复
 clientId: home
@@ -156,7 +156,7 @@ sc
     - log4j2.xml
 ```
 
-并调整cc.yml的配置信息:
+并调整sc.yml的配置信息:
 
 ```yaml
 #客户端id，每个sc.jar用一个，不要重复
