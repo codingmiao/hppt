@@ -65,11 +65,23 @@ public class HttpUtil {
 
 
     public static Response execute(Request request) {
-        try {
-            return okHttpClient.newCall(request).execute();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        java.io.InterruptedIOException interruptedIOException = null;
+        for (int i = 0; i < 5; i++) {
+            try {
+                return okHttpClient.newCall(request).execute();
+            } catch (java.io.InterruptedIOException e) {
+                interruptedIOException = e;
+                try {
+                    Thread.sleep(10);
+                } catch (Exception ex) {
+                    log.debug("发送请求sleep被打断");
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
+        throw new RuntimeException(interruptedIOException);
+
     }
 
 

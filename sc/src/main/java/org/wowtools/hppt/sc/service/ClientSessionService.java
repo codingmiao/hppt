@@ -10,10 +10,6 @@ import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.common.util.HttpUtil;
 import org.wowtools.hppt.sc.StartSc;
 
-import java.io.IOException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,7 +46,7 @@ public class ClientSessionService {
     public static int initServerSession(String remoteHost, int remotePort) {
         String body = StartSc.loginCode + ":" + remoteHost + ":" + remotePort;
         String res;
-        try (Response response = HttpUtil.doPost(initUri, body.getBytes(StandardCharsets.UTF_8))){
+        try (Response response = HttpUtil.doPost(initUri, body.getBytes(StandardCharsets.UTF_8))) {
             res = response.body().string();
         } catch (Exception e) {
             throw new RuntimeException("获取sessionId异常", e);
