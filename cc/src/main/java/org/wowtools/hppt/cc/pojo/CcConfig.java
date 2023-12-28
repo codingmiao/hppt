@@ -18,22 +18,27 @@ public class CcConfig {
     /**
      * 开始时闲置几毫秒发一次http请求，越短延迟越低但越耗性能
      */
-    public long initSleepTime = 1000;
+    public long initSleepTime = 1_000;
 
     /**
      * 当收到空消息时，闲置毫秒数增加多少毫秒
      */
-    public long addSleepTime = 1000;
+    public long addSleepTime = 1_000;
+
+    /**
+     * 当用户端输入字节时，唤醒发送线程，此后多少毫秒不睡眠
+     */
+    public long awakenTime = 10_000;
 
     /**
      * 闲置毫秒数最大到多少毫秒
      */
-    public long maxSleepTime = 60000;
+    public long maxSleepTime = 60_000;
 
     /**
      * 兜底策略，会话超过多少毫秒未确认后自行关闭
      */
-    public long sessionTimeout = 60000;
+    public long sessionTimeout = 60_000;
 
     /**
      * 向服务端发数据请求体的字节数最大值

@@ -9,7 +9,6 @@ import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.common.util.HttpUtil;
 
-import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,7 +22,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class ClientSessionService {
 
-    private static final HttpClient httpClient = HttpClient.newHttpClient();
     private static final String talkUri = StartCc.config.serverUrl + "/talk?c=";
     private static long sleepTime = StartCc.config.initSleepTime - StartCc.config.addSleepTime;
     private static long noSleepLimitTime = 0;
@@ -75,6 +73,7 @@ public class ClientSessionService {
                     } finally {
                         sleeping.set(false);
                     }
+                    StartCc.tryLogin();
                 }
             }
         });
@@ -239,7 +238,9 @@ public class ClientSessionService {
         byte[] responseBody;
         try {
             if ("not_login".equals(response.headers().get("err"))) {
-                StartCc.login();
+                //发现未登录标识，尝试重新登录
+                StartCc.tryLogin();
+                return true;
             }
             responseBody = response.body().bytes();
         } finally {
@@ -259,8 +260,8 @@ public class ClientSessionService {
             rMessagePb = ProtoMessage.MessagePb.parseFrom(responseBody);
         } catch (Exception e) {
             log.warn("服务端响应错误  {}", new String(responseBody, StandardCharsets.UTF_8), e);
-            Thread.sleep(10000);
-            return isEmpty;
+            StartCc.tryLogin();
+            return true;
         }
 
         //收命令
@@ -310,6 +311,7 @@ public class ClientSessionService {
                     clientSession.putBytes(bytesPb.getBytes().toByteArray());
                 }
             }
+            noSleepLimitTime = System.currentTimeMillis() + StartCc.config.awakenTime;
         }
 
         return isEmpty;
@@ -322,7 +324,6 @@ public class ClientSessionService {
         if (sleeping.get()) {
             try {
                 sleepTime = StartCc.config.initSleepTime;
-                noSleepLimitTime = System.currentTimeMillis() + StartCc.config.addSleepTime;
                 sendThread.interrupt();
                 log.info("唤醒发送线程");
             } catch (Exception e) {
@@ -330,4 +331,5 @@ public class ClientSessionService {
             }
         }
     }
+
 }

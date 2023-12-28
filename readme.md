@@ -67,6 +67,8 @@ initSleepTime: 10
 addSleepTime: 100
 # 闲置毫秒数最大到多少毫秒
 maxSleepTime: 10000
+# 当用户端输入字节时，唤醒发送线程，此后多少毫秒不睡眠
+awakenTime: 15000
 # 向服务端发数据请求体的字节数最大值 有时会出现413 Request Entity Too Large问题，没办法改nginx的话就用这个值限制
 maxSendBodySize: 2147483647
 # 是否启用压缩，默认启用 需和服务端保持一致
@@ -216,3 +218,7 @@ forwards:
 ## 安全性如何？
 必须使用指定的clientId才能连接，数据传输过程中对字节进行了加密，如果你还需要更多的个性化验证，比如用户登录，可以发邮件到[liuyu@wowtools.org](liuyu@wowtools.org)进行定制化开发。
 
+# 后续计划
+输入字节审计
+
+自定义字节修改功能

@@ -80,11 +80,25 @@ public class StartCc {
             throw new RuntimeException("获取服务器时间异常", e);
         }
         if ("1".equals(res)) {
+            log.info("登录成功");
             return true;
         } else {
             log.warn("登录失败 " + res);
             return false;
         }
+    }
+
+    private static long lastTryLoginTime = 0;
+
+    public static synchronized void tryLogin() {
+        long t = System.currentTimeMillis();
+        if (t - lastTryLoginTime < StartCc.config.maxSleepTime) {
+            log.debug("登录重试时间过短，跳过重试");
+            return;
+        }
+        lastTryLoginTime = t;
+        log.info("重新登录");
+        Thread.startVirtualThread(StartCc::login);
     }
 
     public static void main(String[] args) {
