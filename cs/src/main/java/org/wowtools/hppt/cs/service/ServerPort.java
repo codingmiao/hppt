@@ -11,6 +11,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import lombok.extern.slf4j.Slf4j;
+import org.wowtools.hppt.common.util.BytesUtil;
 
 import java.util.List;
 
@@ -91,12 +92,10 @@ public class ServerPort {
 
         @Override
         protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
-            int n = byteBuf.readableBytes();
-            byte[] bytes = new byte[n];
-            byteBuf.readBytes(bytes);
+            byte[] bytes = BytesUtil.byteBuf2bytes(byteBuf);
             ServerSession session = ServerSessionManager.getServerSession(channelHandlerContext);
             if (null != session) {
-                log.debug("ServerSession {} 收到用户端发送字节数 {}", session.getSessionId(), n);
+                log.debug("ServerSession {} 收到用户端发送字节数 {}", session.getSessionId(), bytes.length);
                 session.sendBytes(bytes);
             }
 

@@ -2,7 +2,6 @@ package org.wowtools.hppt.cc.service;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -103,8 +102,7 @@ public class ClientSession {
                         if (bytes == null) {
                             continue;
                         }
-                        ByteBuf msg = Unpooled.copiedBuffer(bytes);
-                        ctx.writeAndFlush(msg);
+                        BytesUtil.writeToChannelHandlerContext(ctx, bytes);
                         log.debug("serverSession {} 向目标端口发送字节 {}", sessionId, bytes.length);
                     }
                 } catch (Exception e) {
@@ -126,9 +124,7 @@ public class ClientSession {
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
-            ByteBuf byteBuf = (ByteBuf) msg;
-            byte[] bytes = new byte[byteBuf.readableBytes()];
-            byteBuf.readBytes(bytes);
+            byte[] bytes = BytesUtil.byteBuf2bytes((ByteBuf) msg);
             log.debug("serverSession {} 收到目标端口字节 {}", sessionId, bytes.length);
             try {
                 serverSessionSendQueue.add(bytes);

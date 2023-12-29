@@ -1,5 +1,8 @@
 package org.wowtools.hppt.common.util;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -99,5 +102,25 @@ public class BytesUtil {
         }
         return baos.toByteArray();
     }
+
+    public static ByteBuf bytes2byteBuf(ChannelHandlerContext ctx, byte[] bytes) {
+        ByteBuf byteBuf  = ctx.alloc().buffer(bytes.length, bytes.length);
+        byteBuf.writeBytes(bytes);
+        return byteBuf;
+    }
+
+    //把字节写入ChannelHandlerContext
+    public static void writeToChannelHandlerContext(ChannelHandlerContext ctx, byte[] bytes) {
+        ByteBuf byteBuf = bytes2byteBuf(ctx, bytes);
+        ctx.writeAndFlush(byteBuf);
+    }
+
+    public static byte[] byteBuf2bytes(ByteBuf byteBuf) {
+        byte[] bytes = new byte[byteBuf.readableBytes()];
+        byteBuf.readBytes(bytes);
+        return bytes;
+    }
+
+
 
 }

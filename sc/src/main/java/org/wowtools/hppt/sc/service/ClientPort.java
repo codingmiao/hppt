@@ -8,6 +8,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import lombok.extern.slf4j.Slf4j;
+import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.sc.StartSc;
 
 import java.util.List;
@@ -102,13 +103,11 @@ public class ClientPort {
 
         @Override
         protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
-            int n = byteBuf.readableBytes();
-            byte[] bytes = new byte[n];
-            byteBuf.readBytes(bytes);
+            byte[] bytes = BytesUtil.byteBuf2bytes(byteBuf);
             ClientSession clientSession = clientSessionMapByCtx.get(channelHandlerContext);
             if (null != clientSession) {
                 //触发数据回调事件 转发数据到真实端口
-                log.debug("ClientSession {} 收到客户端发送字节数 {}", clientSession.getSessionId(), n);
+                log.debug("ClientSession {} 收到客户端发送字节数 {}", clientSession.getSessionId(), bytes.length);
                 clientSession.sendBytes(bytes);
             }
         }

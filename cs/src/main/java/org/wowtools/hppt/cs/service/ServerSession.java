@@ -1,7 +1,5 @@
 package org.wowtools.hppt.cs.service;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
@@ -41,8 +39,7 @@ public class ServerSession {
      */
     public void putBytes(byte[] bytes) {
         log.debug("ClientSession {} 收到服务端发来的字节数 {}", sessionId, bytes.length);
-        ByteBuf msg = Unpooled.copiedBuffer(bytes);
-        ctx.writeAndFlush(msg);
+        BytesUtil.writeToChannelHandlerContext(ctx,bytes);
     }
 
     /**
