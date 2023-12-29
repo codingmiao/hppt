@@ -47,6 +47,7 @@ public class ClientSessionService {
         String body = StartSc.loginCode + ":" + remoteHost + ":" + remotePort;
         String res;
         try (Response response = HttpUtil.doPost(initUri, body.getBytes(StandardCharsets.UTF_8))) {
+            assert response.body() != null;
             res = response.body().string();
         } catch (Exception e) {
             throw new RuntimeException("获取sessionId异常", e);
@@ -285,7 +286,7 @@ public class ClientSessionService {
         } catch (Exception e) {
             log.warn("服务端响应错误  {}", new String(responseBody, StandardCharsets.UTF_8), e);
             Thread.sleep(10000);
-            return isEmpty;
+            return true;
         }
 
         //收字节

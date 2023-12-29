@@ -37,7 +37,6 @@ public class TCPForwardingServer {
             ByteBuf readBuffer = (ByteBuf) msg;
             readBuffer.retain();
             channel.writeAndFlush(readBuffer);
-            readBuffer.release();
         }
 
     }

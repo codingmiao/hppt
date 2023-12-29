@@ -85,7 +85,7 @@ public class ServerSession {
         }
 
         @Override
-        public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        public void channelActive(ChannelHandlerContext ctx) {
             //连接建立 从队列中取数据发送到目标端口
             if (null != sendThread) {
                 throw new RuntimeException("逻辑错误 sendThread 重复构建");

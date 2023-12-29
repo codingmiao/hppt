@@ -69,7 +69,6 @@ public class SimpleNettyClient {
                 while (true) {
                     ByteBuf message = Unpooled.copiedBuffer(send, CharsetUtil.UTF_8);
                     ctx.writeAndFlush(message);
-
                     try {
                         Thread.sleep(2000);
                     } catch (InterruptedException e) {

@@ -28,13 +28,11 @@ public class ClientPort {
         void on(ClientPort clientPort, ChannelHandlerContext channelHandlerContext);
     }
 
-    private final int localPort;
     private final OnClientConn onClientConn;
 
     private final ClientPort clientPort = this;
 
-    public ClientPort(int localPort, OnClientConn onClientConn) throws Exception {
-        this.localPort = localPort;
+    public ClientPort(int localPort, OnClientConn onClientConn) {
         this.onClientConn = onClientConn;
 
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
@@ -103,7 +101,7 @@ public class ClientPort {
         }
 
         @Override
-        protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
+        protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
             int n = byteBuf.readableBytes();
             byte[] bytes = new byte[n];
             byteBuf.readBytes(bytes);

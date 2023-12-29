@@ -22,13 +22,13 @@ import java.nio.file.StandardCopyOption;
 public class UpFileServlet extends HttpServlet {
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         handleFileUpload(req);
         resp.getWriter().write("File uploaded successfully!");
         resp.setHeader("Server","hppt");
     }
 
-    private void handleFileUpload(HttpServletRequest request) throws IOException, ServletException {
+    private void handleFileUpload(HttpServletRequest request) throws IOException {
         String uploadDir = StartSs.config.fileDir;
 
         File uploadDirFile = new File(uploadDir);

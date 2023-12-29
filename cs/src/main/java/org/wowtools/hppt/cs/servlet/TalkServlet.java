@@ -28,6 +28,7 @@ public class TalkServlet extends HttpServlet {
         loginCode = loginCode.replace(" ", "+");
         ClientService.Client client = ClientService.getClient(loginCode);
         if (null == client) {
+            log.warn("not_login: {}", loginCode);
             resp.setHeader("err", "not_login");
             return;
         }

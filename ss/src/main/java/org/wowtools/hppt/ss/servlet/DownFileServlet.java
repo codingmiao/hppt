@@ -22,7 +22,7 @@ import java.io.OutputStream;
 public class DownFileServlet extends HttpServlet {
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse response) throws IOException {
         // 设置响应类型和字符编码
         response.setContentType("application/octet-stream");
         response.setCharacterEncoding("UTF-8");
@@ -48,7 +48,7 @@ public class DownFileServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         doPost(req, resp);
     }
 

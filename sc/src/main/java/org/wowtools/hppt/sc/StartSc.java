@@ -2,9 +2,6 @@ package org.wowtools.hppt.sc;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.wowtools.common.utils.ResourcesReader;
 import org.wowtools.hppt.common.util.AesCipherUtil;
@@ -18,12 +15,7 @@ import org.wowtools.hppt.sc.service.ClientSessionManager;
 import org.wowtools.hppt.sc.service.ClientSessionService;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.net.URI;
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -70,6 +62,7 @@ public class StartSc {
         long localTs = System.currentTimeMillis();
         String res;
         try (Response response = HttpUtil.doPost(StartSc.config.serverUrl + "/time")) {
+            assert response.body() != null;
             res = response.body().string();
         } catch (Exception e) {
             throw new RuntimeException("获取服务器时间异常", e);
@@ -86,6 +79,7 @@ public class StartSc {
         String res;
         try (Response response = HttpUtil.doPost(StartSc.config.serverUrl + "/login?c="
                 + URLEncoder.encode(loginCode, StandardCharsets.UTF_8))) {
+            assert response.body() != null;
             res = response.body().string();
         } catch (Exception e) {
             throw new RuntimeException("获取服务器时间异常", e);

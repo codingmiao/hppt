@@ -90,7 +90,7 @@ public class ServerPort {
         }
 
         @Override
-        protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
+        protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
             int n = byteBuf.readableBytes();
             byte[] bytes = new byte[n];
             byteBuf.readBytes(bytes);

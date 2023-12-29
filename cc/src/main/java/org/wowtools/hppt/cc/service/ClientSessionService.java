@@ -242,12 +242,14 @@ public class ClientSessionService {
                 StartCc.tryLogin();
                 return true;
             }
+            assert response.body() != null;
             responseBody = response.body().bytes();
         } finally {
             response.close();
         }
 
         ProtoMessage.MessagePb rMessagePb;
+        byte[] responseBody0 = responseBody;
         try {
             //解密、解压
             if (StartCc.config.enableEncrypt) {
@@ -259,7 +261,7 @@ public class ClientSessionService {
             log.debug("收到服务端发回字节数 {}", responseBody.length);
             rMessagePb = ProtoMessage.MessagePb.parseFrom(responseBody);
         } catch (Exception e) {
-            log.warn("服务端响应错误  {}", new String(responseBody, StandardCharsets.UTF_8), e);
+            log.warn("服务端响应错误  [{}]", new String(responseBody0, StandardCharsets.UTF_8), e);
             StartCc.tryLogin();
             return true;
         }

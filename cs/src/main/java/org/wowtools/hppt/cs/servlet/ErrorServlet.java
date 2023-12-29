@@ -19,7 +19,7 @@ import java.io.PrintWriter;
 public class ErrorServlet extends HttpServlet {
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse response) throws IOException {
         try (PrintWriter write = response.getWriter()){
             write.write("error " + response.getStatus());
             response.setHeader("Server","hppt");
@@ -27,12 +27,12 @@ public class ErrorServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         doPost(req, resp);
     }
 
     @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         doPost(req, resp);
     }
 }

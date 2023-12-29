@@ -12,11 +12,7 @@ import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.common.util.HttpUtil;
 
 import java.io.File;
-import java.net.URI;
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -29,7 +25,7 @@ public class StartCc {
 
     public static AesCipherUtil aesCipherUtil;
 
-    public static final String loginCode;
+    public static String loginCode;
 
     static {
         Configurator.reconfigure(new File(ResourcesReader.getRootPath(StartCc.class) + "/log4j2.xml").toURI());
@@ -50,7 +46,6 @@ public class StartCc {
                 throw new RuntimeException("登录失败");
             }
         }
-        loginCode = BytesUtil.bytes2base64(aesCipherUtil.encryptor.encrypt(StartCc.config.clientId.getBytes(StandardCharsets.UTF_8)));
         log.info("登录成功");
     }
 
@@ -59,6 +54,7 @@ public class StartCc {
         long localTs = System.currentTimeMillis();
         String res;
         try (Response response = HttpUtil.doPost(StartCc.config.serverUrl + "/time")) {
+            assert response.body() != null;
             res = response.body().string();
         } catch (Exception e) {
             throw new RuntimeException("获取服务器时间异常", e);
@@ -75,12 +71,14 @@ public class StartCc {
         String res;
         try (Response response = HttpUtil.doPost(StartCc.config.serverUrl + "/login?c="
                 + URLEncoder.encode(loginCode, StandardCharsets.UTF_8))) {
+            assert response.body() != null;
             res = response.body().string();
         } catch (Exception e) {
             throw new RuntimeException("获取服务器时间异常", e);
         }
         if ("1".equals(res)) {
-            log.info("登录成功");
+            StartCc.loginCode = BytesUtil.bytes2base64(aesCipherUtil.encryptor.encrypt(StartCc.config.clientId.getBytes(StandardCharsets.UTF_8)));
+            log.info("登录成功 {}", StartCc.loginCode);
             return true;
         } else {
             log.warn("登录失败 " + res);

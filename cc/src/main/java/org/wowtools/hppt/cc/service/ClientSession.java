@@ -85,7 +85,7 @@ public class ClientSession {
         }
 
         @Override
-        public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        public void channelActive(ChannelHandlerContext ctx) {
             //连接建立 从队列中取数据发送到目标端口
             if (null != sendThread) {
                 throw new RuntimeException("逻辑错误 sendThread 重复构建");
@@ -103,8 +103,8 @@ public class ClientSession {
                         if (bytes == null) {
                             continue;
                         }
-                        ByteBuf message = Unpooled.copiedBuffer(bytes);
-                        ctx.writeAndFlush(message);
+                        ByteBuf msg = Unpooled.copiedBuffer(bytes);
+                        ctx.writeAndFlush(msg);
                         log.debug("serverSession {} 向目标端口发送字节 {}", sessionId, bytes.length);
                     }
                 } catch (Exception e) {
