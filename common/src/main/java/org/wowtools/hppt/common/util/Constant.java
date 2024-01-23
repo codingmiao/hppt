@@ -14,6 +14,8 @@ public class Constant {
 
     public static final String sessionIdJoinFlag = ",";
 
+    public static final String commandParamJoinFlag = "\n";
+
     //ss端执行的命令代码
     public static final class SsCommands {
         //关闭Session 0逗号连接需要的SessionId

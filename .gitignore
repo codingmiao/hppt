@@ -47,3 +47,5 @@ sc.yml
 ss.yml
 
 dependency-reduced-pom.xml
+
+/_localtest/src/

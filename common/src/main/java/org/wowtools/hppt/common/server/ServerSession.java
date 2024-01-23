@@ -15,6 +15,7 @@ public class ServerSession {
 
     private final Channel channel;
     private final int sessionId;
+    private final String clientId;
 
     private final long sessionTimeout;
 
@@ -24,9 +25,10 @@ public class ServerSession {
     //上次活跃时间
     private long activeTime;
 
-    ServerSession(long sessionTimeout, int sessionId, ServerSessionLifecycle lifecycle, Channel channel) {
+    ServerSession(long sessionTimeout, int sessionId, String clientId, ServerSessionLifecycle lifecycle, Channel channel) {
         activeSession();
         this.sessionId = sessionId;
+        this.clientId = clientId;
         this.channel = channel;
         this.sessionTimeout = sessionTimeout;
         this.lifecycle = lifecycle;
@@ -76,10 +78,17 @@ public class ServerSession {
 
     @Override
     public String toString() {
-        return "[" + sessionId + (isTimeOut() ? " timeout]" : " active]");
+        return "("
+                + clientId + " "
+                + sessionId + (isTimeOut() ? " timeout)" : " active" +
+                ")");
     }
 
     public Channel getChannel() {
         return channel;
+    }
+
+    public String getClientId() {
+        return clientId;
     }
 }

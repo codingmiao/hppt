@@ -11,6 +11,9 @@ import org.wowtools.hppt.common.util.BytesUtil;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.wowtools.hppt.common.util.Constant.commandParamJoinFlag;
 
 /**
  * @author liuyu
@@ -19,10 +22,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class ServerSessionManager {
 
+    private final AtomicInteger sessionIdBuilder = new AtomicInteger();
+
     //<sessionId,session>
     private final Map<Integer, ServerSession> serverSessionMap = new ConcurrentHashMap<>();
     //<channel,session>
     private final Map<Channel, ServerSession> channelServerSessionMap = new ConcurrentHashMap<>();
+    //<clientId,Map<sessionId,session>>
+    private final Map<String, Map<Integer, ServerSession>> clientIdServerSessionMap = new ConcurrentHashMap<>();
 
     private final Bootstrap bootstrap = new Bootstrap();
     private final ServerSessionLifecycle lifecycle;
@@ -48,7 +55,7 @@ public class ServerSessionManager {
                 } catch (InterruptedException e) {
                     continue;
                 }
-                log.info("check session: serverSessionMap {} channelServerSessionMap {} ", serverSessionMap.size(),channelServerSessionMap.size());
+                log.info("check session: serverSessionMap {} channelServerSessionMap {} ", serverSessionMap.size(), channelServerSessionMap.size());
                 HashSet<ServerSession> needClosedSessions = new HashSet<>();
                 serverSessionMap.forEach((id, session) -> {
                     if (session.isTimeOut()) {
@@ -60,8 +67,6 @@ public class ServerSessionManager {
                 channelServerSessionMap.forEach((c, session) -> {
                     if (session.isTimeOut()) {
                         needClosedSessions.add(session);
-                    } else if (session.isNeedCheckActive()) {
-                        lifecycle.checkActive(session);
                     }
                 });
                 for (ServerSession session : needClosedSessions) {
@@ -73,12 +78,23 @@ public class ServerSessionManager {
         });
     }
 
-    public ServerSession createServerSession(String host, int port, int sessionId) {
-        log.info("new ServerSession {} {}:{}", sessionId, host, port);
+    public ServerSession createServerSession(String commandParam) {
+        String[] commandParams = commandParam.split(commandParamJoinFlag);
+        String clientId = commandParams[0];
+        String host = commandParams[1];
+        int port = Integer.parseInt(commandParams[3]);
+        return createServerSession(clientId, host, port);
+    }
+
+    public ServerSession createServerSession(String clientId, String host, int port) {
+        int sessionId = sessionIdBuilder.addAndGet(1);
+        log.info("new ServerSession {} {}:{} from {}", sessionId, host, port, clientId);
         Channel channel = bootstrap.connect(host, port).channel();
-        ServerSession serverSession = new ServerSession(sessionTimeout, sessionId, lifecycle, channel);
+        ServerSession serverSession = new ServerSession(sessionTimeout, sessionId, clientId, lifecycle, channel);
         channelServerSessionMap.put(channel, serverSession);
         serverSessionMap.put(sessionId, serverSession);
+        Map<Integer, ServerSession> clientSessions = clientIdServerSessionMap.computeIfAbsent(clientId, (id) -> new ConcurrentHashMap<>());
+        clientSessions.put(sessionId, serverSession);
         return serverSession;
     }
 
@@ -92,6 +108,7 @@ public class ServerSessionManager {
         if (null != serverSessionMap.remove(serverSession.getSessionId())) {
             lifecycle.closed(serverSession);
         }
+        clientIdServerSessionMap.get(serverSession.getClientId()).remove(serverSession.getSessionId());
     }
 
     private class SimpleHandler extends ChannelInboundHandlerAdapter {
