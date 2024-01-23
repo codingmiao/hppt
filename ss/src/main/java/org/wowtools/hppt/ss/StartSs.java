@@ -1,5 +1,8 @@
 package org.wowtools.hppt.ss;
 
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.eclipse.jetty.server.Server;
@@ -12,6 +15,7 @@ import org.wowtools.hppt.ss.pojo.SsConfig;
 import org.wowtools.hppt.ss.servlet.*;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * @author liuyu
@@ -34,6 +38,9 @@ public class StartSs {
     public static void main(String[] args) throws Exception {
         log.info("*********");
         Server server = new Server(config.port);
+
+
+
         ServletContextHandler context = new ServletContextHandler(server, "/");
         context.addServlet(new ServletHolder(new TimeServlet()), "/time");
         context.addServlet(new ServletHolder(new LoginServlet()), "/login");
@@ -43,6 +50,7 @@ public class StartSs {
 //        context.addServlet(new ServletHolder(new DownFileServlet()), "/down");
         context.addServlet(new ServletHolder(new ErrorServlet()), "/err");
 
+
         ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();
         errorHandler.setShowServlet(false);
         errorHandler.setShowStacks(false);
@@ -51,8 +59,24 @@ public class StartSs {
 
         context.setErrorHandler(errorHandler);
 
+        context.addFilter(DisableTraceFilter.class,"/*",null);
+
         log.info("服务端启动完成 端口 {}", config.port);
         server.start();
         server.join();
+    }
+
+    public static final class DisableTraceFilter implements Filter {
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+            HttpServletRequest httpRequest = (HttpServletRequest) request;
+            String m = httpRequest.getMethod();
+            if ("TRACE".equalsIgnoreCase(m) || "TRACK".equalsIgnoreCase(m)) {
+                HttpServletResponse httpResponse = (HttpServletResponse) response;
+                httpResponse.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                return;
+            }
+            chain.doFilter(request, response);
+        }
     }
 }
