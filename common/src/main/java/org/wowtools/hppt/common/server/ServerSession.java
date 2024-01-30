@@ -12,10 +12,9 @@ import org.wowtools.hppt.common.util.RoughTimeUtil;
 @Slf4j
 public class ServerSession {
 
-
+    private final LoginClientService.Client client;
     private final Channel channel;
     private final int sessionId;
-    private final String clientId;
 
     private final long sessionTimeout;
 
@@ -25,13 +24,13 @@ public class ServerSession {
     //上次活跃时间
     private long activeTime;
 
-    ServerSession(long sessionTimeout, int sessionId, String clientId, ServerSessionLifecycle lifecycle, Channel channel) {
-        activeSession();
+    ServerSession(long sessionTimeout, int sessionId, LoginClientService.Client client, ServerSessionLifecycle lifecycle, Channel channel) {
         this.sessionId = sessionId;
-        this.clientId = clientId;
         this.channel = channel;
         this.sessionTimeout = sessionTimeout;
         this.lifecycle = lifecycle;
+        this.client = client;
+        activeSession();
 
     }
 
@@ -79,7 +78,7 @@ public class ServerSession {
     @Override
     public String toString() {
         return "("
-                + clientId + " "
+                + client.clientId + " "
                 + sessionId + (isTimeOut() ? " timeout)" : " active" +
                 ")");
     }
@@ -88,7 +87,7 @@ public class ServerSession {
         return channel;
     }
 
-    public String getClientId() {
-        return clientId;
+    public LoginClientService.Client getClient() {
+        return client;
     }
 }

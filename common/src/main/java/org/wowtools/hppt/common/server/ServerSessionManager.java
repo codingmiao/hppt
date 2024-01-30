@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.wowtools.hppt.common.util.Constant.commandParamJoinFlag;
-
 /**
  * @author liuyu
  * @date 2023/11/18
@@ -32,6 +30,7 @@ public class ServerSessionManager {
     private final Map<String, Map<Integer, ServerSession>> clientIdServerSessionMap = new ConcurrentHashMap<>();
 
     private final Bootstrap bootstrap = new Bootstrap();
+
     private final ServerSessionLifecycle lifecycle;
     private final long sessionTimeout;
 
@@ -78,24 +77,15 @@ public class ServerSessionManager {
         });
     }
 
-    public ServerSession createServerSession(String commandParam) {
-        String[] commandParams = commandParam.split(commandParamJoinFlag);
-        String clientId = commandParams[0];
-        String host = commandParams[1];
-        int port = Integer.parseInt(commandParams[3]);
-        return createServerSession(clientId, host, port);
-    }
-
-    public ServerSession createServerSession(String clientId, String host, int port) {
+    public void createServerSession(LoginClientService.Client client, String host, int port) {
         int sessionId = sessionIdBuilder.addAndGet(1);
-        log.info("new ServerSession {} {}:{} from {}", sessionId, host, port, clientId);
+        log.info("new ServerSession {} {}:{} from {}", sessionId, host, port, client.clientId);
         Channel channel = bootstrap.connect(host, port).channel();
-        ServerSession serverSession = new ServerSession(sessionTimeout, sessionId, clientId, lifecycle, channel);
+        ServerSession serverSession = new ServerSession(sessionTimeout, sessionId, client, lifecycle, channel);
         channelServerSessionMap.put(channel, serverSession);
         serverSessionMap.put(sessionId, serverSession);
-        Map<Integer, ServerSession> clientSessions = clientIdServerSessionMap.computeIfAbsent(clientId, (id) -> new ConcurrentHashMap<>());
+        Map<Integer, ServerSession> clientSessions = clientIdServerSessionMap.computeIfAbsent(client.clientId, (id) -> new ConcurrentHashMap<>());
         clientSessions.put(sessionId, serverSession);
-        return serverSession;
     }
 
     public void disposeServerSession(ServerSession serverSession, String type) {
@@ -108,7 +98,15 @@ public class ServerSessionManager {
         if (null != serverSessionMap.remove(serverSession.getSessionId())) {
             lifecycle.closed(serverSession);
         }
-        clientIdServerSessionMap.get(serverSession.getClientId()).remove(serverSession.getSessionId());
+        clientIdServerSessionMap.get(serverSession.getClient().clientId).remove(serverSession.getSessionId());
+    }
+
+    public Map<Integer, ServerSession> getServerSessionMapByClientId(String clientId) {
+        return clientIdServerSessionMap.get(clientId);
+    }
+
+    public ServerSession getServerSessionBySessionId(int sessionId) {
+        return serverSessionMap.get(sessionId);
     }
 
     private class SimpleHandler extends ChannelInboundHandlerAdapter {
@@ -148,7 +146,7 @@ public class ServerSessionManager {
             }
             session.activeSession();
             log.debug("serverSession {} 收到目标端口字节 {}", session, bytes.length);
-            lifecycle.sendToUser(session, bytes);
+            lifecycle.sendToClientBuffer(session, bytes, session.getClient());
             lifecycle.afterSendToTarget(session, bytes);
 
         }

@@ -18,11 +18,15 @@ public class Constant {
 
     //ss端执行的命令代码
     public static final class SsCommands {
-        //关闭Session 0逗号连接需要的SessionId
-        public static final char CloseSession = '0';
 
-        //保持Session活跃 1逗号连接需要的SessionId
-        public static final char ActiveSession = '1';
+        //新建session host,port
+        public static final char CreateSession = '0';
+
+        //关闭Session SessionId
+        public static final char CloseSession = '1';
+
+        //保持Session活跃 SessionId
+        public static final char ActiveSession = '2';
     }
 
     //Sc端执行的命令代码

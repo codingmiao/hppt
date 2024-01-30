@@ -105,13 +105,13 @@ public class BytesUtil {
     }
 
     public static ByteBuf bytes2byteBuf(ChannelHandlerContext ctx, byte[] bytes) {
-        ByteBuf byteBuf  = ctx.alloc().buffer(bytes.length, bytes.length);
+        ByteBuf byteBuf = ctx.alloc().buffer(bytes.length, bytes.length);
         byteBuf.writeBytes(bytes);
         return byteBuf;
     }
 
     public static ByteBuf bytes2byteBuf(Channel ctx, byte[] bytes) {
-        ByteBuf byteBuf  = ctx.alloc().buffer(bytes.length, bytes.length);
+        ByteBuf byteBuf = ctx.alloc().buffer(bytes.length, bytes.length);
         byteBuf.writeBytes(bytes);
         return byteBuf;
     }
@@ -133,7 +133,6 @@ public class BytesUtil {
         byteBuf.readBytes(bytes);
         return bytes;
     }
-
 
 
 }

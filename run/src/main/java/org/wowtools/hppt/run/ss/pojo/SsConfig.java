@@ -1,12 +1,23 @@
 package org.wowtools.hppt.run.ss.pojo;
 
+import org.wowtools.hppt.common.util.CommonConfig;
+
 import java.util.ArrayList;
 
 /**
  * @author liuyu
  * @date 2023/11/25
  */
-public class SsConfig {
+public class SsConfig extends CommonConfig {
+
+    /**
+     * 运行类型 支持 websocket(以websocket协议传输数据)、post(以http post协议传输数据)、hppt(以hppt自定义的协议传输数据)
+     */
+    public String Type;
+
+    /**
+     * 服务端口
+     */
     public int port;
 
     /**
@@ -19,18 +30,21 @@ public class SsConfig {
      */
     public int messageQueueSize = 2048;
 
-    /**
-     * 是否启用压缩，默认启用
-     */
-    public boolean enableCompress = true;
-
-    /**
-     * 是否启用内容加密，默认启用
-     */
-    public boolean enableEncrypt = true;
 
     /**
      * 允许的客户端
      */
     public ArrayList<String> clientIds;
+
+    public static final class PostConfig {
+
+    }
+
+    public static final class WebSocketConfig {
+
+    }
+
+    public static final class HpptConfig {
+
+    }
 }

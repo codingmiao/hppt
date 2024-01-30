@@ -39,12 +39,14 @@ public interface ServerSessionLifecycle {
     }
 
     /**
-     * 发送字节给用户的具体操作，例如通过http post发送
+     * 发送字节给客户端缓冲区
      *
      * @param serverSession ServerSession
      * @param bytes         发送的字节
      */
-    void sendToUser(ServerSession serverSession, byte[] bytes);
+    default void sendToClientBuffer(ServerSession serverSession, byte[] bytes, LoginClientService.Client client) {
+        client.addBytes(serverSession.getSessionId(), bytes);
+    }
 
     /**
      * 发送字节给用户后触发
@@ -57,6 +59,7 @@ public interface ServerSessionLifecycle {
 
     /**
      * 校验会话是否超时，一般需要发消息到客户端验证
+     *
      * @param serverSession ServerSession
      */
     default void checkActive(ServerSession serverSession) {

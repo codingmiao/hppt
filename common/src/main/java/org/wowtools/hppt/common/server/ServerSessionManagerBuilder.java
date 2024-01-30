@@ -11,7 +11,6 @@ import org.wowtools.hppt.common.client.ClientSessionManager;
  */
 public class ServerSessionManagerBuilder {
     protected EventLoopGroup group;
-
     protected ServerSessionLifecycle lifecycle;
     protected long sessionTimeout = 30000;
 
@@ -22,6 +21,11 @@ public class ServerSessionManagerBuilder {
 
     public ServerSessionManagerBuilder setLifecycle(ServerSessionLifecycle lifecycle) {
         this.lifecycle = lifecycle;
+        return this;
+    }
+
+    public ServerSessionManagerBuilder setGroup(EventLoopGroup group) {
+        this.group = group;
         return this;
     }
 
