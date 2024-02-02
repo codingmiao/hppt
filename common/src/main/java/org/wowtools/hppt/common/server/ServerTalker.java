@@ -2,6 +2,7 @@ package org.wowtools.hppt.common.server;
 
 import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
+import org.wowtools.hppt.common.pojo.SessionBytes;
 import org.wowtools.hppt.common.protobuf.ProtoMessage;
 import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.CommonConfig;
@@ -21,6 +22,9 @@ public class ServerTalker {
     //接收客户端发来的字节并做相应处理
     public static void receiveClientBytes(CommonConfig config, ServerSessionManager serverSessionManager,
                                           LoginClientService.Client client, byte[] bytes) throws Exception {
+        if (null == bytes || bytes.length == 0) {
+            return;
+        }
         //解密 解压
         if (config.enableEncrypt) {
             bytes = client.aesCipherUtil.descriptor.decrypt(bytes);
@@ -35,7 +39,7 @@ public class ServerTalker {
         /* 发消息 */
         //发命令
         for (String command : inputMessage.getCommandListList()) {
-            receiveClientCommand(command, serverSessionManager, serverSessionMap,client);
+            receiveClientCommand(command, serverSessionManager, serverSessionMap, client);
         }
         //发bytes
         for (ProtoMessage.BytesPb bytesPb : inputMessage.getBytesPbListList()) {
@@ -50,13 +54,14 @@ public class ServerTalker {
     }
 
     private static void receiveClientCommand(String command,
-                                             ServerSessionManager serverSessionManager, Map<Integer, ServerSession> serverSessionMap,LoginClientService.Client client) {
+                                             ServerSessionManager serverSessionManager, Map<Integer, ServerSession> serverSessionMap, LoginClientService.Client client) {
         log.debug("收到客户端命令 {} ", command);
         char type = command.charAt(0);
         switch (type) {
             case Constant.SsCommands.CreateSession -> {
                 String[] params = command.substring(1).split(Constant.sessionIdJoinFlag);
-                serverSessionManager.createServerSession(client, params[0], Integer.parseInt(params[1]));
+                ServerSession session = serverSessionManager.createServerSession(client, params[0], Integer.parseInt(params[1]));
+                client.addCommand(String.valueOf(Constant.ScCommands.InitSession) + session.getSessionId() + Constant.sessionIdJoinFlag + params[2]);
             }
             case Constant.SsCommands.CloseSession -> {
                 int sessionId = Integer.parseInt(command.substring(1));
@@ -79,27 +84,33 @@ public class ServerTalker {
     public static byte[] replyToClient(CommonConfig config, ServerSessionManager serverSessionManager,
                                        LoginClientService.Client client, boolean blocked) throws Exception {
         ProtoMessage.MessagePb.Builder rBuilder = ProtoMessage.MessagePb.newBuilder();
-
+        boolean empty = true;
         /* 取消息 */
         //取bytes
-        List<LoginClientService.SessionIdBytes> fetchBytes = blocked ? client.fetchBytesBlocked() : client.fetchBytes();
+        List<SessionBytes> fetchBytes = blocked ? client.fetchBytesBlocked() : client.fetchBytes();
         if (null != fetchBytes) {
             List<ProtoMessage.BytesPb> bytesPbList = new ArrayList<>(fetchBytes.size());
-            for (LoginClientService.SessionIdBytes fetchByte : fetchBytes) {
+            for (SessionBytes fetchByte : fetchBytes) {
                 bytesPbList.add(ProtoMessage.BytesPb.newBuilder()
-                        .setSessionId(fetchByte.sessionId)
-                        .setBytes(ByteString.copyFrom(fetchByte.bytes))
+                        .setSessionId(fetchByte.getSessionId())
+                        .setBytes(ByteString.copyFrom(fetchByte.getBytes()))
                         .build());
             }
             rBuilder.addAllBytesPbList(bytesPbList);
-
+            empty = false;
         }
 
         //取命令
         List<String> fetchCommands = blocked ? client.fetchCommandsBlocked() : client.fetchCommands();
-        if (!fetchCommands.isEmpty()) {
+        if (null != fetchCommands && !fetchCommands.isEmpty()) {
             rBuilder.addAllCommandList(fetchCommands);
+            empty = false;
         }
+
+        if (empty) {
+            return null;
+        }
+
 
         byte[] bytes = rBuilder.build().toByteArray();
         //压缩 加密

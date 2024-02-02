@@ -1,5 +1,6 @@
 package org.wowtools.hppt.run.ss.post;
 
+import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
@@ -50,7 +51,18 @@ public class PostServerSessionService {
     }
 
     protected ServerSessionLifecycle buildServerSessionLifecycle(SsConfig ssConfig) {
-        return null;
+        if (StringUtil.isNullOrEmpty(ssConfig.lifecycle)) {
+            return new ServerSessionLifecycle() {
+            };
+        } else {
+            try {
+                Class<? extends ServerSessionLifecycle> clazz = (Class<? extends ServerSessionLifecycle>) Class.forName(ssConfig.lifecycle);
+                return clazz.getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        }
     }
 
 }

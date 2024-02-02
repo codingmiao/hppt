@@ -13,7 +13,7 @@ public class SsConfig extends CommonConfig {
     /**
      * 运行类型 支持 websocket(以websocket协议传输数据)、post(以http post协议传输数据)、hppt(以hppt自定义的协议传输数据)
      */
-    public String Type;
+    public String type;
 
     /**
      * 服务端口
@@ -30,6 +30,11 @@ public class SsConfig extends CommonConfig {
      */
     public int messageQueueSize = 2048;
 
+
+    /**
+     * 生命周期实现类path，为空则使用默认
+     */
+    public String lifecycle;
 
     /**
      * 允许的客户端

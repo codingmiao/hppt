@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.RoughTimeUtil;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * @author liuyu
  * @date 2023/11/17
@@ -44,6 +46,9 @@ public class ServerSession {
         activeSession();
         bytes = lifecycle.beforeSendToTarget(this, bytes);
         if (bytes != null) {
+            if (log.isDebugEnabled()) {
+                log.debug(new String(bytes, StandardCharsets.UTF_8));
+            }
             BytesUtil.writeToChannel(channel, bytes);
             lifecycle.afterSendToTarget(this, bytes);
         }

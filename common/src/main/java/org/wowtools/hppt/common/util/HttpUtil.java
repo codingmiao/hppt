@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
 
@@ -23,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class HttpUtil {
 
     private static final okhttp3.MediaType bytesMediaType = okhttp3.MediaType.parse("application/octet-stream");
+    private static final byte[] emptyBts = new byte[0];
 
     private static final OkHttpClient okHttpClient;
 
@@ -52,13 +52,13 @@ public class HttpUtil {
     }
 
     public static Response doPost(String url) {
-        RequestBody body = RequestBody.create(bytesMediaType, new byte[0]);
+        RequestBody body = RequestBody.create(bytesMediaType, emptyBts);
         Request request = new Request.Builder().url(url).post(body).build();
         return execute(request);
     }
 
     public static Response doPost(String url, byte[] bytes) {
-        RequestBody body = RequestBody.create(bytesMediaType, bytes);
+        RequestBody body = RequestBody.create(bytesMediaType, bytes == null ? emptyBts : bytes);
         Request request = new Request.Builder().url(url).post(body).build();
         return execute(request);
     }
@@ -66,6 +66,7 @@ public class HttpUtil {
 
     public static Response execute(Request request) {
         java.io.InterruptedIOException interruptedIOException = null;
+        //做一个循环防止被假唤醒打断
         for (int i = 0; i < 5; i++) {
             try {
                 return okHttpClient.newCall(request).execute();

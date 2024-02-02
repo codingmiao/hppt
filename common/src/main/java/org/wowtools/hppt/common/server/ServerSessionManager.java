@@ -77,7 +77,7 @@ public class ServerSessionManager {
         });
     }
 
-    public void createServerSession(LoginClientService.Client client, String host, int port) {
+    public ServerSession createServerSession(LoginClientService.Client client, String host, int port) {
         int sessionId = sessionIdBuilder.addAndGet(1);
         log.info("new ServerSession {} {}:{} from {}", sessionId, host, port, client.clientId);
         Channel channel = bootstrap.connect(host, port).channel();
@@ -86,6 +86,7 @@ public class ServerSessionManager {
         serverSessionMap.put(sessionId, serverSession);
         Map<Integer, ServerSession> clientSessions = clientIdServerSessionMap.computeIfAbsent(client.clientId, (id) -> new ConcurrentHashMap<>());
         clientSessions.put(sessionId, serverSession);
+        return serverSession;
     }
 
     public void disposeServerSession(ServerSession serverSession, String type) {

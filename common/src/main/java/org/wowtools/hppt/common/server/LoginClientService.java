@@ -1,5 +1,6 @@
 package org.wowtools.hppt.common.server;
 
+import org.wowtools.hppt.common.pojo.SessionBytes;
 import org.wowtools.hppt.common.util.AesCipherUtil;
 import org.wowtools.hppt.common.util.BytesUtil;
 
@@ -14,15 +15,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class LoginClientService {
 
-    public static final class SessionIdBytes {
-        public final int sessionId;
-        public final byte[] bytes;
-
-        public SessionIdBytes(int sessionId, byte[] bytes) {
-            this.sessionId = sessionId;
-            this.bytes = bytes;
-        }
-    }
 
     public static final class Client {
         public final String clientId;
@@ -30,7 +22,7 @@ public class LoginClientService {
 
         private final BlockingQueue<String> commandQueue = new LinkedBlockingQueue<>();
 
-        private final BlockingQueue<SessionIdBytes> sessionBytesQueue = new LinkedBlockingQueue<>();
+        private final BlockingQueue<SessionBytes> sessionBytesQueue = new LinkedBlockingQueue<>();
 
         public Client(String clientId, AesCipherUtil aesCipherUtil) {
             this.clientId = clientId;
@@ -74,22 +66,22 @@ public class LoginClientService {
 
         //添加一条向客户端发送的bytes
         public void addBytes(int sessionId, byte[] bytes) {
-            sessionBytesQueue.add(new SessionIdBytes(sessionId, bytes));
+            sessionBytesQueue.add(new SessionBytes(sessionId, bytes));
         }
 
         //取出所有需要向客户端发送的bytes 取出的bytes会按相同sessionId进行整合 无bytes则返回null
-        public List<SessionIdBytes> fetchBytes() {
+        public List<SessionBytes> fetchBytes() {
             if (sessionBytesQueue.isEmpty()) {
                 return null;
             }
-            List<SessionIdBytes> bytesList = new LinkedList<>();
+            List<SessionBytes> bytesList = new LinkedList<>();
             sessionBytesQueue.drainTo(bytesList);
             return merge(bytesList);
         }
 
         //取出所有需要向客户端发送的bytes 取出的bytes会按相同sessionId进行整合 无bytes则阻塞
-        public List<SessionIdBytes> fetchBytesBlocked() {
-            List<SessionIdBytes> bytesList = new LinkedList<>();
+        public List<SessionBytes> fetchBytesBlocked() {
+            List<SessionBytes> bytesList = new LinkedList<>();
             bytesList.add(takeBytes());
             if (sessionBytesQueue.isEmpty()) {
                 return bytesList;
@@ -98,21 +90,21 @@ public class LoginClientService {
             return merge(bytesList);
         }
 
-        private static List<SessionIdBytes> merge(List<SessionIdBytes> bytesList) {
+        private static List<SessionBytes> merge(List<SessionBytes> bytesList) {
             Map<Integer, List<byte[]>> bytesMap = new HashMap<>();
-            for (SessionIdBytes bytes : bytesList) {
-                bytesMap.computeIfAbsent(bytes.sessionId, (r) -> new LinkedList<>())
-                        .add(bytes.bytes);
+            for (SessionBytes bytes : bytesList) {
+                bytesMap.computeIfAbsent(bytes.getSessionId(), (r) -> new LinkedList<>())
+                        .add(bytes.getBytes());
             }
-            List<SessionIdBytes> res = new ArrayList<>(bytesMap.size());
+            List<SessionBytes> res = new ArrayList<>(bytesMap.size());
             bytesMap.forEach((sessionId, bytes) -> {
-                res.add(new SessionIdBytes(sessionId, BytesUtil.merge(bytes)));
+                res.add(new SessionBytes(sessionId, BytesUtil.merge(bytes)));
             });
             return res;
         }
 
         //取出一条bytes 无bytes则阻塞
-        public SessionIdBytes takeBytes() {
+        public SessionBytes takeBytes() {
             try {
                 return sessionBytesQueue.take();
             } catch (InterruptedException e) {

@@ -68,12 +68,13 @@ public class TalkServlet extends HttpServlet {
             throw new RuntimeException(e);
         }
 
-        log.debug("返回客户端字节数 {}", rBytes.length);
-
 
         resp.setHeader("Server", "");
-        try (OutputStream os = resp.getOutputStream()) {
-            os.write(rBytes);
+        if (null != rBytes) {
+            log.debug("返回客户端字节数 {}", rBytes.length);
+            try (OutputStream os = resp.getOutputStream()) {
+                os.write(rBytes);
+            }
         }
     }
 }

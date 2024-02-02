@@ -13,6 +13,7 @@ public class ClientSessionManagerBuilder {
     protected EventLoopGroup workerGroup;
 
     protected ClientSessionLifecycle lifecycle;
+    protected ClientBytesSender clientBytesSender;
 
     public ClientSessionManagerBuilder setBufferSize(int bufferSize) {
         this.bufferSize = bufferSize;
@@ -31,6 +32,11 @@ public class ClientSessionManagerBuilder {
 
     public ClientSessionManagerBuilder setLifecycle(ClientSessionLifecycle lifecycle) {
         this.lifecycle = lifecycle;
+        return this;
+    }
+
+    public ClientSessionManagerBuilder setClientBytesSender(ClientBytesSender clientBytesSender) {
+        this.clientBytesSender = clientBytesSender;
         return this;
     }
 

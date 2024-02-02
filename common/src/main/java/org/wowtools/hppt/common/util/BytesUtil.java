@@ -83,6 +83,9 @@ public class BytesUtil {
 
     // 使用GZIP压缩字节数组
     public static byte[] compress(byte[] input) throws IOException {
+        if (input.length == 0) {
+            return input;
+        }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(baos)) {
             gzipOutputStream.write(input);
@@ -92,6 +95,9 @@ public class BytesUtil {
 
     // 使用GZIP解压缩字节数组
     public static byte[] decompress(byte[] compressed) throws IOException {
+        if (compressed.length == 0) {
+            return compressed;
+        }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ByteArrayInputStream bais = new ByteArrayInputStream(compressed);
         try (java.util.zip.GZIPInputStream gzipInputStream = new java.util.zip.GZIPInputStream(bais)) {

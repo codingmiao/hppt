@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
 
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,13 +23,21 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 public class ClientSessionManager {
-    public final Map<Integer, ClientSession> clientSessionMap = new ConcurrentHashMap<>();
+    private final Map<Integer, ClientSession> clientSessionMap = new ConcurrentHashMap<>();
 
     private final ServerBootstrap serverBootstrap = new ServerBootstrap();
     private final ClientSessionLifecycle lifecycle;
+    private final ClientBytesSender clientBytesSender;
 
     ClientSessionManager(ClientSessionManagerBuilder builder) {
         lifecycle = builder.lifecycle;
+        if (null == lifecycle) {
+            throw new RuntimeException("lifecycle不能为空");
+        }
+        clientBytesSender = builder.clientBytesSender;
+        if (null == clientBytesSender) {
+            throw new RuntimeException("clientBytesSender不能为空");
+        }
         serverBootstrap.group(builder.bossGroup, builder.workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 128)
@@ -59,6 +68,14 @@ public class ClientSessionManager {
         }
     }
 
+    public ClientSession getClientSessionBySessionId(int sessionId) {
+        return clientSessionMap.get(sessionId);
+    }
+
+    public int getSessionNum() {
+        return clientSessionMap.size();
+    }
+
 
     private final Map<ChannelHandlerContext, ClientSession> clientSessionMapByCtx = new ConcurrentHashMap<>();
 
@@ -72,11 +89,13 @@ public class ClientSessionManager {
             InetSocketAddress localAddress = (InetSocketAddress) channel.localAddress();
             int localPort = localAddress.getPort();
             //用户发起新连接 新建一个ClientSession
-            int sessionId = lifecycle.connected(localPort, channelHandlerContext);
-            ClientSession clientSession = new ClientSession(sessionId, channelHandlerContext, lifecycle);
-            log.debug("ClientSession {} 初始化完成 {}", clientSession.getSessionId(), channelHandlerContext.hashCode());
-            clientSessionMapByCtx.put(channelHandlerContext, clientSession);
-            lifecycle.created(clientSession);
+            clientBytesSender.connected(localPort, channelHandlerContext, (sessionId -> {
+                ClientSession clientSession = new ClientSession(sessionId, channelHandlerContext, lifecycle);
+                log.debug("ClientSession {} 初始化完成 {}", clientSession.getSessionId(), channelHandlerContext.hashCode());
+                clientSessionMapByCtx.put(channelHandlerContext, clientSession);
+                clientSessionMap.put(sessionId, clientSession);
+                lifecycle.created(clientSession);
+            }));
         }
 
         @Override
@@ -101,13 +120,35 @@ public class ClientSessionManager {
         @Override
         protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
             byte[] bytes = BytesUtil.byteBuf2bytes(byteBuf);
-            ClientSession clientSession = clientSessionMapByCtx.get(channelHandlerContext);
+            ClientSession clientSession = null;
+            for (int i = 0; i < 100; i++) {
+                clientSession = clientSessionMapByCtx.get(channelHandlerContext);
+                if (null != clientSession) {
+                    break;
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    continue;
+                }
+            }
             if (null != clientSession) {
+                if (log.isDebugEnabled()) {
+                    log.debug(new String(bytes, StandardCharsets.UTF_8));
+                }
                 //触发数据回调事件 转发数据到真实端口
                 log.debug("ClientSession {} 收到用户端字节 {}", clientSession.getSessionId(), bytes.length);
-                lifecycle.sendToTarget(clientSession, bytes);
+                bytes = lifecycle.beforeSendToTarget(clientSession, bytes);
+                if (null == bytes) {
+                    return;
+                }
+                clientBytesSender.sendToTarget(clientSession, bytes);
                 lifecycle.afterSendToTarget(clientSession, bytes);
+            } else {
+                log.warn("找不到channelHandlerContext对应的client session");
             }
         }
     }
+
+
 }

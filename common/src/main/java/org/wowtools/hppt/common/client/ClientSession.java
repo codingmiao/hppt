@@ -16,7 +16,7 @@ public class ClientSession {
     private final ChannelHandlerContext channelHandlerContext;
     private final ClientSessionLifecycle lifecycle;
 
-    public ClientSession(int sessionId, ChannelHandlerContext channelHandlerContext, ClientSessionLifecycle lifecycle) {
+    ClientSession(int sessionId, ChannelHandlerContext channelHandlerContext, ClientSessionLifecycle lifecycle) {
         this.sessionId = sessionId;
         this.channelHandlerContext = channelHandlerContext;
         this.lifecycle = lifecycle;

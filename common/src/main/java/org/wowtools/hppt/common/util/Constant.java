@@ -19,7 +19,7 @@ public class Constant {
     //ss端执行的命令代码
     public static final class SsCommands {
 
-        //新建session host,port
+        //新建session host,port,initFlag
         public static final char CreateSession = '0';
 
         //关闭Session SessionId
@@ -31,19 +31,22 @@ public class Constant {
 
     //Sc端执行的命令代码
     public static final class ScCommands {
-        //检查客户端的Session是否还活跃 0逗号连接需要的SessionId
-        public static final char CheckSessionActive = '0';
+        //ServerSession就绪，Sc端需执行初始化对应ClientSession操作 sessionId,initFlag
+        public static final char InitSession = '0';
 
-        //关闭客户端连接 1逗号连接需要的SessionId
-        public static final char CloseSession = '1';
+        //检查客户端的Session是否还活跃 sessionId
+        public static final char CheckSessionActive = '1';
+
+        //关闭客户端连接 sessionId
+        public static final char CloseSession = '2';
     }
 
     //Cs端执行的命令代码
     public static final class CsCommands {
-        //检查客户端的Session是否还活跃 0逗号连接需要的SessionId
+        //检查客户端的Session是否还活跃 sessionId
         public static final char CheckSessionActive = '0';
 
-        //关闭客户端连接 1逗号连接需要的SessionId
+        //关闭客户端连接 sessionId
         public static final char CloseSession = '1';
     }
 
