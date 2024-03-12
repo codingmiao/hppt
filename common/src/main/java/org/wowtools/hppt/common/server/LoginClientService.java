@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author liuyu
@@ -44,26 +45,6 @@ public class LoginClientService {
             return res;
         }
 
-        //取出所有需要向客户端发送的命令 无命令则阻塞
-        public List<String> fetchCommandsBlocked() {
-            List<String> res = new LinkedList<>();
-            res.add(takeCommand());
-            if (commandQueue.isEmpty()) {
-                return res;
-            }
-            commandQueue.drainTo(res);
-            return res;
-        }
-
-        //取出一条命令 无命令则阻塞
-        public String takeCommand() {
-            try {
-                return commandQueue.take();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
         //添加一条向客户端发送的bytes
         public void addBytes(int sessionId, byte[] bytes) {
             sessionBytesQueue.add(new SessionBytes(sessionId, bytes));
@@ -79,10 +60,19 @@ public class LoginClientService {
             return merge(bytesList);
         }
 
-        //取出所有需要向客户端发送的bytes 取出的bytes会按相同sessionId进行整合 无bytes则阻塞
+        //取出所有需要向客户端发送的bytes 取出的bytes会按相同sessionId进行整合 无bytes则阻塞3秒后返回
         public List<SessionBytes> fetchBytesBlocked() {
             List<SessionBytes> bytesList = new LinkedList<>();
-            bytesList.add(takeBytes());
+            SessionBytes first;
+            try {
+                first = sessionBytesQueue.poll(3, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                return bytesList;
+            }
+            if (null == first) {
+                return bytesList;
+            }
+            bytesList.add(first);
             if (sessionBytesQueue.isEmpty()) {
                 return bytesList;
             }
@@ -102,16 +92,6 @@ public class LoginClientService {
             });
             return res;
         }
-
-        //取出一条bytes 无bytes则阻塞
-        public SessionBytes takeBytes() {
-            try {
-                return sessionBytesQueue.take();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
     }
 
     private final Map<String, Client> loginClients = new HashMap<>();

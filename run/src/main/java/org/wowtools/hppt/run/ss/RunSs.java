@@ -5,6 +5,7 @@ import org.wowtools.common.utils.ResourcesReader;
 import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
 import org.wowtools.hppt.run.ss.post.PostServerSessionService;
+import org.wowtools.hppt.run.ss.websocket.WebsocketServerSessionService;
 
 import java.io.File;
 
@@ -38,7 +39,7 @@ public class RunSs {
                 new PostServerSessionService(config);
                 break;
             case "websocket":
-                //TODO
+                new WebsocketServerSessionService(config);
                 break;
             case "hppt":
                 //TODO

@@ -80,7 +80,7 @@ public class ServerTalker {
         }
     }
 
-    //向客户端回复消息
+    //生成向客户端回复的消息
     public static byte[] replyToClient(CommonConfig config, ServerSessionManager serverSessionManager,
                                        LoginClientService.Client client, boolean blocked) throws Exception {
         ProtoMessage.MessagePb.Builder rBuilder = ProtoMessage.MessagePb.newBuilder();
@@ -101,7 +101,7 @@ public class ServerTalker {
         }
 
         //取命令
-        List<String> fetchCommands = blocked ? client.fetchCommandsBlocked() : client.fetchCommands();
+        List<String> fetchCommands = client.fetchCommands();
         if (null != fetchCommands && !fetchCommands.isEmpty()) {
             rBuilder.addAllCommandList(fetchCommands);
             empty = false;

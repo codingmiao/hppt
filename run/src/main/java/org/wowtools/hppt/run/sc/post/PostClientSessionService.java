@@ -12,6 +12,7 @@ import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.common.util.HttpUtil;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
+import org.wowtools.hppt.run.sc.util.ScUtil;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -67,26 +68,20 @@ public class PostClientSessionService {
         loginCode = BytesUtil.bytes2base64(aesCipherUtil.encryptor.encrypt(config.clientId.getBytes(StandardCharsets.UTF_8)));
 
         //建立ClientSessionManager，并绑上配置的端口
-        clientSessionManager = new ClientSessionManagerBuilder()
-                .setBufferSize(config.maxSendBodySize * 2)
-                .setLifecycle(buildClientSessionLifecycle(config))
-                .setClientBytesSender(new PostClientBytesSender(config))
-                .build();
-        for (ScConfig.Forward forward : config.forwards) {
-            clientSessionManager.bindPort(forward.localPort);
-        }
+        clientSessionManager = ScUtil.createClientSessionManager(config, buildClientSessionLifecycle(config), new PostClientBytesSender(config));
+
 
         //循环发起post请求发送数据
-        sleepTime = config.initSleepTime - config.addSleepTime;
+        sleepTime = config.post.initSleepTime - config.post.addSleepTime;
         sendThread = buildSendThread();
         sendThread.start();
     }
 
 
-    protected void awakenSendThread() {
+    private void awakenSendThread() {
         if (sleeping.get()) {
             try {
-                sleepTime = config.initSleepTime;
+                sleepTime = config.post.initSleepTime;
                 sendThread.interrupt();
                 log.info("唤醒发送线程");
             } catch (Exception e) {
@@ -101,12 +96,12 @@ public class PostClientSessionService {
                 //发请求
                 boolean isEmpty = true;
                 try {
-                    byte[] sendBytes = ClientTalker.buildSendToServerBytes(config, config.maxSendBodySize, sendCommandQueue, sendBytesQueue, aesCipherUtil);
+                    byte[] sendBytes = ClientTalker.buildSendToServerBytes(config, config.maxSendBodySize, sendCommandQueue, sendBytesQueue, aesCipherUtil, false);
                     if (null != sendBytes) {
                         isEmpty = false;
                     }
                     byte[] responseBytes;
-                    try (Response response = HttpUtil.doPost(config.serverUrl + "/talk?c=" + loginCode, sendBytes)) {
+                    try (Response response = HttpUtil.doPost(config.post.serverUrl + "/talk?c=" + loginCode, sendBytes)) {
                         ResponseBody body = response.body();
                         responseBytes = null == body ? null : body.bytes();
                     }
@@ -120,21 +115,18 @@ public class PostClientSessionService {
                     log.warn("与服务端交互异常", e);
                 }
                 //确定休眠时间并休眠
-                if (clientSessionManager.getSessionNum() == 0
-                        && sendBytesQueue.isEmpty()
-                        && sendCommandQueue.isEmpty()
-                ) {
+                if (clientSessionManager.getSessionNum() == 0 && sendBytesQueue.isEmpty() && sendCommandQueue.isEmpty()) {
                     //无客户端，长睡直到被唤醒
                     log.info("无客户端连接，且无命令要发送，睡眠发送线程");
                     sleepTime = Long.MAX_VALUE;
                 } else if (isEmpty) {
                     //收发数据包都为空，逐步增加睡眠时间
-                    if (sleepTime < config.maxSleepTime) {
-                        sleepTime += config.addSleepTime;
+                    if (sleepTime < config.post.maxSleepTime) {
+                        sleepTime += config.post.addSleepTime;
                     }
                     log.debug("收发数据包都为空，逐步增加睡眠时间 {}", sleepTime);
                 } else {
-                    sleepTime = config.initSleepTime;
+                    sleepTime = config.post.initSleepTime;
                     log.debug("正常包 {}", sleepTime);
                 }
 
@@ -157,7 +149,7 @@ public class PostClientSessionService {
     private long getDt() {
         long localTs = System.currentTimeMillis();
         String res;
-        try (Response response = HttpUtil.doPost(config.serverUrl + "/time")) {
+        try (Response response = HttpUtil.doPost(config.post.serverUrl + "/time")) {
             assert response.body() != null;
             res = response.body().string();
         } catch (Exception e) {
@@ -173,8 +165,7 @@ public class PostClientSessionService {
         String loginCode = BytesUtil.bytes2base64(aesCipherUtil.encryptor.encrypt(config.clientId.getBytes(StandardCharsets.UTF_8)));
 
         String res;
-        try (Response response = HttpUtil.doPost(config.serverUrl + "/login?c="
-                + URLEncoder.encode(loginCode, StandardCharsets.UTF_8))) {
+        try (Response response = HttpUtil.doPost(config.post.serverUrl + "/login?c=" + URLEncoder.encode(loginCode, StandardCharsets.UTF_8))) {
             assert response.body() != null;
             res = response.body().string();
         } catch (Exception e) {
@@ -189,36 +180,61 @@ public class PostClientSessionService {
     }
 
     private ClientSessionLifecycle buildClientSessionLifecycle(ScConfig scConfig) {
+        ClientSessionLifecycle common = new ClientSessionLifecycle() {
+            @Override
+            public void created(ClientSession clientSession) {
+                awakenSendThread();
+            }
+
+            @Override
+            public void afterSendToTarget(ClientSession clientSession, byte[] bytes) {
+                awakenSendThread();
+            }
+
+            @Override
+            public void afterSendToUser(ClientSession clientSession, byte[] bytes) {
+                awakenSendThread();
+            }
+
+            @Override
+            public void closed(ClientSession clientSession) {
+                sendCommandQueue.add(String.valueOf(Constant.SsCommands.CloseSession) + clientSession.getSessionId());
+            }
+        };
         if (StringUtil.isNullOrEmpty(scConfig.lifecycle)) {
-            return new ClientSessionLifecycle() {
-                @Override
-                public void created(ClientSession clientSession) {
-                    awakenSendThread();
-                }
-
-                @Override
-                public void afterSendToTarget(ClientSession clientSession, byte[] bytes) {
-                    awakenSendThread();
-                }
-
-                @Override
-                public void afterSendToUser(ClientSession clientSession, byte[] bytes) {
-                    awakenSendThread();
-                }
-
-                @Override
-                public void closed(ClientSession clientSession) {
-                    sendCommandQueue.add(String.valueOf(Constant.SsCommands.CloseSession) + clientSession.getSessionId());
-                }
-            };
+            return common;
         } else {
             try {
                 Class<? extends ClientSessionLifecycle> clazz = (Class<? extends ClientSessionLifecycle>) Class.forName(scConfig.lifecycle);
-                return clazz.getDeclaredConstructor().newInstance();
+                ClientSessionLifecycle custom = clazz.getDeclaredConstructor().newInstance();
+                return new ClientSessionLifecycle() {
+                    @Override
+                    public void created(ClientSession clientSession) {
+                        common.created(clientSession);
+                        custom.created(clientSession);
+                    }
+
+                    @Override
+                    public void afterSendToTarget(ClientSession clientSession, byte[] bytes) {
+                        common.afterSendToTarget(clientSession, bytes);
+                        custom.afterSendToTarget(clientSession, bytes);
+                    }
+
+                    @Override
+                    public void afterSendToUser(ClientSession clientSession, byte[] bytes) {
+                        common.afterSendToUser(clientSession, bytes);
+                        custom.afterSendToUser(clientSession, bytes);
+                    }
+
+                    @Override
+                    public void closed(ClientSession clientSession) {
+                        common.closed(clientSession);
+                        custom.closed(clientSession);
+                    }
+                };
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
         }
     }
 
@@ -245,9 +261,7 @@ public class PostClientSessionService {
                 return;
             }
             int newSessionFlag = newSessionFlagIdx.addAndGet(1);
-            sendCommandQueue.add(Constant.SsCommands.CreateSession +
-                    forward.remoteHost + Constant.sessionIdJoinFlag + forward.remotePort
-                    + Constant.sessionIdJoinFlag + newSessionFlag);
+            sendCommandQueue.add(Constant.SsCommands.CreateSession + forward.remoteHost + Constant.sessionIdJoinFlag + forward.remotePort + Constant.sessionIdJoinFlag + newSessionFlag);
             sessionIdCallBackMap.put(newSessionFlag, cb);
             awakenSendThread();
         }

@@ -86,11 +86,13 @@ public class BytesUtil {
         if (input.length == 0) {
             return input;
         }
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(baos)) {
-            gzipOutputStream.write(input);
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(baos)){
+                gzipOutputStream.write(input);
+            }
+            return baos.toByteArray();
         }
-        return baos.toByteArray();
     }
 
     // 使用GZIP解压缩字节数组
@@ -98,16 +100,17 @@ public class BytesUtil {
         if (compressed.length == 0) {
             return compressed;
         }
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ByteArrayInputStream bais = new ByteArrayInputStream(compressed);
-        try (java.util.zip.GZIPInputStream gzipInputStream = new java.util.zip.GZIPInputStream(bais)) {
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             ByteArrayInputStream bais = new ByteArrayInputStream(compressed);
+             java.util.zip.GZIPInputStream gzipInputStream = new java.util.zip.GZIPInputStream(bais)) {
             byte[] buffer = new byte[1024];
             int len;
             while ((len = gzipInputStream.read(buffer)) > 0) {
                 baos.write(buffer, 0, len);
             }
+            return baos.toByteArray();
         }
-        return baos.toByteArray();
     }
 
     public static ByteBuf bytes2byteBuf(ChannelHandlerContext ctx, byte[] bytes) {

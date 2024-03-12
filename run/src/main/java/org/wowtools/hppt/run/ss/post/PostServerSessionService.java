@@ -1,16 +1,19 @@
 package org.wowtools.hppt.run.ss.post;
 
-import io.netty.util.internal.StringUtil;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.wowtools.hppt.common.server.LoginClientService;
-import org.wowtools.hppt.common.server.ServerSessionLifecycle;
 import org.wowtools.hppt.common.server.ServerSessionManager;
-import org.wowtools.hppt.common.server.ServerSessionManagerBuilder;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
+import org.wowtools.hppt.run.ss.util.SsUtil;
+
+import java.io.IOException;
 
 /**
  * @author liuyu
@@ -24,9 +27,7 @@ public class PostServerSessionService {
 
 
     public PostServerSessionService(SsConfig ssConfig) throws Exception {
-        serverSessionManager = new ServerSessionManagerBuilder()
-                .setLifecycle(buildServerSessionLifecycle(ssConfig))
-                .build();
+        serverSessionManager = SsUtil.createServerSessionManagerBuilder(ssConfig).build();
         loginClientService = new LoginClientService(ssConfig.clientIds);
 
         log.info("*********");
@@ -44,24 +45,26 @@ public class PostServerSessionService {
         errorHandler.setServer(new Server());
 
         context.setErrorHandler(errorHandler);
+        context.addFilter(DisableTraceFilter.class, "/*", null);
 
         log.info("服务端启动完成 端口 {}", ssConfig.port);
         server.start();
         server.join();
     }
 
-    protected ServerSessionLifecycle buildServerSessionLifecycle(SsConfig ssConfig) {
-        if (StringUtil.isNullOrEmpty(ssConfig.lifecycle)) {
-            return new ServerSessionLifecycle() {
-            };
-        } else {
-            try {
-                Class<? extends ServerSessionLifecycle> clazz = (Class<? extends ServerSessionLifecycle>) Class.forName(ssConfig.lifecycle);
-                return clazz.getDeclaredConstructor().newInstance();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
 
+    //禁用TRACE、TRACK
+    public static final class DisableTraceFilter implements Filter {
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+            HttpServletRequest httpRequest = (HttpServletRequest) request;
+            String m = httpRequest.getMethod();
+            if ("TRACE".equalsIgnoreCase(m) || "TRACK".equalsIgnoreCase(m)) {
+                HttpServletResponse httpResponse = (HttpServletResponse) response;
+                httpResponse.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                return;
+            }
+            chain.doFilter(request, response);
         }
     }
 

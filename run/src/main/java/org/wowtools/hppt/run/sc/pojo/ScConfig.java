@@ -25,6 +25,35 @@ public class ScConfig extends CommonConfig {
 
     }
 
+    public static final class PostConfig {
+        /**
+         * 服务端http地址，可以填nginx转发过的地址
+         */
+        public String serverUrl;
+
+        /**
+         * 开始时闲置几毫秒发一次http请求，越短延迟越低但越耗性能
+         */
+        public long initSleepTime = 1000;
+
+        /**
+         * 当收到空消息时，闲置毫秒数增加多少毫秒
+         */
+        public long addSleepTime = 1000;
+
+        /**
+         * 闲置毫秒数最大到多少毫秒
+         */
+        public long maxSleepTime = 60000;
+    }
+
+    public static final class WebSocketConfig {
+        /**
+         * 服务端http地址，可以填nginx转发过的地址，但注意加允许ws转发的配置
+         */
+        public String serverUrl;
+    }
+
     /**
      * 运行类型 支持 websocket(以websocket协议传输数据)、post(以http post协议传输数据)、hppt(以hppt自定义的协议传输数据)
      */
@@ -35,25 +64,6 @@ public class ScConfig extends CommonConfig {
      */
     public String clientId;
 
-    /**
-     * 服务端http地址，可以填nginx转发过的地址
-     */
-    public String serverUrl;
-
-    /**
-     * 开始时闲置几毫秒发一次http请求，越短延迟越低但越耗性能
-     */
-    public long initSleepTime = 1000;
-
-    /**
-     * 当收到空消息时，闲置毫秒数增加多少毫秒
-     */
-    public long addSleepTime = 1000;
-
-    /**
-     * 闲置毫秒数最大到多少毫秒
-     */
-    public long maxSleepTime = 60000;
 
     /**
      * 向服务端发数据请求体的字节数最大值
@@ -70,5 +80,9 @@ public class ScConfig extends CommonConfig {
      * 自定义生命周期实现类
      */
     public String lifecycle;
+
+    public PostConfig post;
+
+    public WebSocketConfig websocket;
 
 }

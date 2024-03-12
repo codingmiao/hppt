@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author liuyu
@@ -22,10 +23,21 @@ import java.util.concurrent.BlockingQueue;
 @Slf4j
 public class ClientTalker {
 
-    //将缓冲区的数据转为满足向服务端发送的字节
+    /**
+     * 将缓冲区的数据转为满足向服务端发送的字节
+     *
+     * @param config           config
+     * @param maxSendBodySize  最多发送多少字节
+     * @param sendCommandQueue 命令队列
+     * @param sendBytesQueue   字节队列
+     * @param aesCipherUtil    加密工具
+     * @param wait             若两个队列为空且wait为true，则取数据时会阻塞等待3秒
+     * @return
+     * @throws Exception
+     */
     public static byte[] buildSendToServerBytes(CommonConfig config, long maxSendBodySize,
                                                 BlockingQueue<String> sendCommandQueue, BlockingQueue<SessionBytes> sendBytesQueue,
-                                                AesCipherUtil aesCipherUtil) throws Exception {
+                                                AesCipherUtil aesCipherUtil, boolean wait) throws Exception {
         long sendBodySize = 0;//大致预估发送体积
         //命令
         LinkedList<String> commands = new LinkedList<>();
@@ -40,13 +52,22 @@ public class ClientTalker {
                 break;
             }
         } while (true);
+        if (sendBodySize > 0) {
+            wait = false;
+        }
         //bytes
         List<ProtoMessage.BytesPb> bytesPbList = new LinkedList<>();
         do {
             if (sendBodySize >= maxSendBodySize) {
                 break;
             }
-            SessionBytes bytes = sendBytesQueue.poll();
+            SessionBytes bytes;
+            if (wait) {
+                bytes = sendBytesQueue.poll(3, TimeUnit.SECONDS);
+                wait = false;
+            } else {
+                bytes = sendBytesQueue.poll();
+            }
             if (null == bytes) {
                 break;
             }
@@ -85,7 +106,7 @@ public class ClientTalker {
     public static boolean receiveServerBytes(CommonConfig config, byte[] responseBody,
                                              ClientSessionManager clientSessionManager, AesCipherUtil aesCipherUtil, BlockingQueue<String> sendCommandQueue,
                                              Map<Integer, ClientBytesSender.SessionIdCallBack> sessionIdCallBackMap) throws Exception {
-        if (null==responseBody){
+        if (null == responseBody) {
             return true;
         }
         ProtoMessage.MessagePb rMessagePb;

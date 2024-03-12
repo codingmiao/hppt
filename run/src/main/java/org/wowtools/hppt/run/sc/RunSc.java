@@ -5,6 +5,8 @@ import org.wowtools.common.utils.ResourcesReader;
 import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
 import org.wowtools.hppt.run.sc.post.PostClientSessionService;
+import org.wowtools.hppt.run.sc.websocket.WebSocketClientSessionService;
+import org.wowtools.hppt.run.ss.websocket.WebsocketServerSessionService;
 
 import java.io.File;
 
@@ -36,7 +38,7 @@ public class RunSc {
                 new PostClientSessionService(config);
                 break;
             case "websocket":
-                //TODO
+                new WebSocketClientSessionService(config);
                 break;
             case "hppt":
                 //TODO
