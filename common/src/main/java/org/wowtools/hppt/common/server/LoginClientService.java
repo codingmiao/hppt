@@ -51,17 +51,31 @@ public class LoginClientService {
         }
 
         //取出所有需要向客户端发送的bytes 取出的bytes会按相同sessionId进行整合 无bytes则返回null
-        public List<SessionBytes> fetchBytes() {
+        public List<SessionBytes> fetchBytes(long maxReturnBodySize) {
             if (sessionBytesQueue.isEmpty()) {
                 return null;
             }
             List<SessionBytes> bytesList = new LinkedList<>();
-            sessionBytesQueue.drainTo(bytesList);
+            if (maxReturnBodySize < 0) {
+                sessionBytesQueue.drainTo(bytesList);
+            } else {
+                //根据maxReturnBodySize的限制取出队列中的数据返回
+                long currentReturnBodySize = 0L;
+                while (currentReturnBodySize < maxReturnBodySize) {
+                    SessionBytes next = sessionBytesQueue.poll();
+                    if (null == next) {
+                        break;
+                    }
+                    bytesList.add(next);
+                    currentReturnBodySize += next.getBytes().length;
+                }
+            }
             return merge(bytesList);
+
         }
 
         //取出所有需要向客户端发送的bytes 取出的bytes会按相同sessionId进行整合 无bytes则阻塞3秒后返回
-        public List<SessionBytes> fetchBytesBlocked() {
+        public List<SessionBytes> fetchBytesBlocked(long maxReturnBodySize) {
             List<SessionBytes> bytesList = new LinkedList<>();
             SessionBytes first;
             try {
@@ -76,8 +90,23 @@ public class LoginClientService {
             if (sessionBytesQueue.isEmpty()) {
                 return bytesList;
             }
-            sessionBytesQueue.drainTo(bytesList);
-            return merge(bytesList);
+            if (maxReturnBodySize < 0) {
+                sessionBytesQueue.drainTo(bytesList);
+                return merge(bytesList);
+            } else {
+                //根据maxReturnBodySize的限制取出队列中的数据返回
+                long currentReturnBodySize = first.getBytes().length;
+                while (currentReturnBodySize < maxReturnBodySize) {
+                    SessionBytes next = sessionBytesQueue.poll();
+                    if (null == next) {
+                        break;
+                    }
+                    bytesList.add(next);
+                    currentReturnBodySize += next.getBytes().length;
+                }
+                return merge(bytesList);
+            }
+
         }
 
         private static List<SessionBytes> merge(List<SessionBytes> bytesList) {

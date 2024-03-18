@@ -12,8 +12,6 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -92,21 +90,23 @@ public class WebSocketClientSessionService {
 
     private Channel dest() throws Exception {
         final URI webSocketURL = new URI(config.websocket.serverUrl);
-
         EventLoopGroup group = new NioEventLoopGroup();
         Bootstrap boot = new Bootstrap();
         boot.option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .group(group)
-                .handler(new LoggingHandler(LogLevel.INFO))
                 .channel(NioSocketChannel.class)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     protected void initChannel(SocketChannel sc) throws Exception {
+                        int bodySize = config.maxSendBodySize * 2;
+                        if (bodySize < 0) {
+                            bodySize = Integer.MAX_VALUE;
+                        }
                         ChannelPipeline pipeline = sc.pipeline();
                         pipeline.addLast(new HttpClientCodec());
                         pipeline.addLast(new ChunkedWriteHandler());
-                        pipeline.addLast(new HttpObjectAggregator(64 * 1024));
-                        pipeline.addLast(new WebSocketClientProtocolHandler(WebSocketClientHandshakerFactory.newHandshaker(webSocketURL, WebSocketVersion.V13, null, false, new DefaultHttpHeaders())));
+                        pipeline.addLast(new HttpObjectAggregator(bodySize));
+                        pipeline.addLast(new WebSocketClientProtocolHandler(WebSocketClientHandshakerFactory.newHandshaker(webSocketURL, WebSocketVersion.V13, null, false, new DefaultHttpHeaders(), bodySize)));
                         pipeline.addLast(new SimpleChannelInboundHandler<BinaryWebSocketFrame>() {
                             private Long dt;
 

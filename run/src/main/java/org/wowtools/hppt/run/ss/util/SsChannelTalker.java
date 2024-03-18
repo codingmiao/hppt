@@ -55,7 +55,7 @@ public abstract class SsChannelTalker {
         Thread.startVirtualThread(() -> {
             while (cell.actived) {
                 try {
-                    byte[] bytes = ServerTalker.replyToClient(ssConfig, serverSessionManager, client, true);
+                    byte[] bytes = ServerTalker.replyToClient(ssConfig, serverSessionManager, client, -1, true);
                     if (null != bytes) {
                         ctx.channel().writeAndFlush(buildWriteAndFlushObj(ctx, bytes));
                     }
@@ -84,7 +84,7 @@ public abstract class SsChannelTalker {
                         log.warn("登录失败 {}", loginCode);
                         byte[] login = ("login 0").getBytes(StandardCharsets.UTF_8);
                         ctx.channel().writeAndFlush(buildWriteAndFlushObj(ctx, login));
-                    }else {
+                    } else {
                         LoginClientService.Client client = loginClientService.getClient(loginCode);
                         clientCell = new ClientCell();
                         clientCell.client = client;

@@ -30,7 +30,6 @@ public class SsConfig extends CommonConfig {
      */
     public int messageQueueSize = 2048;
 
-
     /**
      * 生命周期实现类path，为空则使用默认
      */
@@ -41,13 +40,19 @@ public class SsConfig extends CommonConfig {
      */
     public ArrayList<String> clientIds;
 
+
     public static final class PostConfig {
 
     }
 
-    public static final class WebSocketConfig {
+    public PostConfig post;
 
+
+    public static final class WebSocketConfig {
+        public long maxReturnBodySize = 40000;
     }
+
+    public WebSocketConfig websocket;
 
     public static final class HpptConfig {
 

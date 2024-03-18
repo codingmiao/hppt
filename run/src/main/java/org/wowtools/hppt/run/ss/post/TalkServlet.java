@@ -62,7 +62,7 @@ public class TalkServlet extends HttpServlet {
         //取消息
         byte[] rBytes;
         try {
-            rBytes = ServerTalker.replyToClient(ssConfig, serverSessionManager, client, false);
+            rBytes = ServerTalker.replyToClient(ssConfig, serverSessionManager, client, ssConfig.websocket.maxReturnBodySize, false);
         } catch (Exception e) {
             log.warn("取消息异常", e);
             throw new RuntimeException(e);

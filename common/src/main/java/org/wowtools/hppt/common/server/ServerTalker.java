@@ -82,12 +82,12 @@ public class ServerTalker {
 
     //生成向客户端回复的消息
     public static byte[] replyToClient(CommonConfig config, ServerSessionManager serverSessionManager,
-                                       LoginClientService.Client client, boolean blocked) throws Exception {
+                                       LoginClientService.Client client,long maxReturnBodySize, boolean blocked) throws Exception {
         ProtoMessage.MessagePb.Builder rBuilder = ProtoMessage.MessagePb.newBuilder();
         boolean empty = true;
         /* 取消息 */
         //取bytes
-        List<SessionBytes> fetchBytes = blocked ? client.fetchBytesBlocked() : client.fetchBytes();
+        List<SessionBytes> fetchBytes = blocked ? client.fetchBytesBlocked(maxReturnBodySize) : client.fetchBytes(maxReturnBodySize);
         if (null != fetchBytes) {
             List<ProtoMessage.BytesPb> bytesPbList = new ArrayList<>(fetchBytes.size());
             for (SessionBytes fetchByte : fetchBytes) {
