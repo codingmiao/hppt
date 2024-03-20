@@ -1,6 +1,7 @@
 package org.wowtools.hppt.run.ss.post;
 
 import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -8,34 +9,31 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.wowtools.hppt.common.server.LoginClientService;
-import org.wowtools.hppt.common.server.ServerSessionManager;
+import org.wowtools.common.utils.LruCache;
+import org.wowtools.hppt.run.ss.common.ServerSessionService;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
-import org.wowtools.hppt.run.ss.util.SsUtil;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * @author liuyu
  * @date 2024/1/24
  */
 @Slf4j
-public class PostServerSessionService {
-
-    private final ServerSessionManager serverSessionManager;
-    private final LoginClientService loginClientService;
+public class PostServerSessionService extends ServerSessionService<PostCtx> {
 
 
     public PostServerSessionService(SsConfig ssConfig) throws Exception {
-        serverSessionManager = SsUtil.createServerSessionManagerBuilder(ssConfig).build();
-        loginClientService = new LoginClientService(ssConfig.clientIds);
+        super(ssConfig);
 
         log.info("*********");
         Server server = new Server(ssConfig.port);
         ServletContextHandler context = new ServletContextHandler(server, "/");
-        context.addServlet(new ServletHolder(new TimeServlet()), "/time");
-        context.addServlet(new ServletHolder(new LoginServlet(loginClientService)), "/login");
-        context.addServlet(new ServletHolder(new TalkServlet(ssConfig, serverSessionManager, loginClientService)), "/talk");
+        context.addServlet(new ServletHolder(new MyServlet()), "/talk");
         context.addServlet(new ServletHolder(new ErrorServlet()), "/err");
 
         ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();
@@ -50,6 +48,46 @@ public class PostServerSessionService {
         log.info("服务端启动完成 端口 {}", ssConfig.port);
         server.start();
         server.join();
+    }
+
+    private final Map<String, PostCtx> ctxMap = LruCache.buildCache(128, 8);
+
+    @Override
+    protected void sendBytesToClient(PostCtx ctx, byte[] bytes) {
+        ctx.sendQueue.add(bytes);
+    }
+
+    @Override
+    protected void closeCtx(PostCtx ctx) {
+        ctxMap.remove(ctx.cookie);
+    }
+
+    private final class MyServlet extends HttpServlet {
+        @Override
+        protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+            resp.setHeader("Server", "");
+            String cookie = req.getParameter("c");
+            PostCtx ctx = ctxMap.computeIfAbsent(cookie, (c) -> new PostCtx(cookie));
+            //读请求体里带过来的bytes并接收
+            byte[] bytes;
+            try (InputStream inputStream = req.getInputStream(); ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    byteArrayOutputStream.write(buffer, 0, bytesRead);
+                }
+                bytes = byteArrayOutputStream.toByteArray();
+            }
+            receiveClientBytes(ctx, bytes);
+            //取缓冲区中的数据返回
+            byte[] rBytes = ctx.sendQueue.poll();
+            if (null != rBytes) {
+                log.debug("返回客户端字节数 {}", rBytes.length);
+                try (OutputStream os = resp.getOutputStream()) {
+                    os.write(rBytes);
+                }
+            }
+        }
     }
 
 

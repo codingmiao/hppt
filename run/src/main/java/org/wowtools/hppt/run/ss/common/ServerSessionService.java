@@ -51,11 +51,12 @@ public abstract class ServerSessionService<CTX> {
      * @param bytes bytes
      * @throws Exception Exception
      */
-    protected void receiveClientBytes(CTX ctx, byte[] bytes) throws Exception {
+    protected void receiveClientBytes(CTX ctx, byte[] bytes) {
         // 若客户端为空,则进行对时或登录
         ClientCell clientCell = ctxClientCellMap.get(ctx);
         if (null == clientCell) {
-            String[] cmd = new String(bytes, StandardCharsets.UTF_8).split(" ", 2);
+            String s = new String(bytes, StandardCharsets.UTF_8);
+            String[] cmd = s.split(" ", 2);
             switch (cmd[0]) {
                 case "dt":
                     byte[] dt = ("dt " + System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8);
@@ -80,7 +81,7 @@ public abstract class ServerSessionService<CTX> {
                     }
                     break;
                 default:
-                    log.warn("未知命令 {} {}", cmd[0], cmd[1]);
+                    log.warn("未知命令 {} ", s);
                     removeCtx(ctx);
             }
             return;

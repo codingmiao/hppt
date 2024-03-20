@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public abstract class ClientSessionService {
     protected final ScConfig config;
-    private final ClientSessionManager clientSessionManager;
+    protected final ClientSessionManager clientSessionManager;
 
     private final BlockingQueue<String> sendCommandQueue = new LinkedBlockingQueue<>();
     private final BlockingQueue<SessionBytes> sendBytesQueue = new LinkedBlockingQueue<>();
@@ -39,7 +39,7 @@ public abstract class ClientSessionService {
     private boolean firstLoginErr = true;
     private boolean noLogin = true;
 
-    private volatile boolean actived = true;
+    protected volatile boolean actived = true;
 
     /**
      * 当一个事件结束时发起的回调
@@ -53,7 +53,7 @@ public abstract class ClientSessionService {
         this.config = config;
         connectToServer(config, () -> {
             log.info("连接建立完成");
-            Thread.startVirtualThread(() -> {
+            new Thread(() -> {
                 //建立连接后，获取时间戳
                 sendBytesToServer("dt".getBytes(StandardCharsets.UTF_8));
                 //等待时间戳返回
@@ -66,7 +66,7 @@ public abstract class ClientSessionService {
                 }
                 //登录
                 sendLoginCommand();
-            });
+            }).start();
         });
         clientSessionManager = ScUtil.createClientSessionManager(config,
                 buildClientSessionLifecycle(), buildClientBytesSender());
@@ -133,6 +133,23 @@ public abstract class ClientSessionService {
     protected void exit() {
         actived = false;
         clientSessionManager.close();
+        synchronized (this){
+            this.notify();
+        }
+    }
+
+    /**
+     * 阻塞直到exit方法被调用
+     */
+    public void sync() {
+        synchronized (this) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            log.info("sync interrupted");
+        }
     }
 
     private Thread buildSendThread() {
