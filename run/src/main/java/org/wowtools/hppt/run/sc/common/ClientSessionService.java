@@ -39,6 +39,8 @@ public abstract class ClientSessionService {
     private boolean firstLoginErr = true;
     private boolean noLogin = true;
 
+    private volatile boolean actived = true;
+
     /**
      * 当一个事件结束时发起的回调
      */
@@ -47,7 +49,7 @@ public abstract class ClientSessionService {
         void end();
     }
 
-    public ClientSessionService(ScConfig config)  throws Exception{
+    public ClientSessionService(ScConfig config) throws Exception {
         this.config = config;
         connectToServer(config, () -> {
             log.info("连接建立完成");
@@ -125,9 +127,17 @@ public abstract class ClientSessionService {
         }
     }
 
+    /**
+     * 当发生难以修复的异常等情况时，主动调用此方法结束当前服务，以便后续自动重启等操作
+     */
+    protected void exit() {
+        actived = false;
+        clientSessionManager.close();
+    }
+
     private Thread buildSendThread() {
         return new Thread(() -> {
-            while (true) {
+            while (actived) {
                 try {
                     byte[] sendBytes = ClientTalker.buildSendToServerBytes(config, config.maxSendBodySize, sendCommandQueue, sendBytesQueue, aesCipherUtil, true);
                     if (null != sendBytes) {
@@ -139,7 +149,7 @@ public abstract class ClientSessionService {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
+                        break;
                     }
                 }
             }

@@ -28,6 +28,7 @@ import java.net.URI;
 public class WebSocketClientSessionService extends ClientSessionService {
     private Channel wsChannel;
 
+    private EventLoopGroup group;
 
     public WebSocketClientSessionService(ScConfig config) throws Exception {
         super(config);
@@ -36,7 +37,7 @@ public class WebSocketClientSessionService extends ClientSessionService {
     @Override
     protected void connectToServer(ScConfig config, Cb cb) throws Exception {
         final URI webSocketURL = new URI(config.websocket.serverUrl);
-        EventLoopGroup group = new NioEventLoopGroup();
+        group = new NioEventLoopGroup();
         Bootstrap boot = new Bootstrap();
         boot.option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
@@ -57,6 +58,15 @@ public class WebSocketClientSessionService extends ClientSessionService {
                             @Override
                             protected void channelRead0(ChannelHandlerContext ctx, BinaryWebSocketFrame msg) throws Exception {
                                 receiveServerBytes(BytesUtil.byteBuf2bytes(msg.content()));
+                            }
+
+                            @Override
+                            public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+                                super.exceptionCaught(ctx, cause);
+                                ctx.close();
+                                wsChannel.close();
+                                group.shutdownGracefully();
+                                exit();
                             }
 
                             @Override

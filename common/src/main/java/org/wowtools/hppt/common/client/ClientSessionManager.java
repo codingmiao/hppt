@@ -11,6 +11,7 @@ import org.wowtools.hppt.common.util.BytesUtil;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,7 +30,11 @@ public class ClientSessionManager {
     private final ClientSessionLifecycle lifecycle;
     private final ClientBytesSender clientBytesSender;
 
+    private final List<Channel> channels = new LinkedList<>();
+    private final ClientSessionManagerBuilder builder;
+
     ClientSessionManager(ClientSessionManagerBuilder builder) {
+        this.builder = builder;
         lifecycle = builder.lifecycle;
         if (null == lifecycle) {
             throw new RuntimeException("lifecycle不能为空");
@@ -56,8 +61,13 @@ public class ClientSessionManager {
     }
 
     public void bindPort(int port) {
-        serverBootstrap.bind(port).channel().closeFuture();
-        log.debug("bindPort {} success", port);
+        synchronized (channels) {
+            Channel channel = serverBootstrap.bind(port).channel();
+            channel.closeFuture();
+            channels.add(channel);
+            log.debug("bindPort {} success", port);
+        }
+
     }
 
     public void disposeClientSession(ClientSession clientSession, String type) {
@@ -76,6 +86,16 @@ public class ClientSessionManager {
         return clientSessionMap.size();
     }
 
+
+    public void close() {
+        synchronized (channels) {
+            for (Channel channel : channels) {
+                channel.close();
+            }
+        }
+        builder.bossGroup.shutdownGracefully();
+        builder.workerGroup.shutdownGracefully();
+    }
 
     private final Map<ChannelHandlerContext, ClientSession> clientSessionMapByCtx = new ConcurrentHashMap<>();
 

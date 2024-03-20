@@ -46,5 +46,6 @@ public class RunSc {
             default:
                 throw new IllegalStateException("Unexpected config.type: " + config.type);
         }
+        System.out.println("-------------exit");
     }
 }

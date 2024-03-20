@@ -88,7 +88,7 @@ public class ServerTalker {
         /* 取消息 */
         //取bytes
         List<SessionBytes> fetchBytes = blocked ? client.fetchBytesBlocked(maxReturnBodySize) : client.fetchBytes(maxReturnBodySize);
-        if (null != fetchBytes) {
+        if (null != fetchBytes && !fetchBytes.isEmpty()) {
             List<ProtoMessage.BytesPb> bytesPbList = new ArrayList<>(fetchBytes.size());
             for (SessionBytes fetchByte : fetchBytes) {
                 bytesPbList.add(ProtoMessage.BytesPb.newBuilder()
