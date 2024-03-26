@@ -86,6 +86,15 @@ public class ServerTalker {
         ProtoMessage.MessagePb.Builder rBuilder = ProtoMessage.MessagePb.newBuilder();
         boolean empty = true;
         /* 取消息 */
+
+        //取命令
+        List<String> fetchCommands = client.fetchCommands();
+        if (null != fetchCommands && !fetchCommands.isEmpty()) {
+            rBuilder.addAllCommandList(fetchCommands);
+            empty = false;
+            blocked = false;
+        }
+
         //取bytes
         List<SessionBytes> fetchBytes = blocked ? client.fetchBytesBlocked(maxReturnBodySize) : client.fetchBytes(maxReturnBodySize);
         if (null != fetchBytes && !fetchBytes.isEmpty()) {
@@ -97,13 +106,6 @@ public class ServerTalker {
                         .build());
             }
             rBuilder.addAllBytesPbList(bytesPbList);
-            empty = false;
-        }
-
-        //取命令
-        List<String> fetchCommands = client.fetchCommands();
-        if (null != fetchCommands && !fetchCommands.isEmpty()) {
-            rBuilder.addAllCommandList(fetchCommands);
             empty = false;
         }
 

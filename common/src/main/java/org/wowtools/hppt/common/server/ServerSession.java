@@ -46,9 +46,6 @@ public class ServerSession {
         activeSession();
         bytes = lifecycle.beforeSendToTarget(this, bytes);
         if (bytes != null) {
-            if (log.isDebugEnabled()) {
-                log.debug(new String(bytes, StandardCharsets.UTF_8));
-            }
             BytesUtil.writeToChannel(channel, bytes);
             lifecycle.afterSendToTarget(this, bytes);
         }

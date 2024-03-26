@@ -153,9 +153,9 @@ public class ClientSessionManager {
                 }
             }
             if (null != clientSession) {
-                if (log.isDebugEnabled()) {
-                    log.debug(new String(bytes, StandardCharsets.UTF_8));
-                }
+//                if (log.isDebugEnabled()) {
+//                    log.debug(new String(bytes, StandardCharsets.UTF_8));
+//                }
                 //触发数据回调事件 转发数据到真实端口
                 log.debug("ClientSession {} 收到用户端字节 {}", clientSession.getSessionId(), bytes.length);
                 bytes = lifecycle.beforeSendToTarget(clientSession, bytes);

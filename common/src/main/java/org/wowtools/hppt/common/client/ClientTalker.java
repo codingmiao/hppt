@@ -174,8 +174,27 @@ public class ClientTalker {
                 if (clientSession != null) {
                     clientSession.sendToUser(bytesPb.getBytes().toByteArray());
                 } else {
-                    //客户端没有这个session 通知服务端关闭
-                    sendCommandQueue.add(String.valueOf(Constant.SsCommands.CloseSession) + bytesPb.getSessionId());
+                    //客户端没有这个session，异步等待一下看是否是未初始化完成
+                    Thread.startVirtualThread(() -> {
+                        ClientSession clientSession1;
+                        //每50ms检测一次，30秒后超时
+                        for (int i = 0; i < 600; i++) {
+                            try {
+                                Thread.sleep(50);
+                            } catch (InterruptedException e) {
+                                continue;
+                            }
+                            clientSession1 = clientSessionManager.getClientSessionBySessionId(bytesPb.getSessionId());
+                            if (null != clientSession1) {
+                                clientSession1.sendToUser(bytesPb.getBytes().toByteArray());
+                                return;
+                            }
+                        }
+                        //客户端没有这个session 通知服务端关闭
+                        log.info("sessionId {} 不存在，关闭session", bytesPb.getSessionId());
+                        sendCommandQueue.add(String.valueOf(Constant.SsCommands.CloseSession) + bytesPb.getSessionId());
+                    });
+
                 }
             }
         }

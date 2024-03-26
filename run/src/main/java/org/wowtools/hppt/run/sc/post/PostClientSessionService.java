@@ -3,15 +3,17 @@ package org.wowtools.hppt.run.sc.post;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.HttpUtil;
 import org.wowtools.hppt.run.sc.common.ClientSessionService;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author liuyu
@@ -37,7 +39,7 @@ public class PostClientSessionService extends ClientSessionService {
 
 
     private void startSendThread(Cb cb) {
-        Thread.startVirtualThread(() -> {
+        new Thread(() -> {
             while (null == sendQueue) {
                 try {
                     Thread.sleep(10);
@@ -48,7 +50,24 @@ public class PostClientSessionService extends ClientSessionService {
             cb.end();
             while (actived) {
                 try {
-                    byte[] sendBytes = sendQueue.poll(sleepTime, TimeUnit.SECONDS);
+                    byte[] sendBytes;
+                    {
+                        List<byte[]> bytesList = new LinkedList<>();
+                        if (log.isDebugEnabled()) {
+                            log.info("sleep {}", sleepTime);
+                        } else if (sleepTime > 5000) {
+                            log.info("sleep {}", sleepTime);
+                        }
+                        byte[] bytes = sendQueue.poll(sleepTime, TimeUnit.MILLISECONDS);
+                        if (null != bytes) {
+                            bytesList.add(bytes);
+                            sendQueue.drainTo(bytesList);
+                            sendBytes = BytesUtil.bytesCollection2PbBytes(bytesList);
+                        } else {
+                            sendBytes = null;
+                        }
+                    }
+
 
                     byte[] responseBytes;
                     try (Response response = HttpUtil.doPost(sendUrl, sendBytes)) {
@@ -56,14 +75,20 @@ public class PostClientSessionService extends ClientSessionService {
                         responseBytes = null == body ? null : body.bytes();
                     }
                     if (null != responseBytes && responseBytes.length > 0) {
-                        receiveServerBytes(responseBytes);
+                        log.debug("收到服务端响应字节数 {}", responseBytes.length);
+                        List<byte[]> bytesList = BytesUtil.pbBytes2BytesList(responseBytes);
+                        for (byte[] bytes : bytesList) {
+                            receiveServerBytes(bytes);
+                        }
                         sleepTime = config.post.initSleepTime;
                     } else {
-                        if (clientSessionManager.getSessionNum()==0) {
+                        if (null != sendBytes && sendBytes.length > 0) {
+                            sleepTime = config.post.initSleepTime;
+                        } else if (clientSessionManager.getSessionNum() == 0
+                                && sleepTime >= config.post.initSleepTime + 3 * config.post.addSleepTime) {
                             log.info("无用户连接，睡眠发送线程");
                             sleepTime = Long.MAX_VALUE;
-                            //TODO 合并发送和接收的bytes
-                        }else {
+                        } else {
                             sleepTime += config.post.addSleepTime;
                             if (sleepTime > config.post.maxSleepTime || sleepTime < 0) {
                                 sleepTime = config.post.maxSleepTime;
@@ -75,7 +100,7 @@ public class PostClientSessionService extends ClientSessionService {
                     exit();
                 }
             }
-        });
+        }).start();
     }
 
     @Override

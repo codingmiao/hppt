@@ -52,6 +52,10 @@ public abstract class ServerSessionService<CTX> {
      * @throws Exception Exception
      */
     protected void receiveClientBytes(CTX ctx, byte[] bytes) {
+        if (null == bytes || bytes.length == 0) {
+            return;
+        }
+        log.debug("收到客户端字节数 {}", bytes.length);
         // 若客户端为空,则进行对时或登录
         ClientCell clientCell = ctxClientCellMap.get(ctx);
         if (null == clientCell) {

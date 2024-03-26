@@ -10,6 +10,7 @@ import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.wowtools.common.utils.LruCache;
+import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.run.ss.common.ServerSessionService;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
 
@@ -17,6 +18,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -69,24 +72,38 @@ public class PostServerSessionService extends ServerSessionService<PostCtx> {
             String cookie = req.getParameter("c");
             PostCtx ctx = ctxMap.computeIfAbsent(cookie, (c) -> new PostCtx(cookie));
             //读请求体里带过来的bytes并接收
-            byte[] bytes;
-            try (InputStream inputStream = req.getInputStream(); ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    byteArrayOutputStream.write(buffer, 0, bytesRead);
+            {
+                byte[] bytes;
+                try (InputStream inputStream = req.getInputStream(); ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = inputStream.read(buffer)) != -1) {
+                        byteArrayOutputStream.write(buffer, 0, bytesRead);
+                    }
+                    bytes = byteArrayOutputStream.toByteArray();
                 }
-                bytes = byteArrayOutputStream.toByteArray();
+
+                List<byte[]> bytesList = BytesUtil.pbBytes2BytesList(bytes);
+                for (byte[] sub : bytesList) {
+                    receiveClientBytes(ctx, sub);
+                }
             }
-            receiveClientBytes(ctx, bytes);
+
             //取缓冲区中的数据返回
-            byte[] rBytes = ctx.sendQueue.poll();
-            if (null != rBytes) {
-                log.debug("返回客户端字节数 {}", rBytes.length);
-                try (OutputStream os = resp.getOutputStream()) {
-                    os.write(rBytes);
+            {
+                byte[] rBytes = ctx.sendQueue.poll();
+                if (null != rBytes) {
+                    List<byte[]> bytesList = new LinkedList<>();
+                    bytesList.add(rBytes);
+                    ctx.sendQueue.drainTo(bytesList);
+                    rBytes = BytesUtil.bytesCollection2PbBytes(bytesList);
+                    log.debug("向客户端发送字节 {}", rBytes.length);
+                    try (OutputStream os = resp.getOutputStream()) {
+                        os.write(rBytes);
+                    }
                 }
             }
+
         }
     }
 

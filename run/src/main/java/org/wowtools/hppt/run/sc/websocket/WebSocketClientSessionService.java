@@ -72,6 +72,19 @@ public class WebSocketClientSessionService extends ClientSessionService {
                             @Override
                             public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
                                 if (WebSocketClientProtocolHandler.ClientHandshakeStateEvent.HANDSHAKE_COMPLETE.equals(evt)) {
+//                                    //每10秒发一个空字节做为心跳包防止websocket断开
+//                                    Thread.startVirtualThread(() -> {
+//                                        byte[] empty = new byte[0];
+//                                        while (actived) {
+//                                            try {
+//                                                Thread.sleep(10000);
+//                                            } catch (InterruptedException e) {
+//                                                throw new RuntimeException(e);
+//                                            }
+//                                            sendBytesToServer(empty);
+//                                        }
+//                                    });
+
                                     cb.end();
                                 }
                                 super.userEventTriggered(ctx, evt);

@@ -1,14 +1,19 @@
 package org.wowtools.hppt.common.util;
 
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import org.wowtools.hppt.common.protobuf.ProtoMessage;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -88,7 +93,7 @@ public class BytesUtil {
         }
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(baos)){
+            try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(baos)) {
                 gzipOutputStream.write(input);
             }
             return baos.toByteArray();
@@ -143,5 +148,30 @@ public class BytesUtil {
         return bytes;
     }
 
+
+    //把bytes集合转成BytesListPb对应的bytes
+    public static byte[] bytesCollection2PbBytes(Collection<byte[]> bytesCollection) {
+        List<ByteString> byteStringList = new ArrayList<>(bytesCollection.size());
+        for (byte[] bytes : bytesCollection) {
+            byteStringList.add(ByteString.copyFrom(bytes));
+        }
+        return ProtoMessage.BytesListPb.newBuilder().addAllBytesList(byteStringList).build().toByteArray();
+    }
+
+    //BytesListPb对应的bytes转成list
+    public static ArrayList<byte[]> pbBytes2BytesList(byte[] pbBytes) {
+        ProtoMessage.BytesListPb bytesListPb;
+        try {
+            bytesListPb = ProtoMessage.BytesListPb.parseFrom(pbBytes);
+        } catch (InvalidProtocolBufferException e) {
+            throw new RuntimeException(e);
+        }
+        List<ByteString> byteStringList = bytesListPb.getBytesListList();
+        ArrayList<byte[]> res = new ArrayList<>(byteStringList.size());
+        for (ByteString s : byteStringList) {
+            res.add(s.toByteArray());
+        }
+        return res;
+    }
 
 }

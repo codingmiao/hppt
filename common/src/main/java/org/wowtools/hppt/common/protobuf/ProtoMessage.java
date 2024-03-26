@@ -7,38 +7,50 @@ package org.wowtools.hppt.common.protobuf;
 public final class ProtoMessage {
   private ProtoMessage() {}
   public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistryLite registry) {
+          com.google.protobuf.ExtensionRegistryLite registry) {
   }
 
   public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistry registry) {
+          com.google.protobuf.ExtensionRegistry registry) {
     registerAllExtensions(
-        (com.google.protobuf.ExtensionRegistryLite) registry);
+            (com.google.protobuf.ExtensionRegistryLite) registry);
   }
   public interface BytesPbOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:pojo.BytesPb)
-      com.google.protobuf.MessageOrBuilder {
+          // @@protoc_insertion_point(interface_extends:pojo.BytesPb)
+          com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     *真实字节
+     * </pre>
+     *
      * <code>bytes bytes = 1;</code>
      * @return The bytes.
      */
     com.google.protobuf.ByteString getBytes();
 
     /**
+     * <pre>
+     *会话id 通过此id确认字节该与哪个端口/哪个用户端交互
+     * </pre>
+     *
      * <code>int32 sessionId = 2;</code>
      * @return The sessionId.
      */
     int getSessionId();
   }
   /**
+   * <pre>
+   *消息字节
+   * </pre>
+   *
    * Protobuf type {@code pojo.BytesPb}
    */
   public static final class BytesPb extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:pojo.BytesPb)
-      BytesPbOrBuilder {
-  private static final long serialVersionUID = 0L;
+          com.google.protobuf.GeneratedMessageV3 implements
+          // @@protoc_insertion_point(message_implements:pojo.BytesPb)
+          BytesPbOrBuilder {
+    private static final long serialVersionUID = 0L;
     // Use BytesPb.newBuilder() to construct.
     private BytesPb(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
@@ -47,33 +59,37 @@ public final class ProtoMessage {
       bytes_ = com.google.protobuf.ByteString.EMPTY;
     }
 
-    @Override
+    @java.lang.Override
     @SuppressWarnings({"unused"})
-    protected Object newInstance(
-        UnusedPrivateParameter unused) {
+    protected java.lang.Object newInstance(
+            UnusedPrivateParameter unused) {
       return new BytesPb();
     }
 
     public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return ProtoMessage.internal_static_pojo_BytesPb_descriptor;
+    getDescriptor() {
+      return org.wowtools.hppt.common.protobuf.ProtoMessage.internal_static_pojo_BytesPb_descriptor;
     }
 
-    @Override
-    protected FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return ProtoMessage.internal_static_pojo_BytesPb_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              BytesPb.class, Builder.class);
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    internalGetFieldAccessorTable() {
+      return org.wowtools.hppt.common.protobuf.ProtoMessage.internal_static_pojo_BytesPb_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                      org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.class, org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.Builder.class);
     }
 
     public static final int BYTES_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString bytes_ = com.google.protobuf.ByteString.EMPTY;
     /**
+     * <pre>
+     *真实字节
+     * </pre>
+     *
      * <code>bytes bytes = 1;</code>
      * @return The bytes.
      */
-    @Override
+    @java.lang.Override
     public com.google.protobuf.ByteString getBytes() {
       return bytes_;
     }
@@ -81,16 +97,20 @@ public final class ProtoMessage {
     public static final int SESSIONID_FIELD_NUMBER = 2;
     private int sessionId_ = 0;
     /**
+     * <pre>
+     *会话id 通过此id确认字节该与哪个端口/哪个用户端交互
+     * </pre>
+     *
      * <code>int32 sessionId = 2;</code>
      * @return The sessionId.
      */
-    @Override
+    @java.lang.Override
     public int getSessionId() {
       return sessionId_;
     }
 
     private byte memoizedIsInitialized = -1;
-    @Override
+    @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
@@ -100,9 +120,9 @@ public final class ProtoMessage {
       return true;
     }
 
-    @Override
+    @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
+            throws java.io.IOException {
       if (!bytes_.isEmpty()) {
         output.writeBytes(1, bytes_);
       }
@@ -112,7 +132,7 @@ public final class ProtoMessage {
       getUnknownFields().writeTo(output);
     }
 
-    @Override
+    @java.lang.Override
     public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
@@ -120,36 +140,36 @@ public final class ProtoMessage {
       size = 0;
       if (!bytes_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, bytes_);
+                .computeBytesSize(1, bytes_);
       }
       if (sessionId_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, sessionId_);
+                .computeInt32Size(2, sessionId_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
 
-    @Override
-    public boolean equals(final Object obj) {
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
-       return true;
+        return true;
       }
-      if (!(obj instanceof BytesPb)) {
+      if (!(obj instanceof org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb)) {
         return super.equals(obj);
       }
-      BytesPb other = (BytesPb) obj;
+      org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb other = (org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb) obj;
 
       if (!getBytes()
-          .equals(other.getBytes())) return false;
+              .equals(other.getBytes())) return false;
       if (getSessionId()
-          != other.getSessionId()) return false;
+              != other.getSessionId()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
-    @Override
+    @java.lang.Override
     public int hashCode() {
       if (memoizedHashCode != 0) {
         return memoizedHashCode;
@@ -165,116 +185,120 @@ public final class ProtoMessage {
       return hash;
     }
 
-    public static BytesPb parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb parseFrom(
+            java.nio.ByteBuffer data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static BytesPb parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb parseFrom(
+            java.nio.ByteBuffer data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static BytesPb parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb parseFrom(
+            com.google.protobuf.ByteString data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static BytesPb parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb parseFrom(
+            com.google.protobuf.ByteString data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static BytesPb parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb parseFrom(byte[] data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static BytesPb parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb parseFrom(
+            byte[] data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static BytesPb parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb parseFrom(java.io.InputStream input)
+            throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
+              .parseWithIOException(PARSER, input);
     }
-    public static BytesPb parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb parseFrom(
+            java.io.InputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static BytesPb parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
+              .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static BytesPb parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb parseDelimitedFrom(java.io.InputStream input)
+            throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static BytesPb parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static BytesPb parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+              .parseDelimitedWithIOException(PARSER, input);
     }
 
-    @Override
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb parseDelimitedFrom(
+            java.io.InputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb parseFrom(
+            com.google.protobuf.CodedInputStream input)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseWithIOException(PARSER, input);
+    }
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb parseFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(BytesPb prototype) {
+    public static Builder newBuilder(org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    @Override
+    @java.lang.Override
     public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
+              ? new Builder() : new Builder().mergeFrom(this);
     }
 
-    @Override
+    @java.lang.Override
     protected Builder newBuilderForType(
-        BuilderParent parent) {
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
     /**
+     * <pre>
+     *消息字节
+     * </pre>
+     *
      * Protobuf type {@code pojo.BytesPb}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:pojo.BytesPb)
-        BytesPbOrBuilder {
+            com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+            // @@protoc_insertion_point(builder_implements:pojo.BytesPb)
+            org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPbOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return ProtoMessage.internal_static_pojo_BytesPb_descriptor;
+      getDescriptor() {
+        return org.wowtools.hppt.common.protobuf.ProtoMessage.internal_static_pojo_BytesPb_descriptor;
       }
 
-      @Override
-      protected FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return ProtoMessage.internal_static_pojo_BytesPb_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                BytesPb.class, Builder.class);
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internalGetFieldAccessorTable() {
+        return org.wowtools.hppt.common.protobuf.ProtoMessage.internal_static_pojo_BytesPb_fieldAccessorTable
+                .ensureFieldAccessorsInitialized(
+                        org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.class, org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.Builder.class);
       }
 
       // Construct using org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.newBuilder()
@@ -283,11 +307,11 @@ public final class ProtoMessage {
       }
 
       private Builder(
-          BuilderParent parent) {
+              com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
 
       }
-      @Override
+      @java.lang.Override
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
@@ -296,35 +320,35 @@ public final class ProtoMessage {
         return this;
       }
 
-      @Override
+      @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return ProtoMessage.internal_static_pojo_BytesPb_descriptor;
+      getDescriptorForType() {
+        return org.wowtools.hppt.common.protobuf.ProtoMessage.internal_static_pojo_BytesPb_descriptor;
       }
 
-      @Override
-      public BytesPb getDefaultInstanceForType() {
-        return BytesPb.getDefaultInstance();
+      @java.lang.Override
+      public org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb getDefaultInstanceForType() {
+        return org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.getDefaultInstance();
       }
 
-      @Override
-      public BytesPb build() {
-        BytesPb result = buildPartial();
+      @java.lang.Override
+      public org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb build() {
+        org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      @Override
-      public BytesPb buildPartial() {
-        BytesPb result = new BytesPb(this);
+      @java.lang.Override
+      public org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb buildPartial() {
+        org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb result = new org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(BytesPb result) {
+      private void buildPartial0(org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.bytes_ = bytes_;
@@ -334,50 +358,50 @@ public final class ProtoMessage {
         }
       }
 
-      @Override
+      @java.lang.Override
       public Builder clone() {
         return super.clone();
       }
-      @Override
+      @java.lang.Override
       public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
+              com.google.protobuf.Descriptors.FieldDescriptor field,
+              java.lang.Object value) {
         return super.setField(field, value);
       }
-      @Override
+      @java.lang.Override
       public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
+              com.google.protobuf.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
-      @Override
+      @java.lang.Override
       public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+              com.google.protobuf.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
-      @Override
+      @java.lang.Override
       public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
+              com.google.protobuf.Descriptors.FieldDescriptor field,
+              int index, java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
-      @Override
+      @java.lang.Override
       public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
+              com.google.protobuf.Descriptors.FieldDescriptor field,
+              java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
-      @Override
+      @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof BytesPb) {
-          return mergeFrom((BytesPb)other);
+        if (other instanceof org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb) {
+          return mergeFrom((org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(BytesPb other) {
-        if (other == BytesPb.getDefaultInstance()) return this;
+      public Builder mergeFrom(org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb other) {
+        if (other == org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.getDefaultInstance()) return this;
         if (other.getBytes() != com.google.protobuf.ByteString.EMPTY) {
           setBytes(other.getBytes());
         }
@@ -389,18 +413,18 @@ public final class ProtoMessage {
         return this;
       }
 
-      @Override
+      @java.lang.Override
       public final boolean isInitialized() {
         return true;
       }
 
-      @Override
+      @java.lang.Override
       public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
         if (extensionRegistry == null) {
-          throw new NullPointerException();
+          throw new java.lang.NullPointerException();
         }
         try {
           boolean done = false;
@@ -439,14 +463,22 @@ public final class ProtoMessage {
 
       private com.google.protobuf.ByteString bytes_ = com.google.protobuf.ByteString.EMPTY;
       /**
+       * <pre>
+       *真实字节
+       * </pre>
+       *
        * <code>bytes bytes = 1;</code>
        * @return The bytes.
        */
-      @Override
+      @java.lang.Override
       public com.google.protobuf.ByteString getBytes() {
         return bytes_;
       }
       /**
+       * <pre>
+       *真实字节
+       * </pre>
+       *
        * <code>bytes bytes = 1;</code>
        * @param value The bytes to set.
        * @return This builder for chaining.
@@ -459,6 +491,10 @@ public final class ProtoMessage {
         return this;
       }
       /**
+       * <pre>
+       *真实字节
+       * </pre>
+       *
        * <code>bytes bytes = 1;</code>
        * @return This builder for chaining.
        */
@@ -471,14 +507,22 @@ public final class ProtoMessage {
 
       private int sessionId_ ;
       /**
+       * <pre>
+       *会话id 通过此id确认字节该与哪个端口/哪个用户端交互
+       * </pre>
+       *
        * <code>int32 sessionId = 2;</code>
        * @return The sessionId.
        */
-      @Override
+      @java.lang.Override
       public int getSessionId() {
         return sessionId_;
       }
       /**
+       * <pre>
+       *会话id 通过此id确认字节该与哪个端口/哪个用户端交互
+       * </pre>
+       *
        * <code>int32 sessionId = 2;</code>
        * @param value The sessionId to set.
        * @return This builder for chaining.
@@ -491,6 +535,10 @@ public final class ProtoMessage {
         return this;
       }
       /**
+       * <pre>
+       *会话id 通过此id确认字节该与哪个端口/哪个用户端交互
+       * </pre>
+       *
        * <code>int32 sessionId = 2;</code>
        * @return This builder for chaining.
        */
@@ -500,15 +548,15 @@ public final class ProtoMessage {
         onChanged();
         return this;
       }
-      @Override
+      @java.lang.Override
       public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
+              final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
-      @Override
+      @java.lang.Override
       public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
+              final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
       }
 
@@ -517,22 +565,22 @@ public final class ProtoMessage {
     }
 
     // @@protoc_insertion_point(class_scope:pojo.BytesPb)
-    private static final BytesPb DEFAULT_INSTANCE;
+    private static final org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new BytesPb();
+      DEFAULT_INSTANCE = new org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb();
     }
 
-    public static BytesPb getDefaultInstance() {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
     private static final com.google.protobuf.Parser<BytesPb>
-        PARSER = new com.google.protobuf.AbstractParser<BytesPb>() {
-      @Override
+            PARSER = new com.google.protobuf.AbstractParser<BytesPb>() {
+      @java.lang.Override
       public BytesPb parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
         Builder builder = newBuilder();
         try {
           builder.mergeFrom(input, extensionRegistry);
@@ -542,7 +590,7 @@ public final class ProtoMessage {
           throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
         } catch (java.io.IOException e) {
           throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
+                  .setUnfinishedMessage(builder.buildPartial());
         }
         return builder.buildPartial();
       }
@@ -552,79 +600,115 @@ public final class ProtoMessage {
       return PARSER;
     }
 
-    @Override
+    @java.lang.Override
     public com.google.protobuf.Parser<BytesPb> getParserForType() {
       return PARSER;
     }
 
-    @Override
-    public BytesPb getDefaultInstanceForType() {
+    @java.lang.Override
+    public org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
   public interface MessagePbOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:pojo.MessagePb)
-      com.google.protobuf.MessageOrBuilder {
+          // @@protoc_insertion_point(interface_extends:pojo.MessagePb)
+          com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     *消息字节list
+     * </pre>
+     *
      * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
      */
-    java.util.List<BytesPb>
-        getBytesPbListList();
+    java.util.List<org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb>
+    getBytesPbListList();
     /**
+     * <pre>
+     *消息字节list
+     * </pre>
+     *
      * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
      */
-    BytesPb getBytesPbList(int index);
+    org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb getBytesPbList(int index);
     /**
+     * <pre>
+     *消息字节list
+     * </pre>
+     *
      * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
      */
     int getBytesPbListCount();
     /**
+     * <pre>
+     *消息字节list
+     * </pre>
+     *
      * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
      */
-    java.util.List<? extends BytesPbOrBuilder>
-        getBytesPbListOrBuilderList();
+    java.util.List<? extends org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPbOrBuilder>
+    getBytesPbListOrBuilderList();
     /**
+     * <pre>
+     *消息字节list
+     * </pre>
+     *
      * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
      */
-    BytesPbOrBuilder getBytesPbListOrBuilder(
-        int index);
+    org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPbOrBuilder getBytesPbListOrBuilder(
+            int index);
 
     /**
+     * <pre>
+     *客户端/服务端需要执行的命令
+     * </pre>
+     *
      * <code>repeated string commandList = 2;</code>
      * @return A list containing the commandList.
      */
-    java.util.List<String>
-        getCommandListList();
+    java.util.List<java.lang.String>
+    getCommandListList();
     /**
+     * <pre>
+     *客户端/服务端需要执行的命令
+     * </pre>
+     *
      * <code>repeated string commandList = 2;</code>
      * @return The count of commandList.
      */
     int getCommandListCount();
     /**
+     * <pre>
+     *客户端/服务端需要执行的命令
+     * </pre>
+     *
      * <code>repeated string commandList = 2;</code>
      * @param index The index of the element to return.
      * @return The commandList at the given index.
      */
-    String getCommandList(int index);
+    java.lang.String getCommandList(int index);
     /**
+     * <pre>
+     *客户端/服务端需要执行的命令
+     * </pre>
+     *
      * <code>repeated string commandList = 2;</code>
      * @param index The index of the value to return.
      * @return The bytes of the commandList at the given index.
      */
     com.google.protobuf.ByteString
-        getCommandListBytes(int index);
+    getCommandListBytes(int index);
   }
   /**
    * Protobuf type {@code pojo.MessagePb}
    */
   public static final class MessagePb extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:pojo.MessagePb)
-      MessagePbOrBuilder {
-  private static final long serialVersionUID = 0L;
+          com.google.protobuf.GeneratedMessageV3 implements
+          // @@protoc_insertion_point(message_implements:pojo.MessagePb)
+          MessagePbOrBuilder {
+    private static final long serialVersionUID = 0L;
     // Use MessagePb.newBuilder() to construct.
     private MessagePb(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
@@ -632,83 +716,111 @@ public final class ProtoMessage {
     private MessagePb() {
       bytesPbList_ = java.util.Collections.emptyList();
       commandList_ =
-          com.google.protobuf.LazyStringArrayList.emptyList();
+              com.google.protobuf.LazyStringArrayList.emptyList();
     }
 
-    @Override
+    @java.lang.Override
     @SuppressWarnings({"unused"})
-    protected Object newInstance(
-        UnusedPrivateParameter unused) {
+    protected java.lang.Object newInstance(
+            UnusedPrivateParameter unused) {
       return new MessagePb();
     }
 
     public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return ProtoMessage.internal_static_pojo_MessagePb_descriptor;
+    getDescriptor() {
+      return org.wowtools.hppt.common.protobuf.ProtoMessage.internal_static_pojo_MessagePb_descriptor;
     }
 
-    @Override
-    protected FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return ProtoMessage.internal_static_pojo_MessagePb_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              MessagePb.class, Builder.class);
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    internalGetFieldAccessorTable() {
+      return org.wowtools.hppt.common.protobuf.ProtoMessage.internal_static_pojo_MessagePb_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                      org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb.class, org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb.Builder.class);
     }
 
     public static final int BYTESPBLIST_FIELD_NUMBER = 1;
     @SuppressWarnings("serial")
-    private java.util.List<BytesPb> bytesPbList_;
+    private java.util.List<org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb> bytesPbList_;
     /**
+     * <pre>
+     *消息字节list
+     * </pre>
+     *
      * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
      */
-    @Override
-    public java.util.List<BytesPb> getBytesPbListList() {
+    @java.lang.Override
+    public java.util.List<org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb> getBytesPbListList() {
       return bytesPbList_;
     }
     /**
+     * <pre>
+     *消息字节list
+     * </pre>
+     *
      * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
      */
-    @Override
-    public java.util.List<? extends BytesPbOrBuilder>
-        getBytesPbListOrBuilderList() {
+    @java.lang.Override
+    public java.util.List<? extends org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPbOrBuilder>
+    getBytesPbListOrBuilderList() {
       return bytesPbList_;
     }
     /**
+     * <pre>
+     *消息字节list
+     * </pre>
+     *
      * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
      */
-    @Override
+    @java.lang.Override
     public int getBytesPbListCount() {
       return bytesPbList_.size();
     }
     /**
+     * <pre>
+     *消息字节list
+     * </pre>
+     *
      * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
      */
-    @Override
-    public BytesPb getBytesPbList(int index) {
+    @java.lang.Override
+    public org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb getBytesPbList(int index) {
       return bytesPbList_.get(index);
     }
     /**
+     * <pre>
+     *消息字节list
+     * </pre>
+     *
      * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
      */
-    @Override
-    public BytesPbOrBuilder getBytesPbListOrBuilder(
-        int index) {
+    @java.lang.Override
+    public org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPbOrBuilder getBytesPbListOrBuilder(
+            int index) {
       return bytesPbList_.get(index);
     }
 
     public static final int COMMANDLIST_FIELD_NUMBER = 2;
     @SuppressWarnings("serial")
     private com.google.protobuf.LazyStringArrayList commandList_ =
-        com.google.protobuf.LazyStringArrayList.emptyList();
+            com.google.protobuf.LazyStringArrayList.emptyList();
     /**
+     * <pre>
+     *客户端/服务端需要执行的命令
+     * </pre>
+     *
      * <code>repeated string commandList = 2;</code>
      * @return A list containing the commandList.
      */
     public com.google.protobuf.ProtocolStringList
-        getCommandListList() {
+    getCommandListList() {
       return commandList_;
     }
     /**
+     * <pre>
+     *客户端/服务端需要执行的命令
+     * </pre>
+     *
      * <code>repeated string commandList = 2;</code>
      * @return The count of commandList.
      */
@@ -716,25 +828,33 @@ public final class ProtoMessage {
       return commandList_.size();
     }
     /**
+     * <pre>
+     *客户端/服务端需要执行的命令
+     * </pre>
+     *
      * <code>repeated string commandList = 2;</code>
      * @param index The index of the element to return.
      * @return The commandList at the given index.
      */
-    public String getCommandList(int index) {
+    public java.lang.String getCommandList(int index) {
       return commandList_.get(index);
     }
     /**
+     * <pre>
+     *客户端/服务端需要执行的命令
+     * </pre>
+     *
      * <code>repeated string commandList = 2;</code>
      * @param index The index of the value to return.
      * @return The bytes of the commandList at the given index.
      */
     public com.google.protobuf.ByteString
-        getCommandListBytes(int index) {
+    getCommandListBytes(int index) {
       return commandList_.getByteString(index);
     }
 
     private byte memoizedIsInitialized = -1;
-    @Override
+    @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
@@ -744,9 +864,9 @@ public final class ProtoMessage {
       return true;
     }
 
-    @Override
+    @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
+            throws java.io.IOException {
       for (int i = 0; i < bytesPbList_.size(); i++) {
         output.writeMessage(1, bytesPbList_.get(i));
       }
@@ -756,7 +876,7 @@ public final class ProtoMessage {
       getUnknownFields().writeTo(output);
     }
 
-    @Override
+    @java.lang.Override
     public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
@@ -764,7 +884,7 @@ public final class ProtoMessage {
       size = 0;
       for (int i = 0; i < bytesPbList_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, bytesPbList_.get(i));
+                .computeMessageSize(1, bytesPbList_.get(i));
       }
       {
         int dataSize = 0;
@@ -779,25 +899,25 @@ public final class ProtoMessage {
       return size;
     }
 
-    @Override
-    public boolean equals(final Object obj) {
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
-       return true;
+        return true;
       }
-      if (!(obj instanceof MessagePb)) {
+      if (!(obj instanceof org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb)) {
         return super.equals(obj);
       }
-      MessagePb other = (MessagePb) obj;
+      org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb other = (org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb) obj;
 
       if (!getBytesPbListList()
-          .equals(other.getBytesPbListList())) return false;
+              .equals(other.getBytesPbListList())) return false;
       if (!getCommandListList()
-          .equals(other.getCommandListList())) return false;
+              .equals(other.getCommandListList())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
-    @Override
+    @java.lang.Override
     public int hashCode() {
       if (memoizedHashCode != 0) {
         return memoizedHashCode;
@@ -817,95 +937,95 @@ public final class ProtoMessage {
       return hash;
     }
 
-    public static MessagePb parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb parseFrom(
+            java.nio.ByteBuffer data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static MessagePb parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb parseFrom(
+            java.nio.ByteBuffer data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static MessagePb parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb parseFrom(
+            com.google.protobuf.ByteString data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static MessagePb parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb parseFrom(
+            com.google.protobuf.ByteString data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static MessagePb parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb parseFrom(byte[] data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static MessagePb parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb parseFrom(
+            byte[] data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static MessagePb parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb parseFrom(java.io.InputStream input)
+            throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
+              .parseWithIOException(PARSER, input);
     }
-    public static MessagePb parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb parseFrom(
+            java.io.InputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static MessagePb parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
+              .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static MessagePb parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb parseDelimitedFrom(java.io.InputStream input)
+            throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static MessagePb parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static MessagePb parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+              .parseDelimitedWithIOException(PARSER, input);
     }
 
-    @Override
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb parseDelimitedFrom(
+            java.io.InputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb parseFrom(
+            com.google.protobuf.CodedInputStream input)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseWithIOException(PARSER, input);
+    }
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb parseFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(MessagePb prototype) {
+    public static Builder newBuilder(org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
-    @Override
+    @java.lang.Override
     public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
+              ? new Builder() : new Builder().mergeFrom(this);
     }
 
-    @Override
+    @java.lang.Override
     protected Builder newBuilderForType(
-        BuilderParent parent) {
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -913,20 +1033,20 @@ public final class ProtoMessage {
      * Protobuf type {@code pojo.MessagePb}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:pojo.MessagePb)
-        MessagePbOrBuilder {
+            com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+            // @@protoc_insertion_point(builder_implements:pojo.MessagePb)
+            org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePbOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return ProtoMessage.internal_static_pojo_MessagePb_descriptor;
+      getDescriptor() {
+        return org.wowtools.hppt.common.protobuf.ProtoMessage.internal_static_pojo_MessagePb_descriptor;
       }
 
-      @Override
-      protected FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return ProtoMessage.internal_static_pojo_MessagePb_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                MessagePb.class, Builder.class);
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internalGetFieldAccessorTable() {
+        return org.wowtools.hppt.common.protobuf.ProtoMessage.internal_static_pojo_MessagePb_fieldAccessorTable
+                .ensureFieldAccessorsInitialized(
+                        org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb.class, org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb.Builder.class);
       }
 
       // Construct using org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb.newBuilder()
@@ -935,11 +1055,11 @@ public final class ProtoMessage {
       }
 
       private Builder(
-          BuilderParent parent) {
+              com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
 
       }
-      @Override
+      @java.lang.Override
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
@@ -951,40 +1071,40 @@ public final class ProtoMessage {
         }
         bitField0_ = (bitField0_ & ~0x00000001);
         commandList_ =
-            com.google.protobuf.LazyStringArrayList.emptyList();
+                com.google.protobuf.LazyStringArrayList.emptyList();
         return this;
       }
 
-      @Override
+      @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return ProtoMessage.internal_static_pojo_MessagePb_descriptor;
+      getDescriptorForType() {
+        return org.wowtools.hppt.common.protobuf.ProtoMessage.internal_static_pojo_MessagePb_descriptor;
       }
 
-      @Override
-      public MessagePb getDefaultInstanceForType() {
-        return MessagePb.getDefaultInstance();
+      @java.lang.Override
+      public org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb getDefaultInstanceForType() {
+        return org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb.getDefaultInstance();
       }
 
-      @Override
-      public MessagePb build() {
-        MessagePb result = buildPartial();
+      @java.lang.Override
+      public org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb build() {
+        org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      @Override
-      public MessagePb buildPartial() {
-        MessagePb result = new MessagePb(this);
+      @java.lang.Override
+      public org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb buildPartial() {
+        org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb result = new org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb(this);
         buildPartialRepeatedFields(result);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartialRepeatedFields(MessagePb result) {
+      private void buildPartialRepeatedFields(org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb result) {
         if (bytesPbListBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             bytesPbList_ = java.util.Collections.unmodifiableList(bytesPbList_);
@@ -996,7 +1116,7 @@ public final class ProtoMessage {
         }
       }
 
-      private void buildPartial0(MessagePb result) {
+      private void buildPartial0(org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000002) != 0)) {
           commandList_.makeImmutable();
@@ -1004,50 +1124,50 @@ public final class ProtoMessage {
         }
       }
 
-      @Override
+      @java.lang.Override
       public Builder clone() {
         return super.clone();
       }
-      @Override
+      @java.lang.Override
       public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
+              com.google.protobuf.Descriptors.FieldDescriptor field,
+              java.lang.Object value) {
         return super.setField(field, value);
       }
-      @Override
+      @java.lang.Override
       public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
+              com.google.protobuf.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
-      @Override
+      @java.lang.Override
       public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+              com.google.protobuf.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
-      @Override
+      @java.lang.Override
       public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
+              com.google.protobuf.Descriptors.FieldDescriptor field,
+              int index, java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
-      @Override
+      @java.lang.Override
       public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
+              com.google.protobuf.Descriptors.FieldDescriptor field,
+              java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
-      @Override
+      @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof MessagePb) {
-          return mergeFrom((MessagePb)other);
+        if (other instanceof org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb) {
+          return mergeFrom((org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(MessagePb other) {
-        if (other == MessagePb.getDefaultInstance()) return this;
+      public Builder mergeFrom(org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb other) {
+        if (other == org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb.getDefaultInstance()) return this;
         if (bytesPbListBuilder_ == null) {
           if (!other.bytesPbList_.isEmpty()) {
             if (bytesPbList_.isEmpty()) {
@@ -1067,8 +1187,8 @@ public final class ProtoMessage {
               bytesPbList_ = other.bytesPbList_;
               bitField0_ = (bitField0_ & ~0x00000001);
               bytesPbListBuilder_ =
-                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getBytesPbListFieldBuilder() : null;
+                      com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                              getBytesPbListFieldBuilder() : null;
             } else {
               bytesPbListBuilder_.addAllMessages(other.bytesPbList_);
             }
@@ -1089,18 +1209,18 @@ public final class ProtoMessage {
         return this;
       }
 
-      @Override
+      @java.lang.Override
       public final boolean isInitialized() {
         return true;
       }
 
-      @Override
+      @java.lang.Override
       public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
         if (extensionRegistry == null) {
-          throw new NullPointerException();
+          throw new java.lang.NullPointerException();
         }
         try {
           boolean done = false;
@@ -1111,10 +1231,10 @@ public final class ProtoMessage {
                 done = true;
                 break;
               case 10: {
-                BytesPb m =
-                    input.readMessage(
-                        BytesPb.parser(),
-                        extensionRegistry);
+                org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb m =
+                        input.readMessage(
+                                org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.parser(),
+                                extensionRegistry);
                 if (bytesPbListBuilder_ == null) {
                   ensureBytesPbListIsMutable();
                   bytesPbList_.add(m);
@@ -1124,7 +1244,7 @@ public final class ProtoMessage {
                 break;
               } // case 10
               case 18: {
-                String s = input.readStringRequireUtf8();
+                java.lang.String s = input.readStringRequireUtf8();
                 ensureCommandListIsMutable();
                 commandList_.add(s);
                 break;
@@ -1146,22 +1266,26 @@ public final class ProtoMessage {
       }
       private int bitField0_;
 
-      private java.util.List<BytesPb> bytesPbList_ =
-        java.util.Collections.emptyList();
+      private java.util.List<org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb> bytesPbList_ =
+              java.util.Collections.emptyList();
       private void ensureBytesPbListIsMutable() {
         if (!((bitField0_ & 0x00000001) != 0)) {
-          bytesPbList_ = new java.util.ArrayList<BytesPb>(bytesPbList_);
+          bytesPbList_ = new java.util.ArrayList<org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb>(bytesPbList_);
           bitField0_ |= 0x00000001;
-         }
+        }
       }
 
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          BytesPb, BytesPb.Builder, BytesPbOrBuilder> bytesPbListBuilder_;
+              org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb, org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.Builder, org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPbOrBuilder> bytesPbListBuilder_;
 
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
-      public java.util.List<BytesPb> getBytesPbListList() {
+      public java.util.List<org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb> getBytesPbListList() {
         if (bytesPbListBuilder_ == null) {
           return java.util.Collections.unmodifiableList(bytesPbList_);
         } else {
@@ -1169,6 +1293,10 @@ public final class ProtoMessage {
         }
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
       public int getBytesPbListCount() {
@@ -1179,9 +1307,13 @@ public final class ProtoMessage {
         }
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
-      public BytesPb getBytesPbList(int index) {
+      public org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb getBytesPbList(int index) {
         if (bytesPbListBuilder_ == null) {
           return bytesPbList_.get(index);
         } else {
@@ -1189,10 +1321,14 @@ public final class ProtoMessage {
         }
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
       public Builder setBytesPbList(
-          int index, BytesPb value) {
+              int index, org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb value) {
         if (bytesPbListBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -1206,10 +1342,14 @@ public final class ProtoMessage {
         return this;
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
       public Builder setBytesPbList(
-          int index, BytesPb.Builder builderForValue) {
+              int index, org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.Builder builderForValue) {
         if (bytesPbListBuilder_ == null) {
           ensureBytesPbListIsMutable();
           bytesPbList_.set(index, builderForValue.build());
@@ -1220,9 +1360,13 @@ public final class ProtoMessage {
         return this;
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
-      public Builder addBytesPbList(BytesPb value) {
+      public Builder addBytesPbList(org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb value) {
         if (bytesPbListBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -1236,10 +1380,14 @@ public final class ProtoMessage {
         return this;
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
       public Builder addBytesPbList(
-          int index, BytesPb value) {
+              int index, org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb value) {
         if (bytesPbListBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -1253,10 +1401,14 @@ public final class ProtoMessage {
         return this;
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
       public Builder addBytesPbList(
-          BytesPb.Builder builderForValue) {
+              org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.Builder builderForValue) {
         if (bytesPbListBuilder_ == null) {
           ensureBytesPbListIsMutable();
           bytesPbList_.add(builderForValue.build());
@@ -1267,10 +1419,14 @@ public final class ProtoMessage {
         return this;
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
       public Builder addBytesPbList(
-          int index, BytesPb.Builder builderForValue) {
+              int index, org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.Builder builderForValue) {
         if (bytesPbListBuilder_ == null) {
           ensureBytesPbListIsMutable();
           bytesPbList_.add(index, builderForValue.build());
@@ -1281,14 +1437,18 @@ public final class ProtoMessage {
         return this;
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
       public Builder addAllBytesPbList(
-          Iterable<? extends BytesPb> values) {
+              java.lang.Iterable<? extends org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb> values) {
         if (bytesPbListBuilder_ == null) {
           ensureBytesPbListIsMutable();
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, bytesPbList_);
+                  values, bytesPbList_);
           onChanged();
         } else {
           bytesPbListBuilder_.addAllMessages(values);
@@ -1296,6 +1456,10 @@ public final class ProtoMessage {
         return this;
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
       public Builder clearBytesPbList() {
@@ -1309,6 +1473,10 @@ public final class ProtoMessage {
         return this;
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
       public Builder removeBytesPbList(int index) {
@@ -1322,27 +1490,39 @@ public final class ProtoMessage {
         return this;
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
-      public BytesPb.Builder getBytesPbListBuilder(
-          int index) {
+      public org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.Builder getBytesPbListBuilder(
+              int index) {
         return getBytesPbListFieldBuilder().getBuilder(index);
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
-      public BytesPbOrBuilder getBytesPbListOrBuilder(
-          int index) {
+      public org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPbOrBuilder getBytesPbListOrBuilder(
+              int index) {
         if (bytesPbListBuilder_ == null) {
           return bytesPbList_.get(index);  } else {
           return bytesPbListBuilder_.getMessageOrBuilder(index);
         }
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
-      public java.util.List<? extends BytesPbOrBuilder>
-           getBytesPbListOrBuilderList() {
+      public java.util.List<? extends org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPbOrBuilder>
+      getBytesPbListOrBuilderList() {
         if (bytesPbListBuilder_ != null) {
           return bytesPbListBuilder_.getMessageOrBuilderList();
         } else {
@@ -1350,33 +1530,45 @@ public final class ProtoMessage {
         }
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
-      public BytesPb.Builder addBytesPbListBuilder() {
+      public org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.Builder addBytesPbListBuilder() {
         return getBytesPbListFieldBuilder().addBuilder(
-            BytesPb.getDefaultInstance());
+                org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.getDefaultInstance());
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
-      public BytesPb.Builder addBytesPbListBuilder(
-          int index) {
+      public org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.Builder addBytesPbListBuilder(
+              int index) {
         return getBytesPbListFieldBuilder().addBuilder(
-            index, BytesPb.getDefaultInstance());
+                index, org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.getDefaultInstance());
       }
       /**
+       * <pre>
+       *消息字节list
+       * </pre>
+       *
        * <code>repeated .pojo.BytesPb bytesPbList = 1;</code>
        */
-      public java.util.List<BytesPb.Builder>
-           getBytesPbListBuilderList() {
+      public java.util.List<org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.Builder>
+      getBytesPbListBuilderList() {
         return getBytesPbListFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          BytesPb, BytesPb.Builder, BytesPbOrBuilder>
-          getBytesPbListFieldBuilder() {
+              org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb, org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.Builder, org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPbOrBuilder>
+      getBytesPbListFieldBuilder() {
         if (bytesPbListBuilder_ == null) {
           bytesPbListBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              BytesPb, BytesPb.Builder, BytesPbOrBuilder>(
+                  org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb, org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPb.Builder, org.wowtools.hppt.common.protobuf.ProtoMessage.BytesPbOrBuilder>(
                   bytesPbList_,
                   ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
@@ -1387,7 +1579,7 @@ public final class ProtoMessage {
       }
 
       private com.google.protobuf.LazyStringArrayList commandList_ =
-          com.google.protobuf.LazyStringArrayList.emptyList();
+              com.google.protobuf.LazyStringArrayList.emptyList();
       private void ensureCommandListIsMutable() {
         if (!commandList_.isModifiable()) {
           commandList_ = new com.google.protobuf.LazyStringArrayList(commandList_);
@@ -1395,15 +1587,23 @@ public final class ProtoMessage {
         bitField0_ |= 0x00000002;
       }
       /**
+       * <pre>
+       *客户端/服务端需要执行的命令
+       * </pre>
+       *
        * <code>repeated string commandList = 2;</code>
        * @return A list containing the commandList.
        */
       public com.google.protobuf.ProtocolStringList
-          getCommandListList() {
+      getCommandListList() {
         commandList_.makeImmutable();
         return commandList_;
       }
       /**
+       * <pre>
+       *客户端/服务端需要执行的命令
+       * </pre>
+       *
        * <code>repeated string commandList = 2;</code>
        * @return The count of commandList.
        */
@@ -1411,30 +1611,42 @@ public final class ProtoMessage {
         return commandList_.size();
       }
       /**
+       * <pre>
+       *客户端/服务端需要执行的命令
+       * </pre>
+       *
        * <code>repeated string commandList = 2;</code>
        * @param index The index of the element to return.
        * @return The commandList at the given index.
        */
-      public String getCommandList(int index) {
+      public java.lang.String getCommandList(int index) {
         return commandList_.get(index);
       }
       /**
+       * <pre>
+       *客户端/服务端需要执行的命令
+       * </pre>
+       *
        * <code>repeated string commandList = 2;</code>
        * @param index The index of the value to return.
        * @return The bytes of the commandList at the given index.
        */
       public com.google.protobuf.ByteString
-          getCommandListBytes(int index) {
+      getCommandListBytes(int index) {
         return commandList_.getByteString(index);
       }
       /**
+       * <pre>
+       *客户端/服务端需要执行的命令
+       * </pre>
+       *
        * <code>repeated string commandList = 2;</code>
        * @param index The index to set the value at.
        * @param value The commandList to set.
        * @return This builder for chaining.
        */
       public Builder setCommandList(
-          int index, String value) {
+              int index, java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         ensureCommandListIsMutable();
         commandList_.set(index, value);
@@ -1443,12 +1655,16 @@ public final class ProtoMessage {
         return this;
       }
       /**
+       * <pre>
+       *客户端/服务端需要执行的命令
+       * </pre>
+       *
        * <code>repeated string commandList = 2;</code>
        * @param value The commandList to add.
        * @return This builder for chaining.
        */
       public Builder addCommandList(
-          String value) {
+              java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         ensureCommandListIsMutable();
         commandList_.add(value);
@@ -1457,37 +1673,49 @@ public final class ProtoMessage {
         return this;
       }
       /**
+       * <pre>
+       *客户端/服务端需要执行的命令
+       * </pre>
+       *
        * <code>repeated string commandList = 2;</code>
        * @param values The commandList to add.
        * @return This builder for chaining.
        */
       public Builder addAllCommandList(
-          Iterable<String> values) {
+              java.lang.Iterable<java.lang.String> values) {
         ensureCommandListIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, commandList_);
+                values, commandList_);
         bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
       /**
+       * <pre>
+       *客户端/服务端需要执行的命令
+       * </pre>
+       *
        * <code>repeated string commandList = 2;</code>
        * @return This builder for chaining.
        */
       public Builder clearCommandList() {
         commandList_ =
-          com.google.protobuf.LazyStringArrayList.emptyList();
+                com.google.protobuf.LazyStringArrayList.emptyList();
         bitField0_ = (bitField0_ & ~0x00000002);;
         onChanged();
         return this;
       }
       /**
+       * <pre>
+       *客户端/服务端需要执行的命令
+       * </pre>
+       *
        * <code>repeated string commandList = 2;</code>
        * @param value The bytes of the commandList to add.
        * @return This builder for chaining.
        */
       public Builder addCommandListBytes(
-          com.google.protobuf.ByteString value) {
+              com.google.protobuf.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         ensureCommandListIsMutable();
@@ -1496,15 +1724,15 @@ public final class ProtoMessage {
         onChanged();
         return this;
       }
-      @Override
+      @java.lang.Override
       public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
+              final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
-      @Override
+      @java.lang.Override
       public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
+              final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
       }
 
@@ -1513,22 +1741,22 @@ public final class ProtoMessage {
     }
 
     // @@protoc_insertion_point(class_scope:pojo.MessagePb)
-    private static final MessagePb DEFAULT_INSTANCE;
+    private static final org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new MessagePb();
+      DEFAULT_INSTANCE = new org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb();
     }
 
-    public static MessagePb getDefaultInstance() {
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
     private static final com.google.protobuf.Parser<MessagePb>
-        PARSER = new com.google.protobuf.AbstractParser<MessagePb>() {
-      @Override
+            PARSER = new com.google.protobuf.AbstractParser<MessagePb>() {
+      @java.lang.Override
       public MessagePb parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
         Builder builder = newBuilder();
         try {
           builder.mergeFrom(input, extensionRegistry);
@@ -1538,7 +1766,7 @@ public final class ProtoMessage {
           throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
         } catch (java.io.IOException e) {
           throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
+                  .setUnfinishedMessage(builder.buildPartial());
         }
         return builder.buildPartial();
       }
@@ -1548,60 +1776,699 @@ public final class ProtoMessage {
       return PARSER;
     }
 
-    @Override
+    @java.lang.Override
     public com.google.protobuf.Parser<MessagePb> getParserForType() {
       return PARSER;
     }
 
-    @Override
-    public MessagePb getDefaultInstanceForType() {
+    @java.lang.Override
+    public org.wowtools.hppt.common.protobuf.ProtoMessage.MessagePb getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface BytesListPbOrBuilder extends
+          // @@protoc_insertion_point(interface_extends:pojo.BytesListPb)
+          com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     *bytes list
+     * </pre>
+     *
+     * <code>repeated bytes bytesList = 1;</code>
+     * @return A list containing the bytesList.
+     */
+    java.util.List<com.google.protobuf.ByteString> getBytesListList();
+    /**
+     * <pre>
+     *bytes list
+     * </pre>
+     *
+     * <code>repeated bytes bytesList = 1;</code>
+     * @return The count of bytesList.
+     */
+    int getBytesListCount();
+    /**
+     * <pre>
+     *bytes list
+     * </pre>
+     *
+     * <code>repeated bytes bytesList = 1;</code>
+     * @param index The index of the element to return.
+     * @return The bytesList at the given index.
+     */
+    com.google.protobuf.ByteString getBytesList(int index);
+  }
+  /**
+   * Protobuf type {@code pojo.BytesListPb}
+   */
+  public static final class BytesListPb extends
+          com.google.protobuf.GeneratedMessageV3 implements
+          // @@protoc_insertion_point(message_implements:pojo.BytesListPb)
+          BytesListPbOrBuilder {
+    private static final long serialVersionUID = 0L;
+    // Use BytesListPb.newBuilder() to construct.
+    private BytesListPb(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private BytesListPb() {
+      bytesList_ = emptyList(com.google.protobuf.ByteString.class);
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+            UnusedPrivateParameter unused) {
+      return new BytesListPb();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+    getDescriptor() {
+      return org.wowtools.hppt.common.protobuf.ProtoMessage.internal_static_pojo_BytesListPb_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    internalGetFieldAccessorTable() {
+      return org.wowtools.hppt.common.protobuf.ProtoMessage.internal_static_pojo_BytesListPb_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                      org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb.class, org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb.Builder.class);
+    }
+
+    public static final int BYTESLIST_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private com.google.protobuf.Internal.ProtobufList<com.google.protobuf.ByteString> bytesList_ =
+            emptyList(com.google.protobuf.ByteString.class);
+    /**
+     * <pre>
+     *bytes list
+     * </pre>
+     *
+     * <code>repeated bytes bytesList = 1;</code>
+     * @return A list containing the bytesList.
+     */
+    @java.lang.Override
+    public java.util.List<com.google.protobuf.ByteString>
+    getBytesListList() {
+      return bytesList_;
+    }
+    /**
+     * <pre>
+     *bytes list
+     * </pre>
+     *
+     * <code>repeated bytes bytesList = 1;</code>
+     * @return The count of bytesList.
+     */
+    public int getBytesListCount() {
+      return bytesList_.size();
+    }
+    /**
+     * <pre>
+     *bytes list
+     * </pre>
+     *
+     * <code>repeated bytes bytesList = 1;</code>
+     * @param index The index of the element to return.
+     * @return The bytesList at the given index.
+     */
+    public com.google.protobuf.ByteString getBytesList(int index) {
+      return bytesList_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+            throws java.io.IOException {
+      for (int i = 0; i < bytesList_.size(); i++) {
+        output.writeBytes(1, bytesList_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      {
+        int dataSize = 0;
+        for (int i = 0; i < bytesList_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+                  .computeBytesSizeNoTag(bytesList_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getBytesListList().size();
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (!(obj instanceof org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb)) {
+        return super.equals(obj);
+      }
+      org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb other = (org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb) obj;
+
+      if (!getBytesListList()
+              .equals(other.getBytesListList())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getBytesListCount() > 0) {
+        hash = (37 * hash) + BYTESLIST_FIELD_NUMBER;
+        hash = (53 * hash) + getBytesListList().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb parseFrom(
+            java.nio.ByteBuffer data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb parseFrom(
+            java.nio.ByteBuffer data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb parseFrom(
+            com.google.protobuf.ByteString data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb parseFrom(
+            com.google.protobuf.ByteString data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb parseFrom(byte[] data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb parseFrom(
+            byte[] data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb parseFrom(java.io.InputStream input)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseWithIOException(PARSER, input);
+    }
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb parseFrom(
+            java.io.InputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb parseDelimitedFrom(java.io.InputStream input)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb parseDelimitedFrom(
+            java.io.InputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb parseFrom(
+            com.google.protobuf.CodedInputStream input)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseWithIOException(PARSER, input);
+    }
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb parseFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+              .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+              ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code pojo.BytesListPb}
+     */
+    public static final class Builder extends
+            com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+            // @@protoc_insertion_point(builder_implements:pojo.BytesListPb)
+            org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPbOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+      getDescriptor() {
+        return org.wowtools.hppt.common.protobuf.ProtoMessage.internal_static_pojo_BytesListPb_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internalGetFieldAccessorTable() {
+        return org.wowtools.hppt.common.protobuf.ProtoMessage.internal_static_pojo_BytesListPb_fieldAccessorTable
+                .ensureFieldAccessorsInitialized(
+                        org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb.class, org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb.Builder.class);
+      }
+
+      // Construct using org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+              com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        bytesList_ = emptyList(com.google.protobuf.ByteString.class);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+      getDescriptorForType() {
+        return org.wowtools.hppt.common.protobuf.ProtoMessage.internal_static_pojo_BytesListPb_descriptor;
+      }
+
+      @java.lang.Override
+      public org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb getDefaultInstanceForType() {
+        return org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb build() {
+        org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb buildPartial() {
+        org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb result = new org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          bytesList_.makeImmutable();
+          result.bytesList_ = bytesList_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+              com.google.protobuf.Descriptors.FieldDescriptor field,
+              java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+              com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+              com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+              com.google.protobuf.Descriptors.FieldDescriptor field,
+              int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+              com.google.protobuf.Descriptors.FieldDescriptor field,
+              java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb) {
+          return mergeFrom((org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb other) {
+        if (other == org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb.getDefaultInstance()) return this;
+        if (!other.bytesList_.isEmpty()) {
+          if (bytesList_.isEmpty()) {
+            bytesList_ = other.bytesList_;
+            bytesList_.makeImmutable();
+            bitField0_ |= 0x00000001;
+          } else {
+            ensureBytesListIsMutable();
+            bytesList_.addAll(other.bytesList_);
+          }
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.google.protobuf.ByteString v = input.readBytes();
+                ensureBytesListIsMutable();
+                bytesList_.add(v);
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.Internal.ProtobufList<com.google.protobuf.ByteString> bytesList_ = emptyList(com.google.protobuf.ByteString.class);
+      private void ensureBytesListIsMutable() {
+        if (!bytesList_.isModifiable()) {
+          bytesList_ = makeMutableCopy(bytesList_);
+        }
+        bitField0_ |= 0x00000001;
+      }
+      /**
+       * <pre>
+       *bytes list
+       * </pre>
+       *
+       * <code>repeated bytes bytesList = 1;</code>
+       * @return A list containing the bytesList.
+       */
+      public java.util.List<com.google.protobuf.ByteString>
+      getBytesListList() {
+        bytesList_.makeImmutable();
+        return bytesList_;
+      }
+      /**
+       * <pre>
+       *bytes list
+       * </pre>
+       *
+       * <code>repeated bytes bytesList = 1;</code>
+       * @return The count of bytesList.
+       */
+      public int getBytesListCount() {
+        return bytesList_.size();
+      }
+      /**
+       * <pre>
+       *bytes list
+       * </pre>
+       *
+       * <code>repeated bytes bytesList = 1;</code>
+       * @param index The index of the element to return.
+       * @return The bytesList at the given index.
+       */
+      public com.google.protobuf.ByteString getBytesList(int index) {
+        return bytesList_.get(index);
+      }
+      /**
+       * <pre>
+       *bytes list
+       * </pre>
+       *
+       * <code>repeated bytes bytesList = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The bytesList to set.
+       * @return This builder for chaining.
+       */
+      public Builder setBytesList(
+              int index, com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        ensureBytesListIsMutable();
+        bytesList_.set(index, value);
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *bytes list
+       * </pre>
+       *
+       * <code>repeated bytes bytesList = 1;</code>
+       * @param value The bytesList to add.
+       * @return This builder for chaining.
+       */
+      public Builder addBytesList(com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        ensureBytesListIsMutable();
+        bytesList_.add(value);
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *bytes list
+       * </pre>
+       *
+       * <code>repeated bytes bytesList = 1;</code>
+       * @param values The bytesList to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllBytesList(
+              java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
+        ensureBytesListIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+                values, bytesList_);
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *bytes list
+       * </pre>
+       *
+       * <code>repeated bytes bytesList = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearBytesList() {
+        bytesList_ = emptyList(com.google.protobuf.ByteString.class);
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+              final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+              final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:pojo.BytesListPb)
+    }
+
+    // @@protoc_insertion_point(class_scope:pojo.BytesListPb)
+    private static final org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb();
+    }
+
+    public static org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<BytesListPb>
+            PARSER = new com.google.protobuf.AbstractParser<BytesListPb>() {
+      @java.lang.Override
+      public BytesListPb parsePartialFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                  .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<BytesListPb> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<BytesListPb> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.wowtools.hppt.common.protobuf.ProtoMessage.BytesListPb getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_pojo_BytesPb_descriptor;
+          internal_static_pojo_BytesPb_descriptor;
   private static final
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_pojo_BytesPb_fieldAccessorTable;
+  com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internal_static_pojo_BytesPb_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_pojo_MessagePb_descriptor;
+          internal_static_pojo_MessagePb_descriptor;
   private static final
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_pojo_MessagePb_fieldAccessorTable;
+  com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internal_static_pojo_MessagePb_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+          internal_static_pojo_BytesListPb_descriptor;
+  private static final
+  com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internal_static_pojo_BytesListPb_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
-      getDescriptor() {
+  getDescriptor() {
     return descriptor;
   }
   private static  com.google.protobuf.Descriptors.FileDescriptor
-      descriptor;
+          descriptor;
   static {
-    String[] descriptorData = {
-      "\n\035definition/ProtoMessage.proto\022\004pojo\"+\n" +
-      "\007BytesPb\022\r\n\005bytes\030\001 \001(\014\022\021\n\tsessionId\030\002 \001" +
-      "(\005\"D\n\tMessagePb\022\"\n\013bytesPbList\030\001 \003(\0132\r.p" +
-      "ojo.BytesPb\022\023\n\013commandList\030\002 \003(\tB1\n!org." +
-      "wowtools.hppt.common.protobufB\014ProtoMess" +
-      "ageb\006proto3"
+    java.lang.String[] descriptorData = {
+            "\n\035definition/ProtoMessage.proto\022\004pojo\"+\n" +
+                    "\007BytesPb\022\r\n\005bytes\030\001 \001(\014\022\021\n\tsessionId\030\002 \001" +
+                    "(\005\"D\n\tMessagePb\022\"\n\013bytesPbList\030\001 \003(\0132\r.p" +
+                    "ojo.BytesPb\022\023\n\013commandList\030\002 \003(\t\" \n\013Byte" +
+                    "sListPb\022\021\n\tbytesList\030\001 \003(\014B1\n!org.wowtoo" +
+                    "ls.hppt.common.protobufB\014ProtoMessageb\006p" +
+                    "roto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
-      .internalBuildGeneratedFileFrom(descriptorData,
-        new com.google.protobuf.Descriptors.FileDescriptor[] {
-        });
+            .internalBuildGeneratedFileFrom(descriptorData,
+                    new com.google.protobuf.Descriptors.FileDescriptor[] {
+                    });
     internal_static_pojo_BytesPb_descriptor =
-      getDescriptor().getMessageTypes().get(0);
+            getDescriptor().getMessageTypes().get(0);
     internal_static_pojo_BytesPb_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_pojo_BytesPb_descriptor,
-        new String[] { "Bytes", "SessionId", });
+            com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+            internal_static_pojo_BytesPb_descriptor,
+            new java.lang.String[] { "Bytes", "SessionId", });
     internal_static_pojo_MessagePb_descriptor =
-      getDescriptor().getMessageTypes().get(1);
+            getDescriptor().getMessageTypes().get(1);
     internal_static_pojo_MessagePb_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_pojo_MessagePb_descriptor,
-        new String[] { "BytesPbList", "CommandList", });
+            com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+            internal_static_pojo_MessagePb_descriptor,
+            new java.lang.String[] { "BytesPbList", "CommandList", });
+    internal_static_pojo_BytesListPb_descriptor =
+            getDescriptor().getMessageTypes().get(2);
+    internal_static_pojo_BytesListPb_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+            internal_static_pojo_BytesListPb_descriptor,
+            new java.lang.String[] { "BytesList", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

@@ -7,6 +7,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
+import org.wowtools.hppt.common.util.Constant;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -60,7 +61,8 @@ public class ServerSessionManager {
                     if (session.isTimeOut()) {
                         needClosedSessions.add(session);
                     } else if (session.isNeedCheckActive()) {
-                        lifecycle.checkActive(session);
+                        //发送校验CheckActive命令
+                        session.getClient().addCommand((String.valueOf(Constant.ScCommands.CheckSessionActive) + session.getSessionId()));
                     }
                 });
                 channelServerSessionMap.forEach((c, session) -> {
@@ -97,6 +99,7 @@ public class ServerSessionManager {
         }
         log.info("serverSession {} close,type [{}]", serverSession.getSessionId(), type);
         if (null != serverSessionMap.remove(serverSession.getSessionId())) {
+            serverSession.getClient().addCommand(String.valueOf(Constant.ScCommands.CloseSession) + serverSession.getSessionId());
             lifecycle.closed(serverSession);
         }
         clientIdServerSessionMap.get(serverSession.getClient().clientId).remove(serverSession.getSessionId());

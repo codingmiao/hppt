@@ -57,13 +57,6 @@ public interface ServerSessionLifecycle {
     default void afterSendToUser(ServerSession serverSession, byte[] bytes) {
     }
 
-    /**
-     * 校验会话是否超时，一般需要发消息到客户端验证
-     *
-     * @param serverSession ServerSession
-     */
-    default void checkActive(ServerSession serverSession) {
-    }
 
     /**
      * 关闭后触发
