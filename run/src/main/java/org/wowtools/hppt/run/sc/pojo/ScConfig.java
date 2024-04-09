@@ -1,5 +1,6 @@
 package org.wowtools.hppt.run.sc.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.wowtools.hppt.common.util.CommonConfig;
 
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
  * @author liuyu
  * @date 2023/11/5
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ScConfig extends CommonConfig {
     public static final class Forward {
         /**
@@ -54,6 +56,17 @@ public class ScConfig extends CommonConfig {
         public String serverUrl;
     }
 
+    public static final class HpptConfig {
+        /**
+         * 服务端host
+         */
+        public String host;
+        /**
+         * 服务端端口
+         */
+        public int port;
+    }
+
     /**
      * 运行类型 支持 websocket(以websocket协议传输数据)、post(以http post协议传输数据)、hppt(以hppt自定义的协议传输数据)
      */
@@ -85,4 +98,5 @@ public class ScConfig extends CommonConfig {
 
     public WebSocketConfig websocket;
 
+    public HpptConfig hppt;
 }

@@ -1,8 +1,10 @@
 package org.wowtools.hppt.run.ss;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.wowtools.common.utils.ResourcesReader;
 import org.wowtools.hppt.common.util.Constant;
+import org.wowtools.hppt.run.ss.hppt.HpptServerSessionService;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
 import org.wowtools.hppt.run.ss.post.PostServerSessionService;
 import org.wowtools.hppt.run.ss.websocket.WebsocketServerSessionService;
@@ -13,6 +15,7 @@ import java.io.File;
  * @author liuyu
  * @date 2024/1/24
  */
+@Slf4j
 public class RunSs {
 
 
@@ -33,7 +36,7 @@ public class RunSs {
         } catch (Exception e) {
             throw new RuntimeException("读取配置文件异常", e);
         }
-
+        log.info("type {}",config.type);
         switch (config.type) {
             case "post":
                 new PostServerSessionService(config);
@@ -42,7 +45,7 @@ public class RunSs {
                 new WebsocketServerSessionService(config);
                 break;
             case "hppt":
-                //TODO
+                new HpptServerSessionService(config);
                 break;
             default:
                 throw new IllegalStateException("Unexpected config.type: " + config.type);

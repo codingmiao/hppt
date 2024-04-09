@@ -103,6 +103,7 @@ public abstract class ClientSessionService {
                     long localTs = System.currentTimeMillis();
                     long serverTs = Long.parseLong(cmd[1]);
                     dt = serverTs - localTs;
+                    log.info("dt {} ms", dt);
                     break;
                 case "login":
                     String state = cmd[1];
@@ -133,7 +134,7 @@ public abstract class ClientSessionService {
     protected void exit() {
         actived = false;
         clientSessionManager.close();
-        synchronized (this){
+        synchronized (this) {
             this.notify();
         }
     }

@@ -26,14 +26,15 @@ public class NettyClient {
                         @Override
                         protected void initChannel(SocketChannel ch) {
                             int len = 2;
+                            int maxFrameLength = (int) (Math.pow(256, len) - 1);
                             ChannelPipeline pipeline = ch.pipeline();
-                            pipeline.addLast(new LengthFieldBasedFrameDecoder(65535, 0, len, 0, len));
+                            pipeline.addLast(new LengthFieldBasedFrameDecoder(maxFrameLength, 0, len, 0, len));
                             pipeline.addLast(new LengthFieldPrepender(len));
                             pipeline.addLast(new MessageHandler());
                         }
                     });
 
-            bootstrap.connect("localhost", 8888).sync().channel().closeFuture().sync();
+            bootstrap.connect("localhost", 20871).sync().channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();
         }
@@ -51,12 +52,10 @@ public class NettyClient {
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
             // 发送消息到服务器
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < 5000; i++) {
-                sb.append("hello").append(i).append(" ");
-            }
-            ByteBuf message = Unpooled.wrappedBuffer(sb.toString().getBytes());
-            ctx.writeAndFlush(message);
+            ByteBuf message1 = Unpooled.wrappedBuffer("hello1".getBytes());
+            ctx.writeAndFlush(message1).addListener((f)->{
+                System.out.println(f);
+            });
         }
 
         @Override

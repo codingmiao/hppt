@@ -1,5 +1,6 @@
 package org.wowtools.hppt.run.ss.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.wowtools.hppt.common.util.CommonConfig;
 
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
  * @author liuyu
  * @date 2023/11/25
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SsConfig extends CommonConfig {
 
     /**

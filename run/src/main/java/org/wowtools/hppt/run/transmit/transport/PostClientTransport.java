@@ -1,45 +1,50 @@
-package org.wowtools.hppt.run.sc.post;
+package org.wowtools.hppt.run.transmit.transport;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.HttpUtil;
-import org.wowtools.hppt.run.sc.common.ClientSessionService;
-import org.wowtools.hppt.run.sc.pojo.ScConfig;
+import org.wowtools.hppt.common.util.JsonConfig;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author liuyu
- * @date 2024/1/31
+ * @date 2024/4/8
  */
 @Slf4j
-public class PostClientSessionService extends ClientSessionService {
+public class PostClientTransport extends Transport {
 
     private long sleepTime;
     private final BlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<>();
     private final String sendUrl;
 
-    public PostClientSessionService(ScConfig config) throws Exception {
-        super(config);
-        sendUrl = config.post.serverUrl + "/talk?c=" + UUID.randomUUID().toString().replace("-", "");
-    }
+    private final long initSleepTime;
+    private final long maxSleepTime;
+    private final long addSleepTime;
 
+
+    public PostClientTransport(String receiveId, String sendId, JsonConfig.MapConfig config, Cb cb) {
+        super(receiveId, sendId, config, cb);
+        startSendThread(cb);
+        sendUrl = config.value("url") + "?c=" + config.value("clientId");//TODO clientId加密
+        initSleepTime = config.value("initSleepTime", 0);
+        maxSleepTime = config.value("maxSleepTime", 10000);
+        addSleepTime = config.value("addSleepTime", 200);
+    }
 
     @Override
-    protected void connectToServer(ScConfig config, Cb cb) {
-        startSendThread(cb);
+    public void send(byte[] bytes) {
+        sendQueue.add(bytes);
     }
 
-
     private void startSendThread(Cb cb) {
-        new Thread(() -> {
+        Thread.startVirtualThread(() -> {
             while (null == sendQueue) {
                 try {
                     Thread.sleep(10);
@@ -78,20 +83,16 @@ public class PostClientSessionService extends ClientSessionService {
                         log.debug("收到服务端响应字节数 {}", responseBytes.length);
                         List<byte[]> bytesList = BytesUtil.pbBytes2BytesList(responseBytes);
                         for (byte[] bytes : bytesList) {
-                            receiveServerBytes(bytes);
+                            receive(bytes);
                         }
-                        sleepTime = config.post.initSleepTime;
+                        sleepTime = initSleepTime;
                     } else {
                         if (null != sendBytes && sendBytes.length > 0) {
-                            sleepTime = config.post.initSleepTime;
-                        } else if (clientSessionManager.getSessionNum() == 0
-                                && sleepTime >= config.post.initSleepTime + 3 * config.post.addSleepTime) {
-                            log.info("无用户连接，睡眠发送线程");
-                            sleepTime = Long.MAX_VALUE;
+                            sleepTime = initSleepTime;
                         } else {
-                            sleepTime += config.post.addSleepTime;
-                            if (sleepTime > config.post.maxSleepTime || sleepTime < 0) {
-                                sleepTime = config.post.maxSleepTime;
+                            sleepTime += addSleepTime;
+                            if (sleepTime > maxSleepTime || sleepTime < 0) {
+                                sleepTime = maxSleepTime;
                             }
                         }
                     }
@@ -100,13 +101,6 @@ public class PostClientSessionService extends ClientSessionService {
                     exit();
                 }
             }
-        }).start();
+        });
     }
-
-    @Override
-    protected void sendBytesToServer(byte[] bytes) {
-        sendQueue.add(bytes);
-    }
-
-
 }

@@ -108,6 +108,10 @@ public abstract class ServerSessionService<CTX> {
      */
     protected abstract void closeCtx(CTX ctx) throws Exception;
 
+    /**
+     * 移除无用的上下文，在有异常、上下文关闭等情况下主动调用
+     * @param ctx
+     */
     protected void removeCtx(CTX ctx) {
         ClientCell cell = ctxClientCellMap.remove(ctx);
         if (null != cell) {
