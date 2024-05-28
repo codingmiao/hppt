@@ -21,13 +21,20 @@ import org.wowtools.hppt.run.ss.pojo.SsConfig;
  */
 @Slf4j
 public class WebsocketServerSessionService extends ServerSessionService<ChannelHandlerContext> {
+    private EventLoopGroup boss;
+    private EventLoopGroup worker;
+
     public WebsocketServerSessionService(SsConfig ssConfig) throws Exception {
         super(ssConfig);
-        log.info("*********");
-        ServerBootstrap serverBootstrap;
+    }
 
-        EventLoopGroup boss = new NioEventLoopGroup();
-        EventLoopGroup worker = new NioEventLoopGroup();
+    @Override
+    public void init(SsConfig ssConfig) throws Exception {
+        log.info("*********");
+        boss = new NioEventLoopGroup();
+        worker = new NioEventLoopGroup();
+
+        ServerBootstrap serverBootstrap;
 
         serverBootstrap = new ServerBootstrap();
         serverBootstrap
@@ -82,5 +89,19 @@ public class WebsocketServerSessionService extends ServerSessionService<ChannelH
     @Override
     protected void closeCtx(ChannelHandlerContext channelHandlerContext) {
         channelHandlerContext.close();
+    }
+
+    @Override
+    public void doClose() {
+        try {
+            boss.shutdownGracefully();
+        } catch (Exception e) {
+            log.warn("boss.shutdownGracefully() err", e);
+        }
+        try {
+            worker.shutdownGracefully();
+        } catch (Exception e) {
+            log.warn("worker.shutdownGracefully() err", e);
+        }
     }
 }

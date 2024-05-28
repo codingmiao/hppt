@@ -15,6 +15,7 @@ public class SsUtil {
         return new ServerSessionManagerBuilder()
                 .setLifecycle(buildServerSessionLifecycle(ssConfig));
     }
+
     private static ServerSessionLifecycle buildServerSessionLifecycle(SsConfig ssConfig) {
         if (StringUtil.isNullOrEmpty(ssConfig.lifecycle)) {
             return new ServerSessionLifecycle() {

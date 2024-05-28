@@ -29,6 +29,12 @@ public class AesCipherUtil {
         this.descriptor = new Descriptor(key);
     }
 
+    public AesCipherUtil(String strKey) {
+        SecretKey key = generateKey(strKey);
+        this.encryptor = new Encryptor(key);
+        this.descriptor = new Descriptor(key);
+    }
+
     /**
      * 加密器
      */
@@ -79,7 +85,6 @@ public class AesCipherUtil {
 
     }
 
-    private static final int n = 16;
 
     private static SecretKey generateKey(String input) {
         try {

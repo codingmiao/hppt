@@ -4,6 +4,8 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import org.wowtools.hppt.common.protobuf.ProtoMessage;
 
@@ -134,6 +136,19 @@ public class BytesUtil {
     public static void writeToChannelHandlerContext(ChannelHandlerContext ctx, byte[] bytes) {
         ByteBuf byteBuf = bytes2byteBuf(ctx, bytes);
         ctx.writeAndFlush(byteBuf);
+//        f.addListener(new ChannelFutureListener() {
+//            @Override
+//            public void operationComplete(ChannelFuture future) {
+//                if (future.isSuccess()) {
+//                    // 消息成功发送
+//                    System.out.println("消息发送成功");
+//                } else {
+//                    // 消息发送失败
+//                    System.err.println("消息发送失败");
+//                    future.cause().printStackTrace();
+//                }
+//            }
+//        });
     }
 
     //把字节写入Channel

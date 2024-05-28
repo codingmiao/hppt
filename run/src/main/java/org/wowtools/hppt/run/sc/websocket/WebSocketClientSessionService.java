@@ -64,8 +64,6 @@ public class WebSocketClientSessionService extends ClientSessionService {
                             public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
                                 super.exceptionCaught(ctx, cause);
                                 ctx.close();
-                                wsChannel.close();
-                                group.shutdownGracefully();
                                 exit();
                             }
 
@@ -102,4 +100,10 @@ public class WebSocketClientSessionService extends ClientSessionService {
         wsChannel.writeAndFlush(frame);
     }
 
+
+    @Override
+    protected void doClose() throws Exception {
+        wsChannel.close();
+        group.shutdownGracefully();
+    }
 }

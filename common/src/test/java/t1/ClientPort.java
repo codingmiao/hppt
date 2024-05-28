@@ -84,7 +84,7 @@ public class ClientPort {
             super.channelInactive(ctx);
             ClientSession clientSession = clientSessionMapByCtx.get(ctx);
             if (null != clientSession) {
-                ClientSessionManager.disposeClientSession(clientSession,"client channelInactive");
+                ClientSessionManager.disposeClientSession(clientSession, "client channelInactive");
             }
         }
 
@@ -93,7 +93,7 @@ public class ClientPort {
             log.debug("client exceptionCaught {}", ctx.hashCode(), cause);
             ClientSession clientSession = clientSessionMapByCtx.get(ctx);
             if (null != clientSession) {
-                ClientSessionManager.disposeClientSession(clientSession,"client exceptionCaught");
+                ClientSessionManager.disposeClientSession(clientSession, "client exceptionCaught");
             }
         }
 

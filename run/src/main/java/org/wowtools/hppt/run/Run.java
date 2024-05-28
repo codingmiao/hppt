@@ -8,7 +8,7 @@ import org.wowtools.hppt.run.ss.RunSs;
  * @date 2024/1/5
  */
 public class Run {
-    public static void main(String[] args)  throws Exception{
+    public static void main(String[] args) throws Exception {
         String type = args[0];
         switch (type) {
             case "ss":

@@ -4,8 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.JsonConfig;
 import org.wowtools.hppt.run.transmit.receiver.Receiver;
 
-import java.util.Map;
-
 /**
  * @author liuyu
  * @date 2024/4/7

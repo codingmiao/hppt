@@ -29,15 +29,15 @@ public class SymmetricEncryptionExample {
             for (int i = 0; i < bt.length; i++) {
                 bt[i] = (byte) (r.nextInt(255) - 128);
             }
-            System.out.println("org len: " +bt.length);
+            System.out.println("org len: " + bt.length);
 
             //压缩
             bt = compress(bt);
-            System.out.println("gzip len: " +bt.length);
+            System.out.println("gzip len: " + bt.length);
 
             // 加密
             bt = encrypt(bt, secretKey);
-            System.out.println("encrypt len: " +bt.length);
+            System.out.println("encrypt len: " + bt.length);
 
 
             // 解密

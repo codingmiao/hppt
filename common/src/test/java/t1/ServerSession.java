@@ -102,7 +102,7 @@ public class ServerSession {
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
             log.info("serverSession channelInactive {}", sessionId);
             super.channelInactive(ctx);
-            ServerSessionManager.disposeServerSession(serverSession,"channelInactive");
+            ServerSessionManager.disposeServerSession(serverSession, "channelInactive");
         }
 
         @Override
@@ -123,7 +123,7 @@ public class ServerSession {
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
             log.warn("{} exceptionCaught", sessionId, cause);
-            ServerSessionManager.disposeServerSession(serverSession,"exceptionCaught");
+            ServerSessionManager.disposeServerSession(serverSession, "exceptionCaught");
         }
 
         public void close() {

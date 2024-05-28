@@ -19,8 +19,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date 2023/11/18
  */
 @Slf4j
-public class ServerSessionManager {
+public class ServerSessionManager implements AutoCloseable {
 
+
+    private volatile boolean running = true;
     private final AtomicInteger sessionIdBuilder = new AtomicInteger();
 
     //<sessionId,session>
@@ -49,11 +51,14 @@ public class ServerSessionManager {
                 });
         //定期检查超时session
         Thread.startVirtualThread(() -> {
-            while (true) {
+            while (running) {
                 try {
                     Thread.sleep(sessionTimeout);
                 } catch (InterruptedException e) {
                     continue;
+                }
+                if (!running) {
+                    return;
                 }
                 log.info("check session: serverSessionMap {} channelServerSessionMap {} ", serverSessionMap.size(), channelServerSessionMap.size());
                 HashSet<ServerSession> needClosedSessions = new HashSet<>();
@@ -77,6 +82,11 @@ public class ServerSessionManager {
             }
 
         });
+    }
+
+    @Override
+    public void close() {
+        running = false;
     }
 
     public ServerSession createServerSession(LoginClientService.Client client, String host, int port) {

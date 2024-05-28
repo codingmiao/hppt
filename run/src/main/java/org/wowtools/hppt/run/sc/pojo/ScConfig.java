@@ -65,6 +65,35 @@ public class ScConfig extends CommonConfig {
          * 服务端端口
          */
         public int port;
+
+        /**
+         * 用几个字节来作为长度位，对应最多可发送Max(256^lengthFieldLength-1,2^31-1)长度的字节，只支持1、2、3、4，服务端与客户端必须一致，默认2
+         */
+        public int lengthFieldLength = 2;
+    }
+
+    public static final class RHpptConfig {
+        /**
+         * 启动服务端口
+         */
+        public int port;
+
+        /**
+         * 用几个字节来作为长度位，对应最多可发送Max(256^lengthFieldLength-1,2^31-1)长度的字节，只支持1、2、3、4，服务端与客户端必须一致，默认2
+         */
+        public int lengthFieldLength = 2;
+    }
+
+    public static final class RPostConfig {
+        /**
+         * 启动服务端口
+         */
+        public int port;
+
+        /**
+         * 等待用户输入字节多少毫秒
+         */
+        public long waitBytesTime = 10000;
     }
 
     /**
@@ -94,9 +123,13 @@ public class ScConfig extends CommonConfig {
      */
     public String lifecycle;
 
-    public PostConfig post;
+    public PostConfig post = new PostConfig();
 
-    public WebSocketConfig websocket;
+    public WebSocketConfig websocket = new WebSocketConfig();
 
-    public HpptConfig hppt;
+    public HpptConfig hppt = new HpptConfig();
+
+    public RHpptConfig rhppt = new RHpptConfig();
+
+    public RPostConfig rpost = new RPostConfig();
 }

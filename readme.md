@@ -2,7 +2,8 @@ hppt，一款基于纯HTTP协议的内网穿透、反向代理工具
 
 # 快速开始
 
-本项目需要jdk21启动，请先前往[jdk官网](https://jdk.java.net/21/)下载对应你操作系统版本的jdk，然后在[releases](https://github.com/codingmiao/hppt/releases)
+本项目需要jdk21启动，请先前往[jdk官网](https://jdk.java.net/21/)
+下载对应你操作系统版本的jdk，然后在[releases](https://github.com/codingmiao/hppt/releases)
 页面下载最新版本编译好的hppt.zip，或自行下载源码编译
 
 ## 示例一 内网穿透，通过公网转发，访问无公网IP的服务器
@@ -40,7 +41,6 @@ clients:
         remotePort: 22
 ```
 
-
 执行如下命令启动cs.jar
 
 ```shell
@@ -55,7 +55,9 @@ cc
     - cc.yml
     - log4j2.xml
 ```
+
 修改cc.yml
+
 ```yaml
 # 客户端id，每个cc.jar用一个，不要重复
 clientId: home
@@ -77,6 +79,7 @@ enableCompress: true
 enableEncrypt: true
 
 ```
+
 其中`http://112.242.68.66:30871`即第一步在公网服务器上部署的cs.jar的访问地址，如果不希望直接暴露30871端口，也可以通过nginx转一下：
 
 ```
@@ -88,6 +91,7 @@ server {
     }
     ...
 ```
+
 这样配nginx然后修改serverUrl配置为 `serverUrl: "http://112.242.68.66:80/xxx"` 即可
 
 执行如下命令启动cs.jar
@@ -99,7 +103,9 @@ server {
 随后，你就可以在公司用linux连接工具访问112.242.68.66的10022端口，来登录家里的台式机了
 
 ## 示例二 通过http端口，反向代理访问内部服务器
-假设你有一个服务器集群，仅有一个nginx提供了80端口对外访问(112.242.68.66:80)，你想要访问集群中的应用服务器(192.168.0.2)的22端口，则可以按如下结构部署
+
+假设你有一个服务器集群，仅有一个nginx提供了80端口对外访问(112.242.68.66:80)，你想要访问集群中的应用服务器(192.168.0.2)
+的22端口，则可以按如下结构部署
 
 ![示例2](_doc/img/2.jpg)
 
@@ -133,7 +139,6 @@ clientIds:
 
 ```
 
-
 执行如下命令启动ss.jar
 
 ```shell
@@ -141,6 +146,7 @@ clientIds:
 ```
 
 在nginx上配置一个代理指向ss.jar
+
 ```
 server {
     listen       80;
@@ -186,7 +192,6 @@ forwards:
 
 ```
 
-
 执行如下命令启动sc.jar
 
 ```shell
@@ -195,15 +200,16 @@ forwards:
 
 随后，你就可以在公司用linux连接工具访问localhost的10022端口，来登录应用服务器了
 
-
 ## 示例三 组合玩法
+
 组合示例一、二，实现更多有趣的玩法，比如把家里的端口代理到自己笔记本上，给其它同事的电脑访问：
 
 ![示例3](_doc/img/3.jpg)
 
-
 # Q&A
+
 ## 性能如何？
+
 由于http本身短连接、带了很多请求头等无用信息之类的原因，比直连损耗30%以上的效率。
 
 以下是scp命令拷贝一份文件，直连和使用hppt反代的耗时对比：
@@ -211,14 +217,18 @@ forwards:
 ![性能对比](_doc/img/4.jpg)
 
 ## 为什么用http post，不用websocket或sse之类的长连接技术？
+
 条件不允许^_^，笔者写这个工具，就是因为使用环境里需要通过nginx转发，而nginx不允许配ws、sse相关的参数。
 
 所以，用http post就是为了最大的适配能力，这个项目就是：要通用性有通用性、要性能有通用性^_^。
 
 ## 安全性如何？
-必须使用指定的clientId才能连接，数据传输过程中对字节进行了加密，如果你还需要更多的个性化验证，比如用户登录，可以发邮件到[liuyu@wowtools.org](liuyu@wowtools.org)进行定制化开发。
+
+必须使用指定的clientId才能连接，数据传输过程中对字节进行了加密，如果你还需要更多的个性化验证，比如用户登录，可以发邮件到[liuyu@wowtools.org](liuyu@wowtools.org)
+进行定制化开发。
 
 # 后续计划
+
 输入字节审计
 
 自定义字节修改功能

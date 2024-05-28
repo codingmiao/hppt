@@ -1,4 +1,4 @@
-package org.wowtools.hppt.run.ss.hppt;
+package org.wowtools.hppt.run.sc.rhppt;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -13,34 +13,40 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
-import org.wowtools.hppt.run.ss.common.ServerSessionService;
-import org.wowtools.hppt.run.ss.pojo.SsConfig;
+import org.wowtools.hppt.run.sc.common.ClientSessionService;
+import org.wowtools.hppt.run.sc.pojo.ScConfig;
 
 /**
  * @author liuyu
  * @date 2024/4/9
  */
 @Slf4j
-public class HpptServerSessionService extends ServerSessionService<ChannelHandlerContext> {
+public class RHpptClientSessionService extends ClientSessionService {
+
     private NioEventLoopGroup bossGroup;
     private NioEventLoopGroup workerGroup;
 
-    public HpptServerSessionService(SsConfig ssConfig) throws Exception {
-        super(ssConfig);
+    private ChannelHandlerContext _ctx;
+
+    public RHpptClientSessionService(ScConfig config) throws Exception {
+        super(config);
     }
 
     @Override
-    public void init(SsConfig ssConfig) {
+    protected void connectToServer(ScConfig config, Cb cb) throws Exception {
+        startServer(config, cb);
+    }
+
+    private void startServer(ScConfig config, Cb cb) throws Exception {
+        ServerBootstrap serverBootstrap = new ServerBootstrap();
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
-
-        ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
-                        int len = ssConfig.hppt.lengthFieldLength;
+                        int len = config.rhppt.lengthFieldLength;
                         int maxFrameLength = (int) (Math.pow(256, len) - 1);
                         if (maxFrameLength <= 0) {
                             maxFrameLength = Integer.MAX_VALUE;
@@ -48,25 +54,18 @@ public class HpptServerSessionService extends ServerSessionService<ChannelHandle
                         ChannelPipeline pipeline = ch.pipeline();
                         pipeline.addLast(new LengthFieldBasedFrameDecoder(maxFrameLength, 0, len, 0, len));
                         pipeline.addLast(new LengthFieldPrepender(len));
-                        pipeline.addLast(new MessageHandler());
+                        pipeline.addLast(new MessageHandler(cb));
                     }
                 });
 
-        serverBootstrap.bind(ssConfig.port);
+        serverBootstrap.bind(config.rhppt.port).sync().channel().closeFuture().sync();
     }
 
     @Override
-    protected void sendBytesToClient(ChannelHandlerContext ctx, byte[] bytes) {
-        BytesUtil.writeToChannelHandlerContext(ctx, bytes);
-    }
-
-    @Override
-    protected void closeCtx(ChannelHandlerContext ctx) throws Exception {
-        ctx.close();
-    }
-
-    @Override
-    public void doClose() {
+    protected void doClose() throws Exception {
+        if (null != _ctx) {
+            _ctx.close();
+        }
         try {
             bossGroup.shutdownGracefully();
         } catch (Exception e) {
@@ -80,23 +79,46 @@ public class HpptServerSessionService extends ServerSessionService<ChannelHandle
     }
 
     private class MessageHandler extends SimpleChannelInboundHandler<ByteBuf> {
+        private final Cb cb;
+
+        public MessageHandler(Cb cb) {
+            this.cb = cb;
+        }
+
+        @Override
+        public void channelActive(ChannelHandlerContext ctx) throws Exception {
+            super.channelActive(ctx);
+            _ctx = ctx;
+            cb.end();
+        }
+
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
             // 处理接收到的消息
             byte[] content = BytesUtil.byteBuf2bytes(msg);
-            receiveClientBytes(ctx, content);
+            try {
+                receiveServerBytes(content);
+            } catch (Exception e) {
+                log.warn("接收消息异常", e);
+                exit();
+            }
         }
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
             super.exceptionCaught(ctx, cause);
-            removeCtx(ctx);
+            exit();
         }
 
         @Override
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
             super.channelInactive(ctx);
-            removeCtx(ctx);
+            exit();
         }
+    }
+
+    @Override
+    protected void sendBytesToServer(byte[] bytes) {
+        BytesUtil.writeToChannelHandlerContext(_ctx, bytes);
     }
 }

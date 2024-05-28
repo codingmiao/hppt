@@ -12,10 +12,6 @@
 
     <modules>
         <module>common</module>
-        <module>sc</module>
-        <module>ss</module>
-        <module>cs</module>
-        <module>cc</module>
         <module>run</module>
         <module>_localtest</module>
     </modules>

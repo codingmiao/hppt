@@ -28,8 +28,9 @@ public class ReadYmlConfig {
          */
         public String fileDir;
     }
+
     public static void main(String[] args) throws Exception {
-        String s = ResourcesReader.readStr(ReadYmlConfig.class,"ss.yml");
+        String s = ResourcesReader.readStr(ReadYmlConfig.class, "ss.yml");
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         SsConfig obj = mapper.readValue(s, SsConfig.class);
         System.out.println(obj);

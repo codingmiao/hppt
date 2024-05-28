@@ -17,8 +17,6 @@ public class ServerPort {
     }
 
 
-
-
     public String getHost() {
         return host;
     }

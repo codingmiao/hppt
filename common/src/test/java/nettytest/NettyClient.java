@@ -53,7 +53,7 @@ public class NettyClient {
         public void channelActive(ChannelHandlerContext ctx) {
             // 发送消息到服务器
             ByteBuf message1 = Unpooled.wrappedBuffer("hello1".getBytes());
-            ctx.writeAndFlush(message1).addListener((f)->{
+            ctx.writeAndFlush(message1).addListener((f) -> {
                 System.out.println(f);
             });
         }

@@ -29,7 +29,7 @@ public class LZ4CompressionExample {
         System.out.println("Compressed Size: " + compressedBytes.length + " bytes");
 
         // 解压缩字节数组
-        byte[] decompressedBytes = decompress(compressedBytes,orgLen);
+        byte[] decompressedBytes = decompress(compressedBytes, orgLen);
 
         // 将解压缩后的字节数组转换为字符串并打印
         String decompressedString = new String(decompressedBytes, StandardCharsets.UTF_8);
@@ -51,7 +51,7 @@ public class LZ4CompressionExample {
     }
 
     // 使用LZ4解压缩字节数组
-    private static byte[] decompress(byte[] compressed,int orgLen) {
+    private static byte[] decompress(byte[] compressed, int orgLen) {
         LZ4Factory lz4Factory = LZ4Factory.fastestInstance();
         LZ4FastDecompressor decompressor = lz4Factory.fastDecompressor();
 

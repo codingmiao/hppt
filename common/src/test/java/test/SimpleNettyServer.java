@@ -53,7 +53,7 @@ public class SimpleNettyServer {
             int n = byteBuf.readableBytes();
             byte[] bytes = new byte[n];
             byteBuf.readBytes(bytes);
-            System.out.println("~"+new String(bytes, StandardCharsets.UTF_8)+"~");
+            System.out.println("~" + new String(bytes, StandardCharsets.UTF_8) + "~");
         }
     }
 }

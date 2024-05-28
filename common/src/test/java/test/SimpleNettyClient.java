@@ -3,12 +3,7 @@ package test;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -22,7 +17,7 @@ public class SimpleNettyClient {
     public SimpleNettyClient(String host, int port) {
         this.host = host;
         this.port = port;
-        new Thread(()->{
+        new Thread(() -> {
             try {
                 run();
             } catch (Exception e) {
@@ -65,7 +60,7 @@ public class SimpleNettyClient {
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
             // 发送字节到服务器
-            new Thread(()->{
+            new Thread(() -> {
                 while (true) {
                     ByteBuf message = Unpooled.copiedBuffer(send, CharsetUtil.UTF_8);
                     ctx.writeAndFlush(message);

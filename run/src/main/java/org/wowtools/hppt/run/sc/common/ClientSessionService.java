@@ -8,13 +8,14 @@ import org.wowtools.hppt.common.pojo.SessionBytes;
 import org.wowtools.hppt.common.util.AesCipherUtil;
 import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.Constant;
+import org.wowtools.hppt.common.util.GridAesCipherUtil;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
 import org.wowtools.hppt.run.sc.util.ScUtil;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,7 +31,7 @@ public abstract class ClientSessionService {
     private final BlockingQueue<String> sendCommandQueue = new LinkedBlockingQueue<>();
     private final BlockingQueue<SessionBytes> sendBytesQueue = new LinkedBlockingQueue<>();
 
-    private final Map<Integer, ClientBytesSender.SessionIdCallBack> sessionIdCallBackMap = new HashMap<>();//<newSessionFlag,cb>
+    private final Map<Integer, ClientBytesSender.SessionIdCallBack> sessionIdCallBackMap = new ConcurrentHashMap<>();//<newSessionFlag,cb>
 
     private AesCipherUtil aesCipherUtil;
 
@@ -51,26 +52,33 @@ public abstract class ClientSessionService {
 
     public ClientSessionService(ScConfig config) throws Exception {
         this.config = config;
+        clientSessionManager = ScUtil.createClientSessionManager(config,
+                buildClientSessionLifecycle(), buildClientBytesSender());
+        buildSendThread().start();
         connectToServer(config, () -> {
             log.info("连接建立完成");
-            new Thread(() -> {
+            Thread.startVirtualThread(() -> {
                 //建立连接后，获取时间戳
-                sendBytesToServer("dt".getBytes(StandardCharsets.UTF_8));
+                sendBytesToServer(GridAesCipherUtil.encrypt("dt".getBytes(StandardCharsets.UTF_8)));
                 //等待时间戳返回
+                int n = 0;
                 while (null == dt) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                        continue;
+                    }
+                    n++;
+                    if (n > 100) {
+                        //等超过10秒依然没有收到dt，重发一次
+                        sendBytesToServer(GridAesCipherUtil.encrypt("dt".getBytes(StandardCharsets.UTF_8)));
+                        n = 0;
                     }
                 }
                 //登录
                 sendLoginCommand();
-            }).start();
+            });
         });
-        clientSessionManager = ScUtil.createClientSessionManager(config,
-                buildClientSessionLifecycle(), buildClientBytesSender());
-        buildSendThread().start();
     }
 
     /**
@@ -96,14 +104,19 @@ public abstract class ClientSessionService {
      */
     protected void receiveServerBytes(byte[] bytes) throws Exception {
         if (noLogin) {
+            bytes = GridAesCipherUtil.decrypt(bytes);
             String s = new String(bytes, StandardCharsets.UTF_8);
             String[] cmd = s.split(" ", 2);
             switch (cmd[0]) {
                 case "dt":
-                    long localTs = System.currentTimeMillis();
-                    long serverTs = Long.parseLong(cmd[1]);
-                    dt = serverTs - localTs;
-                    log.info("dt {} ms", dt);
+                    synchronized (this) {
+                        if (null == dt) {
+                            long localTs = System.currentTimeMillis();
+                            long serverTs = Long.parseLong(cmd[1]);
+                            dt = serverTs - localTs;
+                            log.info("dt {} ms", dt);
+                        }
+                    }
                     break;
                 case "login":
                     String state = cmd[1];
@@ -131,12 +144,24 @@ public abstract class ClientSessionService {
     /**
      * 当发生难以修复的异常等情况时，主动调用此方法结束当前服务，以便后续自动重启等操作
      */
-    protected void exit() {
+    public void exit() {
         actived = false;
         clientSessionManager.close();
+        try {
+            doClose();
+        } catch (Exception e) {
+            log.warn("doClose error ", e);
+        }
         synchronized (this) {
             this.notify();
         }
+    }
+
+    /**
+     * 当服务关闭时，若有一些资源需要释放、关闭等，重写此方法
+     */
+    protected void doClose() throws Exception {
+
     }
 
     /**
@@ -179,7 +204,7 @@ public abstract class ClientSessionService {
     private void sendLoginCommand() {
         aesCipherUtil = new AesCipherUtil(config.clientId, System.currentTimeMillis() + dt);
         String loginCode = BytesUtil.bytes2base64(aesCipherUtil.encryptor.encrypt(config.clientId.getBytes(StandardCharsets.UTF_8)));
-        sendBytesToServer(("login " + loginCode).getBytes(StandardCharsets.UTF_8));
+        sendBytesToServer(GridAesCipherUtil.encrypt(("login " + loginCode).getBytes(StandardCharsets.UTF_8)));
     }
 
 

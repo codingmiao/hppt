@@ -7,11 +7,11 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author liuyu
  * @date 2024/3/20
  */
-public class PostCtx {
-     final String cookie;
-     final BlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<>();
+class PostCtx {
+    final String cookie;
+    final BlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<>();
 
-     public PostCtx(String cookie) {
-          this.cookie = cookie;
-     }
+    public PostCtx(String cookie) {
+        this.cookie = cookie;
+    }
 }
