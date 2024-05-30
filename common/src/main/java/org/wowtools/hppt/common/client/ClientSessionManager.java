@@ -59,12 +59,18 @@ public class ClientSessionManager {
                 });
     }
 
-    public void bindPort(int port) {
+    public boolean bindPort(int port) {
         synchronized (channels) {
-            Channel channel = serverBootstrap.bind(port).channel();
-            channel.closeFuture();
-            channels.add(channel);
-            log.debug("bindPort {} success", port);
+            try {
+                Channel channel = serverBootstrap.bind(port).sync().channel();
+                channel.closeFuture();
+                channels.add(channel);
+                log.debug("bindPort {} success", port);
+                return true;
+            } catch (Exception e) {
+                log.error("Failed to bind port {}.", port, e);
+                return false;
+            }
         }
 
     }

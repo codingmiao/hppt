@@ -23,8 +23,9 @@ public class ScUtil {
                 .setClientBytesSender(clientBytesSender)
                 .build();
         for (ScConfig.Forward forward : config.forwards) {
-            clientSessionManager.bindPort(forward.localPort);
-            log.info("bind port {} -> {}:{}", forward.localPort, forward.remoteHost, forward.remotePort);
+            boolean res = clientSessionManager.bindPort(forward.localPort);
+            log.info("bind port {} {} -> {}:{}", res ? "success" : "fail",
+                    forward.localPort, forward.remoteHost, forward.remotePort);
         }
         return clientSessionManager;
     }
