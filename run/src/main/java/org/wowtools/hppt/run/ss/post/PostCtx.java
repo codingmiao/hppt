@@ -14,4 +14,7 @@ class PostCtx {
     public PostCtx(String cookie) {
         this.cookie = cookie;
     }
+
+    Thread waitResponseThread;
+
 }

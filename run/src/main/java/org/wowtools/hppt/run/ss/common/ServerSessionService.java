@@ -60,7 +60,7 @@ public abstract class ServerSessionService<CTX> {
      * @param bytes bytes
      * @throws Exception Exception
      */
-    protected void receiveClientBytes(CTX ctx, byte[] bytes) {
+    public void receiveClientBytes(CTX ctx, byte[] bytes) {
         if (null == bytes || bytes.length == 0) {
             return;
         }
@@ -73,12 +73,14 @@ public abstract class ServerSessionService<CTX> {
             String[] cmd = s.split(" ", 2);
             switch (cmd[0]) {
                 case "dt":
+                    log.debug("请求dt");
                     byte[] dt = ("dt " + System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8);
                     dt = GridAesCipherUtil.encrypt(dt);
                     sendBytesToClient(ctx, dt);
                     break;
                 case "login":
                     String loginCode = cmd[1];
+                    log.debug("请求login {}", loginCode);
                     if (!loginClientService.login(loginCode)) {
                         log.warn("登录失败 {}", loginCode);
                         byte[] login = ("login 0").getBytes(StandardCharsets.UTF_8);

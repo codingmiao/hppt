@@ -102,11 +102,11 @@ public class ClientSessionManager {
 
         @Override
         public void channelActive(ChannelHandlerContext channelHandlerContext) throws Exception {
-            log.debug("client channelActive {}", channelHandlerContext.hashCode());
             super.channelActive(channelHandlerContext);
             Channel channel = channelHandlerContext.channel();
             InetSocketAddress localAddress = (InetSocketAddress) channel.localAddress();
             int localPort = localAddress.getPort();
+            log.debug("client channelActive {}, port:{}", channelHandlerContext.hashCode(), localPort);
             //用户发起新连接 新建一个ClientSession
             clientBytesSender.connected(localPort, channelHandlerContext, (sessionId -> {
                 ClientSession clientSession = new ClientSession(sessionId, channelHandlerContext, lifecycle);
@@ -119,7 +119,7 @@ public class ClientSessionManager {
 
         @Override
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-            log.debug("client channelInactive {}", ctx.hashCode());
+            log.info("client channelInactive {}", ctx.hashCode());
             super.channelInactive(ctx);
             ClientSession clientSession = clientSessionMapByCtx.get(ctx);
             if (null != clientSession) {
@@ -129,7 +129,7 @@ public class ClientSessionManager {
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            log.debug("client exceptionCaught {}", ctx.hashCode(), cause);
+            log.info("client exceptionCaught {}", ctx.hashCode(), cause);
             ClientSession clientSession = clientSessionMapByCtx.get(ctx);
             if (null != clientSession) {
                 disposeClientSession(clientSession, "client exceptionCaught");

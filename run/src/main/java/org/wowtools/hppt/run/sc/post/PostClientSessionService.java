@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author liuyu
@@ -22,24 +21,30 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class PostClientSessionService extends ClientSessionService {
 
-    private long sleepTime;
     private final BlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<>();
     private final String sendUrl;
+    private final String replyUrl;
+
 
     public PostClientSessionService(ScConfig config) throws Exception {
         super(config);
-        sendUrl = config.post.serverUrl + "/talk?c=" + UUID.randomUUID().toString().replace("-", "");
+        String cookie = UUID.randomUUID().toString().replace("-", "");
+        sendUrl = config.post.serverUrl + "/s?c=" + cookie;
+        replyUrl = config.post.serverUrl + "/r?c=" + cookie;
     }
 
 
     @Override
     protected void connectToServer(ScConfig config, Cb cb) {
-        startSendThread(cb);
+        startSendThread(() -> {
+            startReplyThread();
+            cb.end();
+        });
     }
 
-
     private void startSendThread(Cb cb) {
-        new Thread(() -> {
+        Thread.startVirtualThread(() -> {
+            //等待初始化完成
             while (null == sendQueue) {
                 try {
                     Thread.sleep(10);
@@ -48,29 +53,60 @@ public class PostClientSessionService extends ClientSessionService {
                 }
             }
             cb.end();
+            final long sendSleepTime = config.post.sendSleepTime;
             while (actived) {
+                if (sendSleepTime > 0) {
+                    try {
+                        Thread.sleep(sendSleepTime);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
                 try {
                     byte[] sendBytes;
-                    {
-                        List<byte[]> bytesList = new LinkedList<>();
-                        if (log.isDebugEnabled()) {
-                            log.debug("sleep {}", sleepTime);
-                        } else if (sleepTime > 5000) {
-                            log.info("sleep {}", sleepTime);
-                        }
-                        byte[] bytes = sendQueue.poll(sleepTime, TimeUnit.MILLISECONDS);
-                        if (null != bytes) {
-                            bytesList.add(bytes);
-                            sendQueue.drainTo(bytesList);
-                            sendBytes = BytesUtil.bytesCollection2PbBytes(bytesList);
-                        } else {
-                            sendBytes = null;
+                    List<byte[]> bytesList = new LinkedList<>();
+                    sendBytes = sendQueue.take();
+                    bytesList.add(sendBytes);
+                    sendQueue.drainTo(bytesList);
+                    sendBytes = BytesUtil.bytesCollection2PbBytes(bytesList);
+                    try (Response ignored = HttpUtil.doPost(sendUrl, sendBytes)) {
+                        log.debug("startSendThread 发送完成");
+                    }
+                } catch (Exception e) {
+                    log.warn("SendThread异常", e);
+                    exit();
+                }
+            }
+        });
+    }
+
+    private final Object replyThreadEmptyLock = new Object();
+
+    private void startReplyThread() {
+        Thread.startVirtualThread(() -> {
+            boolean empty = false;
+            final long sendSleepTime = config.post.sendSleepTime;
+            while (actived) {
+                if (sendSleepTime > 0) {
+                    try {
+                        Thread.sleep(sendSleepTime);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                if (empty && !isNoLogin() && clientSessionManager.getSessionNum() == 0) {
+                    synchronized (replyThreadEmptyLock) {
+                        log.info("无客户端,睡眠接收线程");
+                        try {
+                            replyThreadEmptyLock.wait();
+                        } catch (InterruptedException e) {
+                            log.info("唤醒接收线程");
                         }
                     }
-
-
+                }
+                try {
                     byte[] responseBytes;
-                    try (Response response = HttpUtil.doPost(sendUrl, sendBytes)) {
+                    try (Response response = HttpUtil.doPost(replyUrl, null)) {
                         ResponseBody body = response.body();
                         responseBytes = null == body ? null : body.bytes();
                     }
@@ -80,33 +116,28 @@ public class PostClientSessionService extends ClientSessionService {
                         for (byte[] bytes : bytesList) {
                             receiveServerBytes(bytes);
                         }
-                        sleepTime = config.post.initSleepTime;
-                    } else {
-                        if (null != sendBytes && sendBytes.length > 0) {
-                            sleepTime = config.post.initSleepTime;
-                        } else if (clientSessionManager.getSessionNum() == 0
-                                && sleepTime >= config.post.initSleepTime + 3 * config.post.addSleepTime) {
-                            log.info("无用户连接，睡眠发送线程");
-                            sleepTime = Long.MAX_VALUE;
-                        } else {
-                            sleepTime += config.post.addSleepTime;
-                            if (sleepTime > config.post.maxSleepTime || sleepTime < 0) {
-                                sleepTime = config.post.maxSleepTime;
-                            }
-                        }
+                        empty = bytesList.isEmpty();
+                    }else {
+                        empty = true;
                     }
                 } catch (Exception e) {
-                    log.warn("发送线程执行异常", e);
+                    log.warn("ReplyThread异常", e);
                     exit();
                 }
             }
-        }).start();
+        });
     }
+
 
     @Override
     protected void sendBytesToServer(byte[] bytes) {
         sendQueue.add(bytes);
     }
 
-
+    @Override
+    protected void newConnected() {
+        synchronized (replyThreadEmptyLock) {
+            replyThreadEmptyLock.notify();
+        }
+    }
 }

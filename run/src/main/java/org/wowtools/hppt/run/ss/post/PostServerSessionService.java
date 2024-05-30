@@ -1,7 +1,6 @@
 package org.wowtools.hppt.run.ss.post;
 
 import jakarta.servlet.*;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -10,16 +9,10 @@ import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.wowtools.common.utils.LruCache;
-import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.run.ss.common.ServerSessionService;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,13 +34,14 @@ public class PostServerSessionService extends ServerSessionService<PostCtx> {
         log.info("*********");
         server = new Server(ssConfig.port);
         ServletContextHandler context = new ServletContextHandler(server, "/");
-        context.addServlet(new ServletHolder(new MyServlet()), "/talk");
-        context.addServlet(new ServletHolder(new ErrorServlet()), "/err");
+        context.addServlet(new ServletHolder(new SendServlet(this)), "/s");
+        context.addServlet(new ServletHolder(new ReplyServlet(this, ssConfig.post.waitResponseTime)), "/r");
+        context.addServlet(new ServletHolder(new ErrorServlet()), "/e");
 
         ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();
         errorHandler.setShowServlet(false);
         errorHandler.setShowStacks(false);
-        errorHandler.addErrorPage(400, 599, "/err");
+        errorHandler.addErrorPage(400, 599, "/e");
         errorHandler.setServer(new Server());
 
         context.setErrorHandler(errorHandler);
@@ -58,7 +52,7 @@ public class PostServerSessionService extends ServerSessionService<PostCtx> {
         server.join();
     }
 
-    private final Map<String, PostCtx> ctxMap = LruCache.buildCache(128, 8);
+    protected final Map<String, PostCtx> ctxMap = LruCache.buildCache(128, 8);
 
     @Override
     protected void sendBytesToClient(PostCtx ctx, byte[] bytes) {
@@ -73,48 +67,6 @@ public class PostServerSessionService extends ServerSessionService<PostCtx> {
     @Override
     public void doClose() throws Exception {
         server.stop();
-    }
-
-    private final class MyServlet extends HttpServlet {
-        @Override
-        protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-            resp.setHeader("Server", "");
-            String cookie = req.getParameter("c");
-            PostCtx ctx = ctxMap.computeIfAbsent(cookie, (c) -> new PostCtx(cookie));
-            //读请求体里带过来的bytes并接收
-            {
-                byte[] bytes;
-                try (InputStream inputStream = req.getInputStream(); ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-                    byte[] buffer = new byte[1024];
-                    int bytesRead;
-                    while ((bytesRead = inputStream.read(buffer)) != -1) {
-                        byteArrayOutputStream.write(buffer, 0, bytesRead);
-                    }
-                    bytes = byteArrayOutputStream.toByteArray();
-                }
-
-                List<byte[]> bytesList = BytesUtil.pbBytes2BytesList(bytes);
-                for (byte[] sub : bytesList) {
-                    receiveClientBytes(ctx, sub);
-                }
-            }
-
-            //取缓冲区中的数据返回
-            {
-                byte[] rBytes = ctx.sendQueue.poll();
-                if (null != rBytes) {
-                    List<byte[]> bytesList = new LinkedList<>();
-                    bytesList.add(rBytes);
-                    ctx.sendQueue.drainTo(bytesList);
-                    rBytes = BytesUtil.bytesCollection2PbBytes(bytesList);
-                    log.debug("向客户端发送字节 {}", rBytes.length);
-                    try (OutputStream os = resp.getOutputStream()) {
-                        os.write(rBytes);
-                    }
-                }
-            }
-
-        }
     }
 
 

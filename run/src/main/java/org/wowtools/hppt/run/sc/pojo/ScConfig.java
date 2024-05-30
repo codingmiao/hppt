@@ -34,19 +34,10 @@ public class ScConfig extends CommonConfig {
         public String serverUrl;
 
         /**
-         * 开始时闲置几毫秒发一次http请求，越短延迟越低但越耗性能
+         * 人为添加一个发送等待时间（毫秒），若网络质量不佳或发送请求过于频繁，可设置一个大于0的值来等待若干毫秒后一起发送
          */
-        public long initSleepTime = 1000;
+        public long sendSleepTime = 0;
 
-        /**
-         * 当收到空消息时，闲置毫秒数增加多少毫秒
-         */
-        public long addSleepTime = 1000;
-
-        /**
-         * 闲置毫秒数最大到多少毫秒
-         */
-        public long maxSleepTime = 60000;
     }
 
     public static final class WebSocketConfig {

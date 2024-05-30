@@ -44,7 +44,10 @@ public class SsConfig extends CommonConfig {
 
 
     public static final class PostConfig {
-
+        /**
+         * 等待真实端口返回数据的毫秒数
+         */
+        public long waitResponseTime = 30000;
     }
 
     public PostConfig post = new PostConfig();

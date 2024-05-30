@@ -190,9 +190,9 @@ public class ClientTalker {
                                 return;
                             }
                         }
-                        //客户端没有这个session 通知服务端关闭
-                        log.info("sessionId {} 不存在，关闭session", bytesPb.getSessionId());
-                        sendCommandQueue.add(String.valueOf(Constant.SsCommands.CloseSession) + bytesPb.getSessionId());
+//                        //客户端没有这个session 通知服务端关闭
+//                        log.info("sessionId {} 不存在，关闭session", bytesPb.getSessionId());
+//                        sendCommandQueue.add(String.valueOf(Constant.SsCommands.CloseSession) + bytesPb.getSessionId());
                     });
 
                 }

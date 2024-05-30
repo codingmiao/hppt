@@ -22,7 +22,7 @@
         <!-- 设置根Logger的日志级别 -->
         <Root level="info">
             <AppenderRef ref="Console"/>
-            <AppenderRef ref="RollingFile"/>
+<!--            <AppenderRef ref="RollingFile"/>-->
         </Root>
     </Loggers>
 </Configuration>

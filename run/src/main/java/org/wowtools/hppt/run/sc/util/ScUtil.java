@@ -1,5 +1,6 @@
 package org.wowtools.hppt.run.sc.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.client.ClientBytesSender;
 import org.wowtools.hppt.common.client.ClientSessionLifecycle;
 import org.wowtools.hppt.common.client.ClientSessionManager;
@@ -10,6 +11,7 @@ import org.wowtools.hppt.run.sc.pojo.ScConfig;
  * @author liuyu
  * @date 2024/3/12
  */
+@Slf4j
 public class ScUtil {
 
     //建立ClientSessionManager，并绑上配置的端口
@@ -22,6 +24,7 @@ public class ScUtil {
                 .build();
         for (ScConfig.Forward forward : config.forwards) {
             clientSessionManager.bindPort(forward.localPort);
+            log.info("bind port {} -> {}:{}", forward.localPort, forward.remoteHost, forward.remotePort);
         }
         return clientSessionManager;
     }

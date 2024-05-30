@@ -247,6 +247,12 @@ public abstract class ClientSessionService {
                         sendCommandQueue.add(cmd);
                         log.debug("connected command: {}", cmd);
                         sessionIdCallBackMap.put(newSessionFlag, cb);
+                        log.info("建立连接 {}: {}->{}:{}", ctx.hashCode(), forward.localPort, forward.remoteHost, forward.remotePort);
+                        try {
+                            newConnected();
+                        } catch (Exception e) {
+                            log.warn("newConnected Exception",e);
+                        }
                         return;
                     }
                 }
@@ -258,5 +264,13 @@ public abstract class ClientSessionService {
                 sendBytesQueue.add(new SessionBytes(clientSession.getSessionId(), bytes));
             }
         };
+    }
+
+    protected void newConnected() {
+
+    }
+
+    public boolean isNoLogin() {
+        return noLogin;
     }
 }
