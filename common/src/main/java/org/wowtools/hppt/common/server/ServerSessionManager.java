@@ -152,7 +152,9 @@ public class ServerSessionManager implements AutoCloseable {
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
-            byte[] bytes = BytesUtil.byteBuf2bytes((ByteBuf) msg);
+            ByteBuf buf = (ByteBuf) msg;
+            byte[] bytes = BytesUtil.byteBuf2bytes(buf);
+            buf.release();
             ServerSession session = getServeSession(ctx);
             if (null == session) {
                 log.warn("channelRead session不存在");

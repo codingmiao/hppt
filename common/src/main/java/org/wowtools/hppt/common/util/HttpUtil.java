@@ -32,9 +32,9 @@ public class HttpUtil {
                 // 是否开启缓存
                 .retryOnConnectionFailure(false)
                 .connectionPool(pool())
-                .connectTimeout(30L, TimeUnit.SECONDS)
-                .readTimeout(30L, TimeUnit.SECONDS)
-                .writeTimeout(30L, TimeUnit.SECONDS)
+                .connectTimeout(60L, TimeUnit.SECONDS)
+                .readTimeout(60L, TimeUnit.SECONDS)
+                .writeTimeout(60L, TimeUnit.SECONDS)
                 .hostnameVerifier((hostname, session) -> true)
                 // 设置代理
 //                .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8888)))

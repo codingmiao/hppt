@@ -64,6 +64,7 @@ public abstract class ServerSessionService<CTX> {
         if (null == bytes || bytes.length == 0) {
             return;
         }
+        //TODO 锁ctx异步
         log.debug("收到客户端字节数 {}", bytes.length);
         // 若客户端为空,则进行对时或登录
         ClientCell clientCell = ctxClientCellMap.get(ctx);
@@ -113,6 +114,9 @@ public abstract class ServerSessionService<CTX> {
         } catch (Exception e) {
             log.warn("接收客户端消息异常", e);
             removeCtx(ctx);
+        } catch (Throwable t) {
+            log.error("接收客户端消息错误", t);
+            exit();
         }
     }
 

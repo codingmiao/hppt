@@ -48,6 +48,7 @@ public class ServerTalker {
                 //服务端已经没有这个session了，给客户端发关闭命令
                 client.addCommand(String.valueOf(Constant.ScCommands.CloseSession) + bytesPb.getSessionId());
             } else {
+                //TODO sendToTarget会阻塞，考虑severSession中加一个缓冲池接收，减少不同severSession互相等待
                 severSession.sendToTarget(bytesPb.getBytes().toByteArray());
             }
         }

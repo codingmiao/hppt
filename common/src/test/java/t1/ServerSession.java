@@ -88,6 +88,7 @@ public class ServerSession {
                     }
                     ByteBuf message = Unpooled.copiedBuffer(bytes);
                     ctx.writeAndFlush(message);
+                    message.release();
                     log.debug("serverSession {} 向目标端口发送字节 {}", sessionId, bytes.length);
                 }
                 log.debug("sendThread {} end", sessionId);
@@ -110,6 +111,7 @@ public class ServerSession {
             ByteBuf byteBuf = (ByteBuf) msg;
             byte[] bytes = new byte[byteBuf.readableBytes()];
             byteBuf.readBytes(bytes);
+            byteBuf.release();
             log.debug("serverSession {} 收到目标端口字节 {}", sessionId, bytes.length);
             try {
                 ServerSessionManager.serverSessionSendQueue.add(new SessionBytes(sessionId, bytes));

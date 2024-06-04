@@ -5,8 +5,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
+import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.protobuf.ProtoMessage;
 
 import java.io.ByteArrayInputStream;
@@ -22,6 +22,7 @@ import java.util.zip.GZIPOutputStream;
  * @author liuyu
  * @date 2023/11/27
  */
+@Slf4j
 public class BytesUtil {
     /**
      * 按每个数组的最大长度限制，将一个数组拆分为多个
@@ -132,29 +133,37 @@ public class BytesUtil {
         return byteBuf;
     }
 
+    private static void afterWrite(ChannelFuture future, ByteBuf byteBuf) {
+        future.awaitUninterruptibly(); // 同步等待完成
+        if (!future.isSuccess()) {
+            log.warn("写入byteBuf未成功!!!", future.cause());
+            byteBuf.release();
+        }
+    }
+
+    private static void waitChannelWritable(Channel channel) {
+        while (!channel.isWritable()) {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+            }
+        }
+    }
+
     //把字节写入ChannelHandlerContext
     public static void writeToChannelHandlerContext(ChannelHandlerContext ctx, byte[] bytes) {
+        waitChannelWritable(ctx.channel());
         ByteBuf byteBuf = bytes2byteBuf(ctx, bytes);
-        ctx.writeAndFlush(byteBuf);
-//        f.addListener(new ChannelFutureListener() {
-//            @Override
-//            public void operationComplete(ChannelFuture future) {
-//                if (future.isSuccess()) {
-//                    // 消息成功发送
-//                    System.out.println("消息发送成功");
-//                } else {
-//                    // 消息发送失败
-//                    System.err.println("消息发送失败");
-//                    future.cause().printStackTrace();
-//                }
-//            }
-//        });
+        ChannelFuture future = ctx.writeAndFlush(byteBuf);
+        afterWrite(future, byteBuf);
     }
 
     //把字节写入Channel
     public static void writeToChannel(Channel channel, byte[] bytes) {
+        waitChannelWritable(channel);
         ByteBuf byteBuf = bytes2byteBuf(channel, bytes);
-        channel.writeAndFlush(byteBuf);
+        ChannelFuture future = channel.writeAndFlush(byteBuf).awaitUninterruptibly();
+        afterWrite(future, byteBuf);
     }
 
     public static byte[] byteBuf2bytes(ByteBuf byteBuf) {
