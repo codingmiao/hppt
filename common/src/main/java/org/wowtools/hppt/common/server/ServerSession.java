@@ -5,6 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.RoughTimeUtil;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
 /**
  * @author liuyu
  * @date 2023/11/17
@@ -20,9 +23,11 @@ public class ServerSession {
 
     private final ServerSessionLifecycle lifecycle;
 
-
+    private final BlockingQueue<byte[]> sendBytesQueue = new LinkedBlockingQueue<>();
     //上次活跃时间
     private long activeTime;
+
+    private final Thread sendThread;
 
     ServerSession(long sessionTimeout, int sessionId, LoginClientService.Client client, ServerSessionLifecycle lifecycle, Channel channel) {
         this.sessionId = sessionId;
@@ -31,9 +36,28 @@ public class ServerSession {
         this.lifecycle = lifecycle;
         this.client = client;
         activeSession();
-
+        sendThread = startSendThread();
     }
 
+    private Thread startSendThread() {
+        return Thread.startVirtualThread(() -> {
+            while (true) {
+                byte[] bytes;
+                try {
+                    bytes = sendBytesQueue.take();
+                } catch (InterruptedException e) {
+                    log.info("{} sendThread stop",this);
+                    break;
+                }
+                bytes = lifecycle.beforeSendToTarget(this, bytes);
+                if (bytes != null) {
+                    BytesUtil.writeToChannel(channel, bytes);
+                    lifecycle.afterSendToTarget(this, bytes);
+                }
+            }
+        });
+
+    }
 
     /**
      * 向目标端口发送字节
@@ -42,10 +66,8 @@ public class ServerSession {
      */
     public void sendToTarget(byte[] bytes) {
         activeSession();
-        bytes = lifecycle.beforeSendToTarget(this, bytes);
         if (bytes != null) {
-            BytesUtil.writeToChannel(channel, bytes);
-            lifecycle.afterSendToTarget(this, bytes);
+            sendBytesQueue.add(bytes);
         }
     }
 
@@ -72,6 +94,7 @@ public class ServerSession {
 
 
     void close() {
+        sendThread.interrupt();
         channel.close();
     }
 

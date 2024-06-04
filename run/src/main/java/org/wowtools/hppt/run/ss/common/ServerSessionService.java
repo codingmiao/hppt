@@ -1,6 +1,7 @@
 package org.wowtools.hppt.run.ss.common;
 
 import lombok.extern.slf4j.Slf4j;
+import org.wowtools.common.utils.AsyncTaskUtil;
 import org.wowtools.common.utils.LruCache;
 import org.wowtools.hppt.common.server.LoginClientService;
 import org.wowtools.hppt.common.server.ServerSessionManager;
@@ -11,6 +12,9 @@ import org.wowtools.hppt.run.ss.util.SsUtil;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * ServerSessionService抽象类
@@ -27,7 +31,6 @@ public abstract class ServerSessionService<CTX> {
     }
 
     private final Map<CTX, ClientCell> ctxClientCellMap = LruCache.buildCache(128, 8);
-
     protected final SsConfig ssConfig;
     protected final ServerSessionManager serverSessionManager;
     protected final LoginClientService loginClientService;
@@ -108,16 +111,7 @@ public abstract class ServerSessionService<CTX> {
         }
         // 否则进行常规数据接收操作
         LoginClientService.Client client = clientCell.client;
-        //接消息
-        try {
-            ServerTalker.receiveClientBytes(ssConfig, serverSessionManager, client, bytes);
-        } catch (Exception e) {
-            log.warn("接收客户端消息异常", e);
-            removeCtx(ctx);
-        } catch (Throwable t) {
-            log.error("接收客户端消息错误", t);
-            exit();
-        }
+        client.receiveClientBytes.add(bytes);
     }
 
     /**
@@ -181,6 +175,7 @@ public abstract class ServerSessionService<CTX> {
 
     private void startSendThread(ClientCell cell) {
         LoginClientService.Client client = cell.client;
+        //TODO 修复下面两个线程不退出的问题 尝试修改为打断线程
         Thread.startVirtualThread(() -> {
             while (cell.actived) {
                 try {
@@ -193,6 +188,30 @@ public abstract class ServerSessionService<CTX> {
                     removeCtx(cell.ctx);
                 }
             }
+            log.info("startSendThread close 1");
+        });
+        AsyncTaskUtil.execute(()->{
+            while (cell.actived) {
+                byte[] bytes;
+                try {
+                    bytes = client.receiveClientBytes.poll(10, TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    log.warn("e",e);
+                    continue;
+                }
+                //接消息
+                try {
+                    ServerTalker.receiveClientBytes(ssConfig, serverSessionManager, client, bytes);
+                } catch (Exception e) {
+                    log.warn("接收客户端消息异常", e);
+                    //TODO
+//                    removeCtx(ctx);
+                } catch (Throwable t) {
+                    log.error("接收客户端消息错误", t);
+                    exit();
+                }
+            }
+            log.info("startSendThread close 2");
         });
     }
 }

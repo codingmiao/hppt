@@ -6,6 +6,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.protobuf.ProtoMessage;
 
@@ -137,7 +138,7 @@ public class BytesUtil {
         future.awaitUninterruptibly(); // 同步等待完成
         if (!future.isSuccess()) {
             log.warn("写入byteBuf未成功!!!", future.cause());
-            byteBuf.release();
+            ReferenceCountUtil.safeRelease(byteBuf);
         }
     }
 

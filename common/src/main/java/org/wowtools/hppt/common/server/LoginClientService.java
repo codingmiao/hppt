@@ -24,6 +24,8 @@ public class LoginClientService {
         private final BlockingQueue<String> commandQueue = new LinkedBlockingQueue<>();
 
         private final BlockingQueue<SessionBytes> sessionBytesQueue = new LinkedBlockingQueue<>();
+        public final BlockingQueue<byte[]> receiveClientBytes = new LinkedBlockingQueue<>();
+
 
         public Client(String clientId, AesCipherUtil aesCipherUtil) {
             this.clientId = clientId;
