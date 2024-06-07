@@ -1,8 +1,6 @@
 package org.wowtools.hppt.run.ss.common;
 
 import lombok.extern.slf4j.Slf4j;
-import org.wowtools.common.utils.AsyncTaskUtil;
-import org.wowtools.common.utils.LruCache;
 import org.wowtools.hppt.common.server.LoginClientService;
 import org.wowtools.hppt.common.server.ServerSessionManager;
 import org.wowtools.hppt.common.server.ServerTalker;
@@ -12,8 +10,7 @@ import org.wowtools.hppt.run.ss.util.SsUtil;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -26,11 +23,27 @@ import java.util.concurrent.TimeUnit;
 public abstract class ServerSessionService<CTX> {
     private final class ClientCell {
         LoginClientService.Client client;
+        volatile boolean running = true;
         volatile boolean actived = true;
+
         CTX ctx;
+        final LoginClientService.ClientActiveWatcher clientActiveWatcher = new LoginClientService.ClientActiveWatcher() {
+            @Override
+            public void toInactivity() {
+                actived = false;
+            }
+
+            @Override
+            public void toActivity() {
+                actived = true;
+                synchronized (clientActiveWatcher) {
+                    clientActiveWatcher.notifyAll();
+                }
+            }
+        };
     }
 
-    private final Map<CTX, ClientCell> ctxClientCellMap = LruCache.buildCache(128, 8);
+    private final Map<CTX, ClientCell> ctxClientCellMap = new ConcurrentHashMap<>();
     protected final SsConfig ssConfig;
     protected final ServerSessionManager serverSessionManager;
     protected final LoginClientService loginClientService;
@@ -83,21 +96,30 @@ public abstract class ServerSessionService<CTX> {
                     sendBytesToClient(ctx, dt);
                     break;
                 case "login":
+                    clientCell = new ClientCell();
+                    LoginClientService.Client client;
                     String loginCode = cmd[1];
                     log.debug("请求login {}", loginCode);
-                    if (!loginClientService.login(loginCode)) {
+                    client = loginClientService.login(loginCode, clientCell.clientActiveWatcher);
+                    if (client == null) {
                         log.warn("登录失败 {}", loginCode);
                         byte[] login = ("login 0").getBytes(StandardCharsets.UTF_8);
                         login = GridAesCipherUtil.encrypt(login);
                         sendBytesToClient(ctx, login);
                     } else {
-                        LoginClientService.Client client = loginClientService.getClient(loginCode);
-                        clientCell = new ClientCell();
                         clientCell.client = client;
                         clientCell.ctx = ctx;
-                        ctxClientCellMap.put(ctx, clientCell);
-                        startSendThread(clientCell);
+                        synchronized (ctxClientCellMap) {
+                            ctxClientCellMap.forEach((oldCtx, oldCell) -> {
+                                if (oldCell.client.clientId.equals(client.clientId)) {
+                                    log.info("重复登录，移除旧client {} {}", oldCell.client.clientId, ctx);
+                                    removeCtx(oldCtx);
+                                }
+                            });
+                            ctxClientCellMap.put(ctx, clientCell);
+                        }
                         log.info("客户端接入成功 {}", clientCell.client.clientId);
+                        startSendThread(clientCell);
                         byte[] login = ("login 1").getBytes(StandardCharsets.UTF_8);
                         login = GridAesCipherUtil.encrypt(login);
                         sendBytesToClient(ctx, login);
@@ -112,6 +134,9 @@ public abstract class ServerSessionService<CTX> {
         // 否则进行常规数据接收操作
         LoginClientService.Client client = clientCell.client;
         client.receiveClientBytes.add(bytes);
+        if (!clientCell.actived) {
+            clientCell.clientActiveWatcher.toActivity();
+        }
     }
 
     /**
@@ -164,7 +189,7 @@ public abstract class ServerSessionService<CTX> {
     protected void removeCtx(CTX ctx) {
         ClientCell cell = ctxClientCellMap.remove(ctx);
         if (null != cell) {
-            cell.actived = false;
+            cell.running = false;
         }
         try {
             closeCtx(ctx);
@@ -175,43 +200,61 @@ public abstract class ServerSessionService<CTX> {
 
     private void startSendThread(ClientCell cell) {
         LoginClientService.Client client = cell.client;
-        //TODO 修复下面两个线程不退出的问题 尝试修改为打断线程
         Thread.startVirtualThread(() -> {
-            while (cell.actived) {
+            while (cell.running) {
                 try {
                     byte[] bytes = ServerTalker.replyToClient(ssConfig, serverSessionManager, client, -1, true);
                     if (null != bytes) {
                         sendBytesToClient(cell.ctx, bytes);
+                    } else if (!cell.actived) {
+                        synchronized (cell.clientActiveWatcher) {
+                            log.info("客户端 {} 非活跃，挂起回复消息线程", cell.client.clientId);
+                            try {
+                                cell.clientActiveWatcher.wait();
+                            } catch (InterruptedException e) {
+                                log.info("客户端 {} 活跃，恢复回复消息线程", cell.client.clientId);
+                            }
+                        }
                     }
                 } catch (Exception e) {
                     log.warn("向用户端发送消息异常", e);
                     removeCtx(cell.ctx);
                 }
             }
-            log.info("startSendThread close 1");
+            log.info("回复消息线程结束 {} {}", cell.client.clientId, cell.ctx);
         });
-        AsyncTaskUtil.execute(()->{
-            while (cell.actived) {
+        Thread.startVirtualThread(() -> {
+            while (cell.running) {
                 byte[] bytes;
                 try {
                     bytes = client.receiveClientBytes.poll(10, TimeUnit.SECONDS);
                 } catch (Exception e) {
-                    log.warn("e",e);
+                    log.warn("e", e);
                     continue;
                 }
-                //接消息
-                try {
-                    ServerTalker.receiveClientBytes(ssConfig, serverSessionManager, client, bytes);
-                } catch (Exception e) {
-                    log.warn("接收客户端消息异常", e);
-                    //TODO
-//                    removeCtx(ctx);
-                } catch (Throwable t) {
-                    log.error("接收客户端消息错误", t);
-                    exit();
+                if (null != bytes) {
+                    //接消息
+                    try {
+                        ServerTalker.receiveClientBytes(ssConfig, serverSessionManager, client, bytes);
+                    } catch (Exception e) {
+                        log.warn("接收客户端消息异常", e);
+                        removeCtx(cell.ctx);
+                    } catch (Throwable t) {
+                        log.error("接收客户端消息错误", t);
+                        exit();
+                    }
+                } else if (!cell.actived) {
+                    synchronized (cell.clientActiveWatcher) {
+                        log.info("客户端 {} 非活跃，挂起接收消息线程", cell.client.clientId);
+                        try {
+                            cell.clientActiveWatcher.wait();
+                        } catch (InterruptedException e) {
+                            log.info("客户端 {} 活跃，恢复接收消息线程", cell.client.clientId);
+                        }
+                    }
                 }
             }
-            log.info("startSendThread close 2");
+            log.info("接收消息线程结束 {} {}", cell.client.clientId, cell.ctx);
         });
     }
 }

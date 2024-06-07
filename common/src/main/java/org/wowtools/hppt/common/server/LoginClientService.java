@@ -26,10 +26,15 @@ public class LoginClientService {
         private final BlockingQueue<SessionBytes> sessionBytesQueue = new LinkedBlockingQueue<>();
         public final BlockingQueue<byte[]> receiveClientBytes = new LinkedBlockingQueue<>();
 
+        private final HashMap<Integer, ServerSession> sessions = new HashMap<>();
 
-        public Client(String clientId, AesCipherUtil aesCipherUtil) {
+        private final ClientActiveWatcher activeWatcher;
+
+
+        private Client(String clientId, AesCipherUtil aesCipherUtil, ClientActiveWatcher activeWatcher) {
             this.clientId = clientId;
             this.aesCipherUtil = aesCipherUtil;
+            this.activeWatcher = activeWatcher;
         }
 
         //添加一条向客户端发送的命令
@@ -45,6 +50,24 @@ public class LoginClientService {
             List<String> res = new LinkedList<>();
             commandQueue.drainTo(res);
             return res;
+        }
+
+        public void addSession(ServerSession session) {
+            synchronized (sessions) {
+                int s1 = sessions.size();
+                sessions.put(session.getSessionId(), session);
+                if (s1 == 0) {
+                    activeWatcher.toActivity();
+                }
+            }
+        }
+
+        public void removeSession(ServerSession session) {
+            synchronized (sessions) {
+                if (sessions.remove(session.getSessionId()) != null && sessions.isEmpty()) {
+                    activeWatcher.toInactivity();
+                }
+            }
         }
 
         //添加一条向客户端发送的bytes
@@ -125,7 +148,21 @@ public class LoginClientService {
         }
     }
 
-    private final Map<String, Client> loginClients = new HashMap<>();
+    /**
+     * 客户端是否活跃的观察器
+     */
+    public interface ClientActiveWatcher {
+        /**
+         * 客户端变得不活跃时触发
+         */
+        void toInactivity();
+
+        /**
+         * 客户端变得活跃时触发
+         */
+        void toActivity();
+    }
+
 
     private final String[] allowClientIds;
 
@@ -144,38 +181,22 @@ public class LoginClientService {
     /**
      * 传入的code能解密出客户端id，则登录成功
      *
-     * @param code loginCode
-     * @return 是否登录成功
+     * @param code                loginCode
+     * @param clientActiveWatcher 用以观察客户端活跃状态的变化
+     * @return 登录成功则返回Client对象，否则返回null
      */
-    public boolean login(String code) {
+    public Client login(String code, ClientActiveWatcher clientActiveWatcher) {
         byte[] bytesCode = BytesUtil.base642bytes(code);
         for (String clientId : allowClientIds) {
             AesCipherUtil aesCipherUtil = new AesCipherUtil(clientId, System.currentTimeMillis());
             try {
                 if (new String(aesCipherUtil.descriptor.decrypt(bytesCode), StandardCharsets.UTF_8).equals(clientId)) {
-                    synchronized (loginClients) {
-                        //把已登录的同id客户端踢掉
-                        LinkedList<String> r = new LinkedList<>();
-                        loginClients.forEach((c, client) -> {
-                            if (client.clientId.equals(clientId)) {
-                                r.add(c);
-                            }
-                        });
-                        for (String s : r) {
-                            loginClients.remove(s);
-                        }
-                        //放入
-                        loginClients.put(code, new Client(clientId, aesCipherUtil));
-                    }
-                    return true;
+                    return new Client(clientId, aesCipherUtil, clientActiveWatcher);
                 }
             } catch (Exception e) {
             }
         }
-        return false;
+        return null;
     }
 
-    public Client getClient(String code) {
-        return loginClients.get(code);
-    }
 }

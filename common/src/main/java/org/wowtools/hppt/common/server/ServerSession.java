@@ -37,6 +37,7 @@ public class ServerSession {
         this.client = client;
         activeSession();
         sendThread = startSendThread();
+        client.addSession(this);
     }
 
     private Thread startSendThread() {
@@ -46,7 +47,7 @@ public class ServerSession {
                 try {
                     bytes = sendBytesQueue.take();
                 } catch (InterruptedException e) {
-                    log.info("{} sendThread stop",this);
+                    log.info("{} sendThread stop", this);
                     break;
                 }
                 bytes = lifecycle.beforeSendToTarget(this, bytes);
@@ -96,6 +97,7 @@ public class ServerSession {
     void close() {
         sendThread.interrupt();
         channel.close();
+        client.removeSession(this);
     }
 
     @Override
