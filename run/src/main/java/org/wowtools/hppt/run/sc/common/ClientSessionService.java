@@ -40,7 +40,7 @@ public abstract class ClientSessionService {
     private boolean firstLoginErr = true;
     private boolean noLogin = true;
 
-    protected volatile boolean actived = true;
+    protected volatile boolean running = true;
 
     /**
      * 当一个事件结束时发起的回调
@@ -145,7 +145,7 @@ public abstract class ClientSessionService {
      * 当发生难以修复的异常等情况时，主动调用此方法结束当前服务，以便后续自动重启等操作
      */
     public void exit() {
-        actived = false;
+        running = false;
         clientSessionManager.close();
         try {
             doClose();
@@ -180,7 +180,7 @@ public abstract class ClientSessionService {
 
     private Thread buildSendThread() {
         return new Thread(() -> {
-            while (actived) {
+            while (running) {
                 try {
                     byte[] sendBytes = ClientTalker.buildSendToServerBytes(config, config.maxSendBodySize, sendCommandQueue, sendBytesQueue, aesCipherUtil, true);
                     if (null != sendBytes) {

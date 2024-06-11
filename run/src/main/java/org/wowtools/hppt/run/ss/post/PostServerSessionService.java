@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -32,10 +33,18 @@ public class PostServerSessionService extends ServerSessionService<PostCtx> {
     @Override
     public void init(SsConfig ssConfig) throws Exception {
         log.info("*********");
-        server = new Server(ssConfig.port);
+        server = new Server();
+        // 创建一个ServerConnector
+        ServerConnector connector = new ServerConnector(server);
+        connector.setPort(ssConfig.port);
+        // 设置请求超时时间（以毫秒为单位）
+        connector.setIdleTimeout(ssConfig.post.waitResponseTime * 2);
+        // 将connector添加到server
+        server.addConnector(connector);
+
         ServletContextHandler context = new ServletContextHandler(server, "/");
         context.addServlet(new ServletHolder(new SendServlet(this)), "/s");
-        context.addServlet(new ServletHolder(new ReplyServlet(this, ssConfig.post.waitResponseTime)), "/r");
+        context.addServlet(new ServletHolder(new ReplyServlet(this, ssConfig.post.waitResponseTime, ssConfig.post.replyDelayTime)), "/r");
         context.addServlet(new ServletHolder(new ErrorServlet()), "/e");
 
         ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();

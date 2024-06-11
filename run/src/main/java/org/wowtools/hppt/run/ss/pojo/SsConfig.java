@@ -45,9 +45,14 @@ public class SsConfig extends CommonConfig {
 
     public static final class PostConfig {
         /**
-         * 等待真实端口返回数据的毫秒数
+         * 等待真实端口返回数据的毫秒数，一般设一个略小于http服务超时时间的值
          */
         public long waitResponseTime = 30000;
+
+        /**
+         * 回复的servlet人为设置的延迟，避免客户端过于频繁的发请求
+         */
+        public long replyDelayTime = 0;
     }
 
     public PostConfig post = new PostConfig();

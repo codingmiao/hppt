@@ -15,6 +15,4 @@ class PostCtx {
         this.cookie = cookie;
     }
 
-    Thread waitResponseThread;
-
 }

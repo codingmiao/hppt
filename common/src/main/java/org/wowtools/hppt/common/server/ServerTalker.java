@@ -26,14 +26,10 @@ public class ServerTalker {
         if (null == bytes || bytes.length == 0) {
             return;
         }
-        //解密 解压
+        //解密
         if (config.enableEncrypt) {
             bytes = client.aesCipherUtil.descriptor.decrypt(bytes);
         }
-        if (config.enableCompress) {
-            bytes = BytesUtil.decompress(bytes);
-        }
-
         ProtoMessage.MessagePb inputMessage = ProtoMessage.MessagePb.parseFrom(bytes);
         Map<Integer, ServerSession> serverSessionMap = serverSessionManager.getServerSessionMapByClientId(client.clientId);
 
@@ -116,10 +112,7 @@ public class ServerTalker {
 
 
         byte[] bytes = rBuilder.build().toByteArray();
-        //压缩 加密
-        if (config.enableCompress) {
-            bytes = BytesUtil.compress(bytes);
-        }
+        //加密
         if (config.enableEncrypt) {
             bytes = client.aesCipherUtil.encryptor.encrypt(bytes);
         }

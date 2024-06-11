@@ -8,6 +8,7 @@ import org.wowtools.hppt.common.util.HttpUtil;
 import org.wowtools.hppt.run.sc.common.ClientSessionService;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
 
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -45,32 +46,32 @@ public class PostClientSessionService extends ClientSessionService {
     private void startSendThread(Cb cb) {
         Thread.startVirtualThread(() -> {
             //等待初始化完成
-            while (null == sendQueue) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
             cb.end();
+            //起一个while循环不断发送数据
             final long sendSleepTime = config.post.sendSleepTime;
-            while (actived) {
-                if (sendSleepTime > 0) {
-                    try {
-                        Thread.sleep(sendSleepTime);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+            while (running) {
                 try {
                     byte[] sendBytes;
                     List<byte[]> bytesList = new LinkedList<>();
                     sendBytes = sendQueue.take();
                     bytesList.add(sendBytes);
+                    if (sendSleepTime > 0) {
+                        try {
+                            Thread.sleep(sendSleepTime);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
                     sendQueue.drainTo(bytesList);
                     sendBytes = BytesUtil.bytesCollection2PbBytes(bytesList);
-                    try (Response ignored = HttpUtil.doPost(sendUrl, sendBytes)) {
-                        log.debug("startSendThread 发送完成");
+                    try (Response r = HttpUtil.doPost(sendUrl, sendBytes)) {
+                        assert r.body() != null;
+                        byte[] rBytes = r.body().bytes();
+                        if (rBytes.length == 0) {
+                            log.debug("SendThread 发送完成");
+                        } else {
+                            throw new RuntimeException("异常的响应值" + new String(rBytes, StandardCharsets.UTF_8));
+                        }
                     }
                 } catch (Exception e) {
                     log.warn("SendThread异常", e);
@@ -86,24 +87,23 @@ public class PostClientSessionService extends ClientSessionService {
         Thread.startVirtualThread(() -> {
             boolean empty = false;
             final long sendSleepTime = config.post.sendSleepTime;
-            while (actived) {
-                if (sendSleepTime > 0) {
-                    try {
-                        Thread.sleep(sendSleepTime);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+            while (running) {
+                //检测是否需要挂起接收线程
                 if (empty && !isNoLogin() && clientSessionManager.getSessionNum() == 0) {
                     synchronized (replyThreadEmptyLock) {
-                        log.info("无客户端,睡眠接收线程");
+                        log.info("无客户端,挂起接收线程");
                         try {
                             replyThreadEmptyLock.wait();
                         } catch (InterruptedException e) {
                             log.info("唤醒接收线程");
+                            if (!running) {
+                                log.info("退出已停止ReplyThread");
+                                return;
+                            }
                         }
                     }
                 }
+                //发一个接收请求接数据
                 try {
                     byte[] responseBytes;
                     try (Response response = HttpUtil.doPost(replyUrl, null)) {
@@ -112,17 +112,31 @@ public class PostClientSessionService extends ClientSessionService {
                     }
                     if (null != responseBytes && responseBytes.length > 0) {
                         log.debug("收到服务端响应字节数 {}", responseBytes.length);
-                        List<byte[]> bytesList = BytesUtil.pbBytes2BytesList(responseBytes);
+                        List<byte[]> bytesList;
+                        try {
+                            bytesList = BytesUtil.pbBytes2BytesList(responseBytes);
+                        } catch (Exception e) {
+                            log.warn("解析protobuf字节异常 {}", new String(responseBytes, StandardCharsets.UTF_8));
+                            throw e;
+                        }
                         for (byte[] bytes : bytesList) {
                             receiveServerBytes(bytes);
                         }
                         empty = bytesList.isEmpty();
-                    }else {
+                    } else {
                         empty = true;
                     }
                 } catch (Exception e) {
                     log.warn("ReplyThread异常", e);
                     exit();
+                }
+                //按需做等待
+                if (sendSleepTime > 0) {
+                    try {
+                        Thread.sleep(sendSleepTime);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         });
@@ -139,5 +153,15 @@ public class PostClientSessionService extends ClientSessionService {
         synchronized (replyThreadEmptyLock) {
             replyThreadEmptyLock.notify();
         }
+    }
+
+    @Override
+    public void exit() {
+        super.exit();
+        Thread.startVirtualThread(() -> {
+            synchronized (replyThreadEmptyLock) {
+                replyThreadEmptyLock.notify();
+            }
+        });
     }
 }

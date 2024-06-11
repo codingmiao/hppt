@@ -90,10 +90,7 @@ public class ClientTalker {
         }
 
         byte[] bytes = rBuilder.build().toByteArray();
-        //压缩 加密
-        if (config.enableCompress) {
-            bytes = BytesUtil.compress(bytes);
-        }
+        //加密
         if (config.enableEncrypt) {
             bytes = aesCipherUtil.encryptor.encrypt(bytes);
         }
@@ -111,12 +108,9 @@ public class ClientTalker {
         }
         ProtoMessage.MessagePb rMessagePb;
         try {
-            //解密、解压
+            //解密
             if (config.enableEncrypt) {
                 responseBody = aesCipherUtil.descriptor.decrypt(responseBody);
-            }
-            if (config.enableCompress) {
-                responseBody = BytesUtil.decompress(responseBody);
             }
             log.debug("收到服务端发回字节数 {}", responseBody.length);
             rMessagePb = ProtoMessage.MessagePb.parseFrom(responseBody);

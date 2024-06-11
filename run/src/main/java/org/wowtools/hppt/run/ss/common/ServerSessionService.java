@@ -80,7 +80,6 @@ public abstract class ServerSessionService<CTX> {
         if (null == bytes || bytes.length == 0) {
             return;
         }
-        //TODO 锁ctx异步
         log.debug("收到客户端字节数 {}", bytes.length);
         // 若客户端为空,则进行对时或登录
         ClientCell clientCell = ctxClientCellMap.get(ctx);
