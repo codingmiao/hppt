@@ -14,114 +14,17 @@ hppt，一款可通过任意协议转发tcp端口的工具。
 下载对应你操作系统版本的jdk，然后在[releases](https://github.com/codingmiao/hppt/releases)
 页面下载最新版本编译好的hppt.zip，或自行下载源码编译
 
-## 示例一 内网穿透，通过公网转发，访问无公网IP的服务器
+## 示例1 通过http端口，反向代理访问内部服务器SSH端口
 
-假设你家里有一台台式机(ssh端口为22)，并且有一台公网VPS服务器(ip 112.242.68.66)，你想在公司用笔记本登录家里的台式机，可按如下结构部署：
+假设你有一个服务器集群，仅有一个nginx提供了80/443端口对外访问(111.222.33.44:80)，你想要访问集群中的应用服务器(192.168.0.2)的22端口，则可以按如下结构部署
 
-![示例1](_doc/img/1.jpg)
+![示例1](_doc/img/3.jpg)
 
-1、拷贝cs文件夹到公网服务器上:
-
-```
-cs
-    - cs.jar
-    - cs.yml
-    - log4j2.xml
-```
-
-并调整cs.yml的配置信息:
-
-```yaml
-# http服务端口
-port: 30871
-# 是否启用压缩，默认启用 需和服务端保持一致
-enableCompress: true
-# 是否启用内容加密，默认启用 需和服务端保持一致
-enableEncrypt: true
-# 客户端配置列表
-clients:
-  - # 客户端ID
-    clientId: home
-    # 客户端转发配置列表
-    forwards:
-      - localPort: 10022
-        remoteHost: "localhost"
-        remotePort: 22
-```
-
-执行如下命令启动cs.jar
-
-```shell
-<jdk21_path>/bin/java -jar cs.jar
-```
-
-2、拷贝cc文件夹到在家里的台式机上：
+1、在集群中任一服务器上新建一个hppt目录，并上传hppt.jar、ss.yml、log4j2.xml文件到此目录下:
 
 ```
-cc
-    - cc.jar
-    - cc.yml
-    - log4j2.xml
-```
-
-修改cc.yml
-
-```yaml
-# 客户端id，每个cc.jar用一个，不要重复
-clientId: home
-# 服务端http地址，可以填nginx转发过的地址
-serverUrl: "http://112.242.68.66:30871"
-# 开始时闲置几毫秒发一次http请求，越短延迟越低但越耗性能
-initSleepTime: 10
-# 当收到空消息时，闲置毫秒数增加多少毫秒
-addSleepTime: 100
-# 闲置毫秒数最大到多少毫秒
-maxSleepTime: 10000
-# 当用户端输入字节时，唤醒发送线程，此后多少毫秒不睡眠
-awakenTime: 15000
-# 向服务端发数据请求体的字节数最大值 有时会出现413 Request Entity Too Large问题，没办法改nginx的话就用这个值限制
-maxSendBodySize: 2147483647
-# 是否启用压缩，默认启用 需和服务端保持一致
-enableCompress: true
-# 是否启用内容加密，默认启用 需和服务端保持一致
-enableEncrypt: true
-
-```
-
-其中`http://112.242.68.66:30871`即第一步在公网服务器上部署的cs.jar的访问地址，如果不希望直接暴露30871端口，也可以通过nginx转一下：
-
-```
-server {
-    listen       80;
-    ...
-    location /xxx/ {
-        proxy_pass http://localhost:30871/;
-    }
-    ...
-```
-
-这样配nginx然后修改serverUrl配置为 `serverUrl: "http://112.242.68.66:80/xxx"` 即可
-
-执行如下命令启动cs.jar
-
-```shell
-<jdk21_path>/bin/java -jar cc.jar
-```
-
-随后，你就可以在公司用linux连接工具访问112.242.68.66的10022端口，来登录家里的台式机了
-
-## 示例二 通过http端口，反向代理访问内部服务器
-
-假设你有一个服务器集群，仅有一个nginx提供了80端口对外访问(112.242.68.66:80)，你想要访问集群中的应用服务器(192.168.0.2)
-的22端口，则可以按如下结构部署
-
-![示例2](_doc/img/2.jpg)
-
-1、拷贝ss文件夹到网关服务器上:
-
-```
-ss
-    - ss.jar
+hppt
+    - hppt.jar
     - ss.yml
     - log4j2.xml
 ```
@@ -129,34 +32,31 @@ ss
 并调整ss.yml的配置信息:
 
 ```yaml
+#使用http post协议传输数据，此协议最为简单，但性能略差，如有需要请查看websocket协议或hppt协议或自定义协议
+type: post
 #服务http端口
 port: 20871
-#超过sessionTimeout，给客户端发送存活确认命令，若下一个sessionTimeout内未收到确认，则强制关闭服务
-sessionTimeout: 60000
-#接收到客户端/真实端口的数据时，数据被暂存在一个队列里，队列满后强制关闭会话
-messageQueueSize: 20480
-#上传/下载文件用的目录
-fileDir: /data/ss/dt
-#是否启用压缩，默认启用 需和客户端保持一致
-enableCompress: true
-#是否启用内容加密，默认启用 需和客户端保持一致
-enableEncrypt: true
 # 允许的客户端id
 clientIds:
-  - book
+  - user1
+  - user2
 
 ```
+（注1：作为快速演示，这里的type选择了最简单的post类型，此场景下最佳性能的协议为websocket，如需使用请参考:[websocket代理内网端口]）
+（注2：实际应用中，为了确保安全，建议把clientId设置得更复杂一些）
 
-执行如下命令启动ss.jar
+执行如下命令运行服务端的hppt
 
 ```shell
-<jdk21_path>/bin/java -jar ss.jar
+cd hppt
+<jdk21_path>/bin/java -jar hppt.jar ss ss.yml
 ```
 
-在nginx上配置一个代理指向ss.jar
+在nginx上增加一段配置指向hppt
 
 ```
 server {
+    # 用https也ok的，对应修改nginx https配置即可
     listen       80;
     ...
     location /xxx/ {
@@ -165,11 +65,13 @@ server {
     ...
 ```
 
-2、拷贝sc文件夹到自己笔记本上:
+随后，访问`http://111.222.33.44:80/xxx/` 能看到“error 404”字样即证明服务端部署成功。
+
+2、自己笔记本上，新建一个hppt目录，拷贝hppt.jar、sc.yml、log4j2.xml文件到此目录下:
 
 ```
-sc
-    - sc.jar
+hppt
+    - hppt.jar
     - sc.yml
     - log4j2.xml
 ```
@@ -177,58 +79,216 @@ sc
 并调整sc.yml的配置信息:
 
 ```yaml
-#客户端id，每个sc.jar用一个，不要重复
-clientId: book
-#服务端http地址，可以填nginx转发过的地址
-serverUrl: "http://112.242.68.66:80/xxx"
-#开始时闲置几毫秒发一次http请求，越短延迟越低但越耗性能
-initSleepTime: 10
-#当收到空消息时，闲置毫秒数增加多少毫秒
-addSleepTime: 1000
-#闲置毫秒数最大到多少毫秒
-maxSleepTime: 60000
-#向服务端发数据请求体的字节数最大值 nginx代理的话，如果没办法修改配置，会出现413 Request Entity Too Large问题，没办法改nginx的话就用这个值限制
-maxSendBodySize: 1024000
-#是否启用压缩，默认启用 需和服务端保持一致
-enableCompress: true
-#是否启用内容加密，默认启用 需和服务端保持一致
-enableEncrypt: true
+# 和服务端的type保持一致
+type: post
+# 客户端id，必须在服务端的clientIds列表里才能成功连接，每个客户端用一个id，不要重复
+clientId: user1
+
+post:
+  # 服务端http地址，如无法直连，用nginx代理几次填nginx的地址也ok
+  serverUrl: "http://111.222.33.44:80/xxx"
+  # 人为设置的延迟（毫秒），一般填0即可，如果传文件等数据量大、延迟要求低的场景，可以设一个几百毫秒的延迟来降低post请求发送频率
+  sendSleepTime: 0
 forwards:
+  # 把192.168.0.2的22端口代理到本机的10022端口
   - localPort: 10022
     remoteHost: "192.168.0.2"
     remotePort: 22
+    # 同理也可以代理数据库等任意TCP端口，只要服务端的hppt所在服务器能访问到的端口都行
+  - localPort: 10023
+    remoteHost: "192.168.0.3"
+    remotePort: 3306
+
 
 ```
 
-执行如下命令启动sc.jar
+执行如下命令启动客户端的hppt
 
 ```shell
-<jdk21_path>/bin/java -jar sc.jar
+cd hppt
+<jdk21_path>/bin/java -jar hppt.jar sc sc.yml
 ```
 
 随后，你就可以在公司用linux连接工具访问localhost的10022端口，来登录应用服务器了
 
-## 示例三 组合玩法
 
-组合示例一、二，实现更多有趣的玩法，比如把家里的端口代理到自己笔记本上，给其它同事的电脑访问：
+## 示例2 内网穿透，通过公网转发，访问无公网IP的服务器
 
-![示例3](_doc/img/3.jpg)
+假设你家里有一台台式机(ssh端口为22)，并且有一台公网VPS服务器(ip 111.222.33.44)，你想在公司用笔记本登录家里的台式机，可按如下结构部署：
+
+![示例2](_doc/img/4.jpg)
+
+1、公网服务器上，新建一个hppt目录，拷贝hppt.jar、sc.yml、log4j2.xml文件到此目录下:
+
+```
+hppt
+    - hppt.jar
+    - sc.yml
+    - log4j2.xml
+```
+
+并调整sc.yml的配置信息:
+
+```yaml
+# 通讯协议 本示例使用了性能最好的hppt协议，加r前缀表示客户端和服务端角色互换。这里也可以配http post或websocket
+type: rhppt
+# 客户端id
+clientId: user1
+
+# 服务端口
+rhppt:
+  port: 20871
+
+forwards:
+  # 把192.168.0.2的22端口代理到本机的10022端口
+  - localPort: 10022
+    remoteHost: "192.168.0.2"
+    remotePort: 22
+    # 同理也可以代理数据库等任意TCP端口，只要服务端的hppt所在服务器能访问到的端口都行
+  - localPort: 10023
+    remoteHost: "192.168.0.3"
+    remotePort: 3306
+
+```
+
+执行如下命令启动公网服务器上的hppt
+
+```shell
+<jdk21_path>/bin/java -jar hppt.jar sc sc.yml
+```
+
+2、家里的台式机上，新建一个hppt目录，拷贝hppt.jar、ss.yml、log4j2.xml文件到此目录下：
+
+```
+hppt
+    - hppt.jar
+    - ss.yml
+    - log4j2.xml
+```
+
+修改ss.yml
+
+```yaml
+# 通讯协议 客户端与服务端保持一致
+type: rhppt
+#服务http端口
+port: 20871
+
+# 指向上一步启动的服务的ip和端口
+rhppt:
+  host: "111.222.33.44"
+  port: 20871
+
+# 对应的的客户端id
+clientIds:
+  - user1
+
+```
+
+
+执行如下命令启动家里台式机上的hppt
+
+```shell
+cd hppt
+<jdk21_path>/bin/java -jar hppt.jar ss ss.yml
+```
+
+随后，你就可以在公司用linux连接工具访问111.222.33.44的10022端口，来登录家里的台式机了
+
+
+## 示例3 编写自定义协议
+如下图所示，A、B两台机器间无法进行通信，但他们都可以访问到机器C上的kafka，本示例演示如何通过编写自定义协议，使得A能够以C上的kafka作为桥梁访问到B上的SSH端口：
+
+![kafkademo](_doc/img/kafkademo.jpg)
+
+首先clone本项目到本地，然后`mvn clean install`把本项目安装到maven。
+
+然后新建一个java工程，引入maven依赖
+```xml
+        <dependency>
+            <groupId>org.wowtools.hppt</groupId>
+            <artifactId>run</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+```
+然后就可以编写代码了：
+
+编写一个服务端实现并在机器B上运行，你需要实现如下方法:
+```java
+public class ServerDemo extends ServerSessionService<T> {
+
+    public ServerDemo(SsConfig ssConfig) {
+        super(ssConfig);
+    }
+
+    //初始化时需要做什么
+    public void init(SsConfig ssConfig) throws Exception {
+        
+    }
+
+    //怎样发送字节到客户端
+    protected void sendBytesToClient(T ctx, byte[] bytes) {
+
+    }
+
+    //收到客户端的字节时，主动去调用receiveClientBytes(CTX ctx, byte[] bytes)
+
+    //当客户端断开时需要做什么
+    protected void closeCtx(T ctx) throws Exception {
+	
+    }
+
+    //当本服务端关闭后，在此释放掉连接池等资源
+    protected void doClose() throws Exception {
+
+    }
+}
+```
+完整的示例实现请参考[这里](kafkademo/src/main/java/org/wowtools/hppt/kafkademo/ServerDemo.java)
+
+
+编写一个客户端实现并在机器B上运行，你需要实现如下方法:
+```java
+public class ClientDemo extends ClientSessionService {
+    public ClientDemo(ScConfig config) throws Exception {
+        super(config);
+    }
+
+    //怎样连接到服务端
+    protected void connectToServer(ScConfig config, Cb cb) throws Exception {
+
+    }
+
+    //怎样发送字节到服务端
+    protected void sendBytesToServer(byte[] bytes) {
+
+    }
+
+    //收到客户端的字节时，主动去调用receiveServerBytes(byte[] bytes)
+}
+```
+完整的示例实现请参考[这里](kafkademo/src/main/java/org/wowtools/hppt/kafkademo/ClientDemo.java)
+
+随后，你就可以通过访问A的10022端口，来连接B上的SSH 22端口了。
 
 # Q&A
 
 ## 性能如何？
 
-由于http本身短连接、带了很多请求头等无用信息之类的原因，比直连损耗30%以上的效率。
+使用hppt或websocket等长连接协议的话，本项目只是做了个转发和加解密等操作，性能损耗在%5以内，以下是示例2中scp命令拷贝一个186m的文件，连接原始端口和代理端口的耗时对比：
 
-以下是scp命令拷贝一份文件，直连和使用hppt反代的耗时对比：
+```shell
+# 直连
+scp -P 22 jdk-21_linux-aarch64_bin.tar.gz   root@xxx:/xxx                                                                                                                          
+100%  186MB   7.5MB/s   00:25
+# 代理
+scp -P 10022 jdk-21_linux-aarch64_bin.tar.gz   root@xxx:/xxx                                                                                                                          
+100%  186MB   7.2MB/s   00:26
 
-![性能对比](_doc/img/4.jpg)
+```
 
-## 为什么用http post，不用websocket或sse之类的长连接技术？
-
-条件不允许^_^，笔者写这个工具，就是因为使用环境里需要通过nginx转发，而nginx不允许配ws、sse相关的参数。
-
-所以，用http post就是为了最大的适配能力，这个项目就是：要通用性有通用性、要性能有通用性^_^。
+但如果是用http post作为传输协议的话，由于http本身短连接、带了很多请求头等无用信息之类的原因，损耗就比较大了，笔者在应用环境中测试甚至会达到30%左右的损耗。
+所以在性能敏感的场景，建议使用长连接协议，短连接协议仅在不关注性能或是环境不允许的情况下再使用。
 
 ## 安全性如何？
 
@@ -237,6 +297,10 @@ forwards:
 
 # 后续计划
 
-输入字节审计
+完成rwebsocket协议，优化rpost协议的性能开销
 
-自定义字节修改功能
+中继模式开发
+
+完善文档和demo
+
+...(还有什么好玩的想法给我提issue或者发邮件哈)

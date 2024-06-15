@@ -59,7 +59,6 @@ public class SsConfig extends CommonConfig {
 
 
     public static final class WebSocketConfig {
-        public long maxReturnBodySize = 40000;
     }
 
     public WebSocketConfig websocket;
@@ -83,9 +82,9 @@ public class SsConfig extends CommonConfig {
          */
         public int port;
         /**
-         * 用几个字节来作为长度位，对应最多可发送Max(256^lengthFieldLength-1,2^31-1)长度的字节，只支持1、2、3、4，服务端与客户端必须一致，默认2
+         * 用几个字节来作为长度位，对应最多可发送Max(256^lengthFieldLength-1,2^31-1)长度的字节，只支持1、2、3、4，服务端与客户端必须一致，默认3
          */
-        public int lengthFieldLength = 2;
+        public int lengthFieldLength = 3;
     }
 
     public RHpptConfig rhppt = new RHpptConfig();

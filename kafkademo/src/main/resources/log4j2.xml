@@ -20,7 +20,7 @@
         <Logger name="org.wowtools" level="debug"/>
 
         <!-- 设置根Logger的日志级别 -->
-        <Root level="debug">
+        <Root level="info">
             <AppenderRef ref="Console"/>
 <!--            <AppenderRef ref="RollingFile"/>-->
         </Root>
