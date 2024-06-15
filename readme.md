@@ -42,7 +42,8 @@ clientIds:
   - user2
 
 ```
-（注1：作为快速演示，这里的type选择了最简单的post类型，此场景下最佳性能的协议为websocket，如需使用请参考:[websocket代理内网端口]）
+（注1：作为快速演示，这里的type选择了最简单的post类型，此场景下最佳性能的协议为websocket，或是有独立端口的话可以配置hppt协议，ws、hppt版的说明奋力码字中。。）
+
 （注2：实际应用中，为了确保安全，建议把clientId设置得更复杂一些）
 
 执行如下命令运行服务端的hppt
@@ -90,7 +91,7 @@ post:
   # 人为设置的延迟（毫秒），一般填0即可，如果传文件等数据量大、延迟要求低的场景，可以设一个几百毫秒的延迟来降低post请求发送频率
   sendSleepTime: 0
 forwards:
-  # 把192.168.0.2的22端口代理到本机的10022端口
+    # 把192.168.0.2的22端口代理到本机的10022端口
   - localPort: 10022
     remoteHost: "192.168.0.2"
     remotePort: 22
@@ -140,7 +141,7 @@ rhppt:
   port: 20871
 
 forwards:
-  # 把192.168.0.2的22端口代理到本机的10022端口
+    # 把192.168.0.2的22端口代理到本机的10022端口
   - localPort: 10022
     remoteHost: "192.168.0.2"
     remotePort: 22
@@ -203,13 +204,14 @@ cd hppt
 
 首先clone本项目到本地，然后`mvn clean install`把本项目安装到maven。
 
-然后新建一个java工程，引入maven依赖
+然后新建一个java工程，引入hppt-run以及kafka等maven依赖
 ```xml
         <dependency>
             <groupId>org.wowtools.hppt</groupId>
             <artifactId>run</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <!--继续添加其他依赖-->
 ```
 然后就可以编写代码了：
 
@@ -223,24 +225,20 @@ public class ServerDemo extends ServerSessionService<T> {
 
     //初始化时需要做什么
     public void init(SsConfig ssConfig) throws Exception {
-        
     }
 
     //怎样发送字节到客户端
     protected void sendBytesToClient(T ctx, byte[] bytes) {
-
     }
 
     //收到客户端的字节时，主动去调用receiveClientBytes(CTX ctx, byte[] bytes)
 
     //当客户端断开时需要做什么
     protected void closeCtx(T ctx) throws Exception {
-	
     }
 
     //当本服务端关闭后，在此释放掉连接池等资源
     protected void doClose() throws Exception {
-
     }
 }
 ```
@@ -256,12 +254,10 @@ public class ClientDemo extends ClientSessionService {
 
     //怎样连接到服务端
     protected void connectToServer(ScConfig config, Cb cb) throws Exception {
-
     }
 
     //怎样发送字节到服务端
     protected void sendBytesToServer(byte[] bytes) {
-
     }
 
     //收到客户端的字节时，主动去调用receiveServerBytes(byte[] bytes)
@@ -275,7 +271,7 @@ public class ClientDemo extends ClientSessionService {
 
 ## 性能如何？
 
-使用hppt或websocket等长连接协议的话，本项目只是做了个转发和加解密等操作，性能损耗在%5以内，以下是示例2中scp命令拷贝一个186m的文件，连接原始端口和代理端口的耗时对比：
+使用hppt或websocket等长连接协议的话，本项目只是做了个转发和加解密等操作，性能损耗在5%以内，以下是示例2中scp命令拷贝一个186m的文件，连接原始端口和代理端口的耗时对比：
 
 ```shell
 # 直连
