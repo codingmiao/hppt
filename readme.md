@@ -1,6 +1,11 @@
+![hppt](_doc/img/hppt.png)
+
 hppt，一款可通过任意协议转发tcp端口的工具。
 
-![hppt](_doc/img/hppt.png)
+[github](https://github.com/codingmiao/hppt)
+
+[gitee](https://gitee.com/wowtools/hppt)
+
 
 # 简介
 日常工作中，我们常常因为无法访问某些远程端口而带来很多麻烦，例如下面的场景，服务器的防火墙只留了80/443端口用以web访问，
