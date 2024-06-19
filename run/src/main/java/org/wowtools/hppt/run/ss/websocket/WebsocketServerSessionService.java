@@ -48,7 +48,7 @@ public class WebsocketServerSessionService extends ServerSessionService<ChannelH
                                       pipeline.addLast(new HttpServerCodec())
                                               .addLast(new ChunkedWriteHandler())
                                               .addLast(new HttpObjectAggregator(1024 * 1024 * 10))
-                                              .addLast(new WebSocketServerProtocolHandler("/s", null, false, 1024 * 1024 * 50, false, true, 10000L))
+                                              .addLast(new WebSocketServerProtocolHandler("/", null, false, 1024 * 1024 * 50, false, true, 10000L))
                                               .addLast(new MyHandler());
                                   }
                               }

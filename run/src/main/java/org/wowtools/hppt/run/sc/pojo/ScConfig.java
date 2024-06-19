@@ -45,6 +45,11 @@ public class ScConfig extends CommonConfig {
          * 服务端http地址，可以填nginx转发过的地址，但注意加允许ws转发的配置
          */
         public String serverUrl;
+
+        /**
+         * 发送websocket ping的周期(毫秒)，定期发送一个ping心跳信号以防止ws闲置断开
+         */
+        public long pingInterval;
     }
 
     public static final class HpptConfig {

@@ -4,12 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.server.LoginClientService;
 import org.wowtools.hppt.common.server.ServerSessionManager;
 import org.wowtools.hppt.common.server.ServerTalker;
+import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.GridAesCipherUtil;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
 import org.wowtools.hppt.run.ss.util.SsUtil;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -25,6 +27,7 @@ public abstract class ServerSessionService<CTX> {
         LoginClientService.Client client;
         volatile boolean running = true;
         volatile boolean actived = true;
+        final String reConnectToken = UUID.randomUUID().toString();
 
         CTX ctx;
         final LoginClientService.ClientActiveWatcher clientActiveWatcher = new LoginClientService.ClientActiveWatcher() {
@@ -119,9 +122,40 @@ public abstract class ServerSessionService<CTX> {
                         }
                         log.info("客户端接入成功 {}", clientCell.client.clientId);
                         startSendThread(clientCell);
-                        byte[] login = ("login 1").getBytes(StandardCharsets.UTF_8);
+                        String code = BytesUtil.bytes2base64(client.aesCipherUtil.encryptor.encrypt(clientCell.reConnectToken.getBytes(StandardCharsets.UTF_8)));
+                        byte[] login = ("login " + code).getBytes(StandardCharsets.UTF_8);
                         login = GridAesCipherUtil.encrypt(login);
                         sendBytesToClient(ctx, login);
+                    }
+                    break;
+                case "reConnect":
+                    byte[] base64Bytes = BytesUtil.base642bytes(cmd[1]);
+                    ClientCell currentClientCell = null;
+                    for (Map.Entry<CTX, ClientCell> entry : ctxClientCellMap.entrySet()) {
+                        ClientCell clientCell1 = entry.getValue();
+                        try {
+                            byte[] decryptBytes = clientCell1.client.aesCipherUtil.descriptor.decrypt(base64Bytes);
+                            String[] codes = new String(decryptBytes, StandardCharsets.UTF_8).split(" ", 2);
+                            String reConnectCode = codes[0];
+                            if (!clientCell1.reConnectToken.equals(reConnectCode)) {
+                                log.info("重连token不匹配");
+                                continue;
+                            }
+                            long st = Long.valueOf(codes[1]);
+                            long now = System.currentTimeMillis();
+                            if (Math.abs(now - st) > 60000) {
+                                log.info("重连时差过大 st {} now {}", st, now);
+                                continue;
+                            }
+                        } catch (Exception e) {
+                            continue;
+                        }
+                        currentClientCell = clientCell1;
+                        break;
+                    }
+                    if (currentClientCell != null) {
+                        ctxClientCellMap.put(ctx, currentClientCell);
+                        log.info("客户端重连成功 {}", currentClientCell.client.clientId);
                     }
                     break;
                 default:

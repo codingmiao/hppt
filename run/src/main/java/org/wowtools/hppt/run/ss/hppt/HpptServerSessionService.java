@@ -57,7 +57,9 @@ public class HpptServerSessionService extends ServerSessionService<ChannelHandle
 
     @Override
     protected void sendBytesToClient(ChannelHandlerContext ctx, byte[] bytes) {
-        BytesUtil.writeToChannelHandlerContext(ctx, bytes);
+        if (!BytesUtil.writeToChannelHandlerContext(ctx, bytes)) {
+            exit();
+        }
     }
 
     @Override

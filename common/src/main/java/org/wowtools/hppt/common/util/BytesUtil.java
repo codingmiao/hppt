@@ -134,12 +134,14 @@ public class BytesUtil {
         return byteBuf;
     }
 
-    private static void afterWrite(ChannelFuture future, ByteBuf byteBuf) {
+    private static boolean afterWrite(ChannelFuture future, Object msg) {
         future.awaitUninterruptibly(); // 同步等待完成
-        if (!future.isSuccess()) {
-            log.warn("写入byteBuf未成功!!!", future.cause());
-            ReferenceCountUtil.safeRelease(byteBuf);
+        if (future.isSuccess()) {
+            return true;
         }
+        log.warn("写入消息未成功!!!", future.cause());
+        ReferenceCountUtil.safeRelease(msg);
+        return false;
     }
 
     private static void waitChannelWritable(Channel channel) {
@@ -152,19 +154,26 @@ public class BytesUtil {
     }
 
     //把字节写入ChannelHandlerContext
-    public static void writeToChannelHandlerContext(ChannelHandlerContext ctx, byte[] bytes) {
+    public static boolean writeToChannelHandlerContext(ChannelHandlerContext ctx, byte[] bytes) {
         waitChannelWritable(ctx.channel());
         ByteBuf byteBuf = bytes2byteBuf(ctx, bytes);
         ChannelFuture future = ctx.writeAndFlush(byteBuf);
-        afterWrite(future, byteBuf);
+        return afterWrite(future, byteBuf);
     }
 
     //把字节写入Channel
-    public static void writeToChannel(Channel channel, byte[] bytes) {
+    public static boolean writeToChannel(Channel channel, byte[] bytes) {
         waitChannelWritable(channel);
         ByteBuf byteBuf = bytes2byteBuf(channel, bytes);
         ChannelFuture future = channel.writeAndFlush(byteBuf).awaitUninterruptibly();
-        afterWrite(future, byteBuf);
+        return afterWrite(future, byteBuf);
+    }
+
+    //把对象写入Channel
+    public static boolean writeObjToChannel(Channel channel, Object obj) {
+        waitChannelWritable(channel);
+        ChannelFuture future = channel.writeAndFlush(obj).awaitUninterruptibly();
+        return afterWrite(future, obj);
     }
 
     public static byte[] byteBuf2bytes(ByteBuf byteBuf) {

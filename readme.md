@@ -265,7 +265,7 @@ public class ClientDemo extends ClientSessionService {
     protected void sendBytesToServer(byte[] bytes) {
     }
 
-    //收到客户端的字节时，主动去调用receiveServerBytes(byte[] bytes)
+    //收到服务端的字节时，主动去调用receiveServerBytes(byte[] bytes)
 }
 ```
 完整的示例实现请参考[这里](kafkademo/src/main/java/org/wowtools/hppt/kafkademo/ClientDemo.java)

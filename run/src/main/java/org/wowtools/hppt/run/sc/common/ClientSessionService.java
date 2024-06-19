@@ -42,6 +42,8 @@ public abstract class ClientSessionService {
 
     protected volatile boolean running = true;
 
+    private String reConnectCode;
+
     /**
      * 当一个事件结束时发起的回调
      */
@@ -119,9 +121,10 @@ public abstract class ClientSessionService {
                     }
                     break;
                 case "login":
-                    String state = cmd[1];
-                    if ("1".equals(state)) {
+                    String code = cmd[1];
+                    if (!"0".equals(code)) {
                         noLogin = false;
+                        reConnectCode = new String(aesCipherUtil.descriptor.decrypt(BytesUtil.base642bytes(code)),StandardCharsets.UTF_8);
                         log.info("登录成功");
                     } else if (firstLoginErr) {
                         firstLoginErr = false;
@@ -205,6 +208,16 @@ public abstract class ClientSessionService {
         aesCipherUtil = new AesCipherUtil(config.clientId, System.currentTimeMillis() + dt);
         String loginCode = BytesUtil.bytes2base64(aesCipherUtil.encryptor.encrypt(config.clientId.getBytes(StandardCharsets.UTF_8)));
         sendBytesToServer(GridAesCipherUtil.encrypt(("login " + loginCode).getBytes(StandardCharsets.UTF_8)));
+    }
+
+    /**
+     * 发送重连接命令给服务端,当出现连接断开等问题时，可考虑重新建立连接后调用用此方法使得服务端知晓新旧CTX间的关系从而完成重连
+     */
+    protected void sendReConnectCommand() {
+        noLogin = true;
+        long st = System.currentTimeMillis() + dt;
+        String code = BytesUtil.bytes2base64(aesCipherUtil.encryptor.encrypt((reConnectCode+" "+st).getBytes(StandardCharsets.UTF_8)));
+        sendBytesToServer(GridAesCipherUtil.encrypt(("reConnect " + code).getBytes(StandardCharsets.UTF_8)));
     }
 
 

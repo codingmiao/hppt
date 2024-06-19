@@ -27,7 +27,7 @@ public class PostServerSessionService extends ServerSessionService<PostCtx> {
 
     public PostServerSessionService(SsConfig ssConfig) throws Exception {
         super(ssConfig);
-
+        ctxMap = LruCache.buildCache(ssConfig.clientIds.size() * 2, ssConfig.clientIds.size() * 2);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class PostServerSessionService extends ServerSessionService<PostCtx> {
         server.join();
     }
 
-    protected final Map<String, PostCtx> ctxMap = LruCache.buildCache(128, 8);
+    protected final Map<String, PostCtx> ctxMap;
 
     @Override
     protected void sendBytesToClient(PostCtx ctx, byte[] bytes) {
