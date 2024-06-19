@@ -47,9 +47,9 @@ public class ScConfig extends CommonConfig {
         public String serverUrl;
 
         /**
-         * 发送websocket ping的周期(毫秒)，定期发送一个ping心跳信号以防止ws闲置断开
+         * 发送websocket ping的周期(毫秒)，定期发送一个ping心跳信号以防止ws闲置断开，小于等于0则不执行心跳ping，默认3000
          */
-        public long pingInterval;
+        public long pingInterval = 30000;
     }
 
     public static final class HpptConfig {

@@ -78,16 +78,19 @@ public class WebSocketClientSessionService extends ClientSessionService {
                                 if (WebSocketClientProtocolHandler.ClientHandshakeStateEvent.HANDSHAKE_COMPLETE.equals(evt)) {
                                     //初始化完成
                                     //定期发一个ping防止掉线
-                                    Thread.startVirtualThread(() -> {
-                                        while (true) {
-                                            try {
-                                                Thread.sleep(30000);
-                                            } catch (InterruptedException e) {
-                                                throw new RuntimeException(e);
+                                    long pingInterval = config.websocket.pingInterval;
+                                    if (pingInterval > 0) {
+                                        Thread.startVirtualThread(() -> {
+                                            while (true) {
+                                                try {
+                                                    Thread.sleep(pingInterval);
+                                                } catch (InterruptedException e) {
+                                                    throw new RuntimeException(e);
+                                                }
+                                                BytesUtil.writeObjToChannel(ctx.channel(), new PingWebSocketFrame());
                                             }
-                                            ctx.channel().writeAndFlush(new PingWebSocketFrame());
-                                        }
-                                    });
+                                        });
+                                    }
                                     cb.end();
                                 }
                                 super.userEventTriggered(ctx, evt);
