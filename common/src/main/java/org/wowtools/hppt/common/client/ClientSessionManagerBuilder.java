@@ -48,7 +48,7 @@ public class ClientSessionManagerBuilder {
             bossGroup = new NioEventLoopGroup();
         }
         if (workerGroup == null) {
-            workerGroup = new NioEventLoopGroup(4);
+            workerGroup = new NioEventLoopGroup(12);
         }
         if (lifecycle == null) {
             throw new RuntimeException("lifecycle不能为空");

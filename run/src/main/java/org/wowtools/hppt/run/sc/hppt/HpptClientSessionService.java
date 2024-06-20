@@ -2,7 +2,10 @@ package org.wowtools.hppt.run.sc.hppt;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.*;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -20,7 +23,6 @@ import org.wowtools.hppt.run.sc.pojo.ScConfig;
 @Slf4j
 public class HpptClientSessionService extends ClientSessionService {
 
-    private EventLoopGroup group;
 
     private ChannelHandlerContext _ctx;
 
@@ -29,37 +31,46 @@ public class HpptClientSessionService extends ClientSessionService {
     }
 
     @Override
-    protected void connectToServer(ScConfig config, Cb cb) throws Exception {
-        group = new NioEventLoopGroup();
-        try {
-            Bootstrap bootstrap = new Bootstrap();
-            bootstrap.group(group)
-                    .channel(NioSocketChannel.class)
-                    .handler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel ch) {
-                            int len = config.hppt.lengthFieldLength;
-                            int maxFrameLength = (int) (Math.pow(256, len) - 1);
-                            if (maxFrameLength <= 0) {
-                                maxFrameLength = Integer.MAX_VALUE;
+    protected void connectToServer(ScConfig config, Cb cb) {
+        Thread.startVirtualThread(() -> {
+            NioEventLoopGroup workerGroup = new NioEventLoopGroup(config.hppt.workerGroupNum);
+            try {
+                Bootstrap bootstrap = new Bootstrap();
+                bootstrap.group(workerGroup)
+                        .channel(NioSocketChannel.class)
+                        .handler(new ChannelInitializer<SocketChannel>() {
+                            @Override
+                            protected void initChannel(SocketChannel ch) {
+                                int len = config.hppt.lengthFieldLength;
+                                int maxFrameLength = (int) (Math.pow(256, len) - 1);
+                                if (maxFrameLength <= 0) {
+                                    maxFrameLength = Integer.MAX_VALUE;
+                                }
+                                ChannelPipeline pipeline = ch.pipeline();
+                                pipeline.addLast(new LengthFieldBasedFrameDecoder(maxFrameLength, 0, len, 0, len));
+                                pipeline.addLast(new LengthFieldPrepender(len));
+                                pipeline.addLast(new MessageHandler(cb));
                             }
-                            ChannelPipeline pipeline = ch.pipeline();
-                            pipeline.addLast(new LengthFieldBasedFrameDecoder(maxFrameLength, 0, len, 0, len));
-                            pipeline.addLast(new LengthFieldPrepender(len));
-                            pipeline.addLast(new MessageHandler(cb));
-                        }
-                    });
-
-            bootstrap.connect(config.hppt.host, config.hppt.port).sync();
-        } catch (Exception e) {
-            group.shutdownGracefully();
-            throw e;
-        }
+                        });
+                bootstrap.connect(config.hppt.host, config.hppt.port).sync().channel().closeFuture().sync();
+            } catch (Exception e) {
+                log.warn("netty err", e);
+                exit();
+            } finally {
+                try {
+                    workerGroup.shutdownGracefully();
+                } catch (Exception e) {
+                    log.warn("workerGroup.shutdownGracefully err", e);
+                }
+            }
+        });
     }
 
     @Override
     protected void sendBytesToServer(byte[] bytes) {
-        BytesUtil.writeToChannelHandlerContext(_ctx, bytes);
+        if (!BytesUtil.writeToChannelHandlerContext(_ctx, bytes)) {
+            exit();
+        }
     }
 
     private class MessageHandler extends SimpleChannelInboundHandler<ByteBuf> {
@@ -91,7 +102,15 @@ public class HpptClientSessionService extends ClientSessionService {
 
     @Override
     protected void doClose() throws Exception {
-        _ctx.close();
-        group.shutdownGracefully();
+        try {
+            _ctx.close();
+        } catch (Exception e) {
+
+        }
+        try {
+            _ctx.channel().close();
+        } catch (Exception e) {
+
+        }
     }
 }

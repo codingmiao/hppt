@@ -11,6 +11,12 @@ import java.util.ArrayList;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ScConfig extends CommonConfig {
+
+    /**
+     * 客户端netty workerGroup 线程数，默认12
+     */
+    public int workerGroupNum = 12;
+
     public static final class Forward {
         /**
          * 本机代理端口
@@ -50,6 +56,11 @@ public class ScConfig extends CommonConfig {
          * 发送websocket ping的周期(毫秒)，定期发送一个ping心跳信号以防止ws闲置断开，小于等于0则不执行心跳ping，默认3000
          */
         public long pingInterval = 30000;
+
+        /**
+         * netty workerGroupNum 默认2
+         */
+        public int workerGroupNum = 2;
     }
 
     public static final class HpptConfig {
@@ -63,9 +74,14 @@ public class ScConfig extends CommonConfig {
         public int port;
 
         /**
-         * 用几个字节来作为长度位，对应最多可发送Max(256^lengthFieldLength-1,2^31-1)长度的字节，只支持1、2、3、4，服务端与客户端必须一致，默认2
+         * 用几个字节来作为长度位，对应最多可发送Max(256^lengthFieldLength-1,2^31-1)长度的字节，只支持1、2、3、4，服务端与客户端必须一致，默认3
          */
-        public int lengthFieldLength = 2;
+        public int lengthFieldLength = 3;
+
+        /**
+         * netty workerGroupNum 默认2
+         */
+        public int workerGroupNum = 2;
     }
 
     public static final class RHpptConfig {
@@ -78,6 +94,7 @@ public class ScConfig extends CommonConfig {
          * 用几个字节来作为长度位，对应最多可发送Max(256^lengthFieldLength-1,2^31-1)长度的字节，只支持1、2、3、4，服务端与客户端必须一致，默认3
          */
         public int lengthFieldLength = 3;
+
     }
 
     public static final class RPostConfig {

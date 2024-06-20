@@ -64,15 +64,29 @@ public class PostClientSessionService extends ClientSessionService {
                     }
                     sendQueue.drainTo(bytesList);
                     sendBytes = BytesUtil.bytesCollection2PbBytes(bytesList);
-                    try (Response r = HttpUtil.doPost(sendUrl, sendBytes)) {
-                        assert r.body() != null;
-                        byte[] rBytes = r.body().bytes();
-                        if (rBytes.length == 0) {
-                            log.debug("SendThread 发送完成");
-                        } else {
-                            throw new RuntimeException("异常的响应值" + new String(rBytes, StandardCharsets.UTF_8));
+                    if (log.isDebugEnabled()) {
+                        long t = System.currentTimeMillis();
+                        try (Response r = HttpUtil.doPost(sendUrl, sendBytes)) {
+                            assert r.body() != null;
+                            byte[] rBytes = r.body().bytes();
+                            if (rBytes.length == 0) {
+                                log.debug("SendThread 发送完成,cost {}", System.currentTimeMillis() - t);
+                            } else {
+                                throw new RuntimeException("异常的响应值" + new String(rBytes, StandardCharsets.UTF_8));
+                            }
+                        }
+                    } else {
+                        try (Response r = HttpUtil.doPost(sendUrl, sendBytes)) {
+                            assert r.body() != null;
+                            byte[] rBytes = r.body().bytes();
+                            if (rBytes.length == 0) {
+                                log.debug("SendThread 发送完成");
+                            } else {
+                                throw new RuntimeException("异常的响应值" + new String(rBytes, StandardCharsets.UTF_8));
+                            }
                         }
                     }
+
                 } catch (Exception e) {
                     log.warn("SendThread异常", e);
                     exit();
@@ -106,9 +120,18 @@ public class PostClientSessionService extends ClientSessionService {
                 //发一个接收请求接数据
                 try {
                     byte[] responseBytes;
-                    try (Response response = HttpUtil.doPost(replyUrl, null)) {
-                        ResponseBody body = response.body();
-                        responseBytes = null == body ? null : body.bytes();
+                    if (log.isDebugEnabled()) {
+                        long t = System.currentTimeMillis();
+                        try (Response response = HttpUtil.doPost(replyUrl, null)) {
+                            ResponseBody body = response.body();
+                            responseBytes = null == body ? null : body.bytes();
+                        }
+                        log.debug("ReplyThread 发送完成,cost {}", System.currentTimeMillis() - t);
+                    }else {
+                        try (Response response = HttpUtil.doPost(replyUrl, null)) {
+                            ResponseBody body = response.body();
+                            responseBytes = null == body ? null : body.bytes();
+                        }
                     }
                     if (null != responseBytes && responseBytes.length > 0) {
                         log.debug("收到服务端响应字节数 {}", responseBytes.length);

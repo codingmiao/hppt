@@ -31,8 +31,8 @@ public class HpptServerSessionService extends ServerSessionService<ChannelHandle
 
     @Override
     public void init(SsConfig ssConfig) {
-        bossGroup = new NioEventLoopGroup();
-        workerGroup = new NioEventLoopGroup();
+        bossGroup = new NioEventLoopGroup(ssConfig.hppt.bossGroupNum);
+        workerGroup = new NioEventLoopGroup(ssConfig.hppt.workerGroupNum);
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workerGroup)

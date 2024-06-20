@@ -39,6 +39,11 @@ public class DirChangeWatcher implements AutoCloseable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        try {
+            dir.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         Thread.startVirtualThread(() -> {
             while (running) {
                 log.debug("Waiting for file change: {}", dir);

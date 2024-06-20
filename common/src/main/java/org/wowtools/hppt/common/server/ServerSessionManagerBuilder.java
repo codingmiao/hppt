@@ -29,7 +29,7 @@ public class ServerSessionManagerBuilder {
 
     public ServerSessionManager build() {
         if (group == null) {
-            group = new NioEventLoopGroup();
+            group = new NioEventLoopGroup(2);
         }
 
         if (lifecycle == null) {

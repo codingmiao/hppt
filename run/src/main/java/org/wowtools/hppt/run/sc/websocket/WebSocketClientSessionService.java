@@ -10,7 +10,6 @@ import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.run.sc.common.ClientSessionService;
@@ -39,8 +38,8 @@ public class WebSocketClientSessionService extends ClientSessionService {
 
     private void newWsConn(ScConfig config, Cb cb) throws Exception {
         doClose();
-        final URI webSocketURL = new URI(config.websocket.serverUrl);
-        group = new NioEventLoopGroup();
+        final URI webSocketURL = new URI(config.websocket.serverUrl+"/s");//随便加一个后缀防止被nginx转发时识别不到
+        group = new NioEventLoopGroup(config.websocket.workerGroupNum);
         Bootstrap boot = new Bootstrap();
         boot.option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
@@ -81,7 +80,7 @@ public class WebSocketClientSessionService extends ClientSessionService {
                                     long pingInterval = config.websocket.pingInterval;
                                     if (pingInterval > 0) {
                                         Thread.startVirtualThread(() -> {
-                                            while (true) {
+                                            while (running) {
                                                 try {
                                                     Thread.sleep(pingInterval);
                                                 } catch (InterruptedException e) {
@@ -98,6 +97,7 @@ public class WebSocketClientSessionService extends ClientSessionService {
                         });
                     }
                 });
+
         ChannelFuture cf = boot.connect(webSocketURL.getHost(), webSocketURL.getPort()).sync();
         wsChannel = cf.channel();
     }

@@ -1,5 +1,6 @@
 package org.wowtools.hppt.run.sc.util;
 
+import io.netty.channel.nio.NioEventLoopGroup;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.client.ClientBytesSender;
 import org.wowtools.hppt.common.client.ClientSessionLifecycle;
@@ -20,6 +21,7 @@ public class ScUtil {
         ClientSessionManager clientSessionManager = new ClientSessionManagerBuilder()
                 .setBufferSize(config.maxSendBodySize * 2)
                 .setLifecycle(lifecycle)
+                .setWorkerGroup(new NioEventLoopGroup(config.workerGroupNum))
                 .setClientBytesSender(clientBytesSender)
                 .build();
         for (ScConfig.Forward forward : config.forwards) {
