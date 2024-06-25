@@ -58,9 +58,9 @@ public class ScConfig extends CommonConfig {
         public long pingInterval = 30000;
 
         /**
-         * netty workerGroupNum 默认2
+         * netty workerGroupNum 默认12
          */
-        public int workerGroupNum = 2;
+        public int workerGroupNum = 12;
     }
 
     public static final class HpptConfig {

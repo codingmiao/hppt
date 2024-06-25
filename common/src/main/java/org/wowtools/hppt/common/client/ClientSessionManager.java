@@ -114,13 +114,17 @@ public class ClientSessionManager {
             int localPort = localAddress.getPort();
             log.debug("client channelActive {}, port:{}", channelHandlerContext.hashCode(), localPort);
             //用户发起新连接 新建一个ClientSession
-            clientBytesSender.connected(localPort, channelHandlerContext, (sessionId -> {
-                ClientSession clientSession = new ClientSession(sessionId, channelHandlerContext, lifecycle);
-                log.debug("ClientSession {} 初始化完成 {}", clientSession.getSessionId(), channelHandlerContext.hashCode());
-                clientSessionMapByCtx.put(channelHandlerContext, clientSession);
-                clientSessionMap.put(sessionId, clientSession);
-                lifecycle.created(clientSession);
-            }));
+            ClientBytesSender.SessionIdCallBack cb = new ClientBytesSender.SessionIdCallBack() {
+                @Override
+                public void cb(int sessionId) {
+                    ClientSession clientSession = new ClientSession(sessionId, channelHandlerContext, lifecycle);
+                    log.debug("ClientSession {} 初始化完成 {}", clientSession.getSessionId(), channelHandlerContext.hashCode());
+                    clientSessionMapByCtx.put(channelHandlerContext, clientSession);
+                    clientSessionMap.put(sessionId, clientSession);
+                    lifecycle.created(clientSession);
+                }
+            };
+            clientBytesSender.connected(localPort, channelHandlerContext, cb);
         }
 
         @Override

@@ -86,7 +86,9 @@ public class WebSocketClientSessionService extends ClientSessionService {
                                                 } catch (InterruptedException e) {
                                                     throw new RuntimeException(e);
                                                 }
-                                                BytesUtil.writeObjToChannel(ctx.channel(), new PingWebSocketFrame());
+                                                if (!BytesUtil.writeObjToChannel(ctx.channel(), new PingWebSocketFrame())) {
+                                                    exit();
+                                                }
                                             }
                                         });
                                     }

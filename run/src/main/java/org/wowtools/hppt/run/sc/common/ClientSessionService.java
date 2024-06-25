@@ -5,10 +5,7 @@ import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.client.*;
 import org.wowtools.hppt.common.pojo.SessionBytes;
-import org.wowtools.hppt.common.util.AesCipherUtil;
-import org.wowtools.hppt.common.util.BytesUtil;
-import org.wowtools.hppt.common.util.Constant;
-import org.wowtools.hppt.common.util.GridAesCipherUtil;
+import org.wowtools.hppt.common.util.*;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
 import org.wowtools.hppt.run.sc.util.ScUtil;
 
@@ -32,7 +29,6 @@ public abstract class ClientSessionService {
     private final BlockingQueue<SessionBytes> sendBytesQueue = new LinkedBlockingQueue<>();
 
     private final Map<Integer, ClientBytesSender.SessionIdCallBack> sessionIdCallBackMap = new ConcurrentHashMap<>();//<newSessionFlag,cb>
-
     private AesCipherUtil aesCipherUtil;
 
     private Long dt;
@@ -79,7 +75,28 @@ public abstract class ClientSessionService {
                 }
                 //登录
                 sendLoginCommand();
+                checkSessionInit();
             });
+        });
+    }
+
+    //起一个线程定时检测是否有SessionIdCallBack长期未得到响应，若是则说明连接故障，重启ClientSessionService
+    private void checkSessionInit() {
+        Thread.startVirtualThread(() -> {
+            while (running) {
+                try {
+                    Thread.sleep(30000);
+                } catch (InterruptedException e) {
+                    continue;
+                }
+                for (Map.Entry<Integer, ClientBytesSender.SessionIdCallBack> entry : sessionIdCallBackMap.entrySet()) {
+                    if (RoughTimeUtil.getTimestamp() - entry.getValue().createTime > 10000) {
+                        log.warn("session长期未连接成功，疑似连接故障，重启");
+                        exit();
+                        return;
+                    }
+                }
+            }
         });
     }
 
@@ -124,7 +141,7 @@ public abstract class ClientSessionService {
                     String code = cmd[1];
                     if (!"0".equals(code)) {
                         noLogin = false;
-                        reConnectCode = new String(aesCipherUtil.descriptor.decrypt(BytesUtil.base642bytes(code)),StandardCharsets.UTF_8);
+                        reConnectCode = new String(aesCipherUtil.descriptor.decrypt(BytesUtil.base642bytes(code)), StandardCharsets.UTF_8);
                         log.info("登录成功");
                     } else if (firstLoginErr) {
                         firstLoginErr = false;
@@ -216,7 +233,7 @@ public abstract class ClientSessionService {
     protected void sendReConnectCommand() {
         noLogin = true;
         long st = System.currentTimeMillis() + dt;
-        String code = BytesUtil.bytes2base64(aesCipherUtil.encryptor.encrypt((reConnectCode+" "+st).getBytes(StandardCharsets.UTF_8)));
+        String code = BytesUtil.bytes2base64(aesCipherUtil.encryptor.encrypt((reConnectCode + " " + st).getBytes(StandardCharsets.UTF_8)));
         sendBytesToServer(GridAesCipherUtil.encrypt(("reConnect " + code).getBytes(StandardCharsets.UTF_8)));
     }
 
@@ -264,7 +281,7 @@ public abstract class ClientSessionService {
                         try {
                             newConnected();
                         } catch (Exception e) {
-                            log.warn("newConnected Exception",e);
+                            log.warn("newConnected Exception", e);
                         }
                         return;
                     }

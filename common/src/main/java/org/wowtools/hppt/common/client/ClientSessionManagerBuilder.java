@@ -1,7 +1,7 @@
 package org.wowtools.hppt.common.client;
 
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
+import org.wowtools.hppt.common.util.VirtualThreadEventLoopGroup;
 
 /**
  * @author liuyu
@@ -45,10 +45,10 @@ public class ClientSessionManagerBuilder {
             bufferSize = 10240;
         }
         if (bossGroup == null) {
-            bossGroup = new NioEventLoopGroup();
+            bossGroup = VirtualThreadEventLoopGroup.build();
         }
         if (workerGroup == null) {
-            workerGroup = new NioEventLoopGroup(12);
+            workerGroup = VirtualThreadEventLoopGroup.build(12);
         }
         if (lifecycle == null) {
             throw new RuntimeException("lifecycle不能为空");
