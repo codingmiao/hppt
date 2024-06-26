@@ -1,7 +1,7 @@
 package org.wowtools.hppt.common.client;
 
 import io.netty.channel.EventLoopGroup;
-import org.wowtools.hppt.common.util.VirtualThreadEventLoopGroup;
+import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
 
 /**
  * @author liuyu
@@ -45,10 +45,10 @@ public class ClientSessionManagerBuilder {
             bufferSize = 10240;
         }
         if (bossGroup == null) {
-            bossGroup = VirtualThreadEventLoopGroup.build();
+            bossGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup();
         }
         if (workerGroup == null) {
-            workerGroup = VirtualThreadEventLoopGroup.build(12);
+            workerGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup();
         }
         if (lifecycle == null) {
             throw new RuntimeException("lifecycle不能为空");

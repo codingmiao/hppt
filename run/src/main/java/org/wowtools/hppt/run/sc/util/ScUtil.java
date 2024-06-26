@@ -5,7 +5,7 @@ import org.wowtools.hppt.common.client.ClientBytesSender;
 import org.wowtools.hppt.common.client.ClientSessionLifecycle;
 import org.wowtools.hppt.common.client.ClientSessionManager;
 import org.wowtools.hppt.common.client.ClientSessionManagerBuilder;
-import org.wowtools.hppt.common.util.VirtualThreadEventLoopGroup;
+import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
 
 /**
@@ -21,7 +21,7 @@ public class ScUtil {
         ClientSessionManager clientSessionManager = new ClientSessionManagerBuilder()
                 .setBufferSize(config.maxSendBodySize * 2)
                 .setLifecycle(lifecycle)
-                .setWorkerGroup(VirtualThreadEventLoopGroup.build(config.workerGroupNum))
+                .setWorkerGroup(NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup(config.workerGroupNum))
                 .setClientBytesSender(clientBytesSender)
                 .build();
         for (ScConfig.Forward forward : config.forwards) {

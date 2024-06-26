@@ -2,8 +2,6 @@ package org.wowtools.hppt.run.ss.websocket;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
@@ -12,6 +10,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
+import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
 import org.wowtools.hppt.run.ss.common.ServerSessionService;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
 
@@ -31,15 +30,15 @@ public class WebsocketServerSessionService extends ServerSessionService<ChannelH
     @Override
     public void init(SsConfig ssConfig) throws Exception {
         log.info("*********");
-        boss = new NioEventLoopGroup();
-        worker = new NioEventLoopGroup();
+        boss = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup();
+        worker = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup();
 
         ServerBootstrap serverBootstrap;
 
         serverBootstrap = new ServerBootstrap();
         serverBootstrap
                 .group(boss, worker)
-                .channel(NioServerSocketChannel.class)
+                .channel(NettyChannelTypeChecker.getChannelClass())
                 .childOption(ChannelOption.TCP_NODELAY, true)
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                                   @Override
@@ -53,7 +52,6 @@ public class WebsocketServerSessionService extends ServerSessionService<ChannelH
                                   }
                               }
                 );
-
         serverBootstrap.bind(ssConfig.port).sync();
     }
 

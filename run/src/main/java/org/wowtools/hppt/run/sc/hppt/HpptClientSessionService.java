@@ -2,17 +2,13 @@ package org.wowtools.hppt.run.sc.hppt;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
+import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
 import org.wowtools.hppt.run.sc.common.ClientSessionService;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
 
@@ -33,11 +29,11 @@ public class HpptClientSessionService extends ClientSessionService {
     @Override
     protected void connectToServer(ScConfig config, Cb cb) {
         Thread.startVirtualThread(() -> {
-            NioEventLoopGroup workerGroup = new NioEventLoopGroup(config.hppt.workerGroupNum);
+            EventLoopGroup workerGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup(config.hppt.workerGroupNum);
             try {
                 Bootstrap bootstrap = new Bootstrap();
                 bootstrap.group(workerGroup)
-                        .channel(NioSocketChannel.class)
+                        .channel(NettyChannelTypeChecker.getChannelClass())
                         .handler(new ChannelInitializer<SocketChannel>() {
                             @Override
                             protected void initChannel(SocketChannel ch) {

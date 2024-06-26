@@ -3,12 +3,12 @@ package org.wowtools.hppt.run.ss.rhppt;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import org.wowtools.hppt.common.util.BytesUtil;
+import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
 import org.wowtools.hppt.run.ss.common.ServerSessionService;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
 
@@ -26,7 +26,7 @@ public class RHpptServerSessionService extends ServerSessionService<ChannelHandl
 
     @Override
     public void init(SsConfig ssConfig) throws Exception {
-        group = new NioEventLoopGroup();
+        group = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup();
         try {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(group)

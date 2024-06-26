@@ -8,6 +8,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
+import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
 
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
@@ -43,7 +44,7 @@ public class ClientSessionManager {
             throw new RuntimeException("clientBytesSender不能为空");
         }
         serverBootstrap.group(builder.bossGroup, builder.workerGroup)
-                .channel(NioServerSocketChannel.class)
+                .channel(NettyChannelTypeChecker.getChannelClass())
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_SNDBUF, builder.bufferSize)
                 .childOption(ChannelOption.SO_RCVBUF, builder.bufferSize)

@@ -13,9 +13,9 @@ import java.util.ArrayList;
 public class ScConfig extends CommonConfig {
 
     /**
-     * 客户端netty workerGroup 线程数，默认12
+     * 客户端netty workerGroup 线程数，默认128 (使用了虚拟线程，所以线程数开大一些没问题)
      */
-    public int workerGroupNum = 12;
+    public int workerGroupNum = 128;
 
     public static final class Forward {
         /**
@@ -58,9 +58,9 @@ public class ScConfig extends CommonConfig {
         public long pingInterval = 30000;
 
         /**
-         * netty workerGroupNum 默认12
+         * netty workerGroupNum 默认128
          */
-        public int workerGroupNum = 12;
+        public int workerGroupNum = 128;
     }
 
     public static final class HpptConfig {
@@ -79,9 +79,9 @@ public class ScConfig extends CommonConfig {
         public int lengthFieldLength = 3;
 
         /**
-         * netty workerGroupNum 默认2
+         * netty workerGroupNum 默认128
          */
-        public int workerGroupNum = 2;
+        public int workerGroupNum = 128;
     }
 
     public static final class RHpptConfig {

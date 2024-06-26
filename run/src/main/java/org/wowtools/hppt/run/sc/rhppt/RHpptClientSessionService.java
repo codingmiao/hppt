@@ -2,17 +2,13 @@ package org.wowtools.hppt.run.sc.rhppt;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
+import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
 import org.wowtools.hppt.run.sc.common.ClientSessionService;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
 
@@ -23,8 +19,8 @@ import org.wowtools.hppt.run.sc.pojo.ScConfig;
 @Slf4j
 public class RHpptClientSessionService extends ClientSessionService {
 
-    private NioEventLoopGroup bossGroup;
-    private NioEventLoopGroup workerGroup;
+    private EventLoopGroup bossGroup;
+    private EventLoopGroup workerGroup;
 
     private ChannelHandlerContext _ctx;
 
@@ -39,10 +35,10 @@ public class RHpptClientSessionService extends ClientSessionService {
 
     private void startServer(ScConfig config, Cb cb) throws Exception {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
-        bossGroup = new NioEventLoopGroup();
-        workerGroup = new NioEventLoopGroup();
+        bossGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup();
+        workerGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup();
         serverBootstrap.group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel.class)
+                .channel(NettyChannelTypeChecker.getChannelClass())
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {

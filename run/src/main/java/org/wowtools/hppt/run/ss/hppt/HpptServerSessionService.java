@@ -2,17 +2,13 @@ package org.wowtools.hppt.run.ss.hppt;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
+import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
 import org.wowtools.hppt.run.ss.common.ServerSessionService;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
 
@@ -22,8 +18,8 @@ import org.wowtools.hppt.run.ss.pojo.SsConfig;
  */
 @Slf4j
 public class HpptServerSessionService extends ServerSessionService<ChannelHandlerContext> {
-    private NioEventLoopGroup bossGroup;
-    private NioEventLoopGroup workerGroup;
+    private EventLoopGroup bossGroup;
+    private EventLoopGroup workerGroup;
 
     public HpptServerSessionService(SsConfig ssConfig) throws Exception {
         super(ssConfig);
@@ -31,12 +27,12 @@ public class HpptServerSessionService extends ServerSessionService<ChannelHandle
 
     @Override
     public void init(SsConfig ssConfig) {
-        bossGroup = new NioEventLoopGroup(ssConfig.hppt.bossGroupNum);
-        workerGroup = new NioEventLoopGroup(ssConfig.hppt.workerGroupNum);
+        bossGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup(ssConfig.hppt.bossGroupNum);
+        workerGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup(ssConfig.hppt.workerGroupNum);
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel.class)
+                .channel(NettyChannelTypeChecker.getChannelClass())
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {

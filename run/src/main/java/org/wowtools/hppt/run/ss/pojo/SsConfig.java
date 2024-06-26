@@ -72,12 +72,12 @@ public class SsConfig extends CommonConfig {
         /**
          * 服务端netty bossGroupNum 默认1
          */
-        public int bossGroupNum = 1;
+        public int bossGroupNum = 16;
 
         /**
          * 服务端netty workerGroupNum 默认12
          */
-        public int workerGroupNum = 12;
+        public int workerGroupNum = 128;
     }
 
     public HpptConfig hppt = new HpptConfig();
