@@ -38,7 +38,7 @@ public class WebsocketServerSessionService extends ServerSessionService<ChannelH
         serverBootstrap = new ServerBootstrap();
         serverBootstrap
                 .group(boss, worker)
-                .channel(NettyChannelTypeChecker.getChannelClass())
+                .channel(NettyChannelTypeChecker.getServerSocketChannelClass())
                 .childOption(ChannelOption.TCP_NODELAY, true)
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                                   @Override

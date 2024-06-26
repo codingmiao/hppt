@@ -33,7 +33,7 @@ public class HpptClientSessionService extends ClientSessionService {
             try {
                 Bootstrap bootstrap = new Bootstrap();
                 bootstrap.group(workerGroup)
-                        .channel(NettyChannelTypeChecker.getChannelClass())
+                        .channel(NettyChannelTypeChecker.getSocketChannelClass())
                         .handler(new ChannelInitializer<SocketChannel>() {
                             @Override
                             protected void initChannel(SocketChannel ch) {

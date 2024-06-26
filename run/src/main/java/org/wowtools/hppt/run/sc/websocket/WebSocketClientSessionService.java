@@ -37,13 +37,13 @@ public class WebSocketClientSessionService extends ClientSessionService {
 
     private void newWsConn(ScConfig config, Cb cb) throws Exception {
         doClose();
-        final URI webSocketURL = new URI(config.websocket.serverUrl + "/s");//随便加一个后缀防止被nginx转发时识别不到
+        final URI webSocketURL = new URI(config.websocket.serverUrl+"/s");//随便加一个后缀防止被nginx转发时识别不到
         group = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup(config.websocket.workerGroupNum);
         Bootstrap boot = new Bootstrap();
         boot.option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .group(group)
-                .channel(NettyChannelTypeChecker.getChannelClass())
+                .channel(NettyChannelTypeChecker.getSocketChannelClass())
                 .handler(new ChannelInitializer<SocketChannel>() {
                     protected void initChannel(SocketChannel sc) throws Exception {
                         int bodySize = config.maxSendBodySize * 2;

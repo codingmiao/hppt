@@ -32,7 +32,7 @@ public class HpptServerSessionService extends ServerSessionService<ChannelHandle
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workerGroup)
-                .channel(NettyChannelTypeChecker.getChannelClass())
+                .channel(NettyChannelTypeChecker.getServerSocketChannelClass())
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {

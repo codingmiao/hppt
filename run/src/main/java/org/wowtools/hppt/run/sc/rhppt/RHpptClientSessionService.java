@@ -38,7 +38,7 @@ public class RHpptClientSessionService extends ClientSessionService {
         bossGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup();
         workerGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup();
         serverBootstrap.group(bossGroup, workerGroup)
-                .channel(NettyChannelTypeChecker.getChannelClass())
+                .channel(NettyChannelTypeChecker.getServerSocketChannelClass())
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {

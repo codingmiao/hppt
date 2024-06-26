@@ -1,22 +1,13 @@
 package org.wowtools.hppt.common.util;
 
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.NettyRuntime;
 import io.netty.util.internal.SystemPropertyUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.util.List;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -37,9 +28,13 @@ public class NettyChannelTypeChecker {
 
 
     //TODO epoll+虚拟线程+高线程数 会导致最多只有CPU核心数的线程工作，原因暂不明确，先全部使用NioEventLoopGroup
-    public static Class<? extends ServerChannel> getChannelClass() {
+    public static Class<? extends ServerChannel> getServerSocketChannelClass() {
         return NioServerSocketChannel.class;
     }
+    public static Class<? extends NioSocketChannel> getSocketChannelClass() {
+        return NioSocketChannel.class;
+    }
+
 
     public static EventLoopGroup buildVirtualThreadEventLoopGroup(int nThread) {
         return new NioEventLoopGroup(nThread, new VirtualThreadFactory());

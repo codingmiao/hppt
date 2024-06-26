@@ -8,6 +8,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.Constant;
+import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class ServerSessionManager implements AutoCloseable {
         lifecycle = builder.lifecycle;
         sessionTimeout = builder.sessionTimeout;
         bootstrap.group(builder.group)
-                .channel(NioSocketChannel.class)
+                .channel(NettyChannelTypeChecker.getSocketChannelClass())
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {

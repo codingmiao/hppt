@@ -4,7 +4,6 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import org.wowtools.hppt.common.util.BytesUtil;
@@ -30,7 +29,7 @@ public class RHpptServerSessionService extends ServerSessionService<ChannelHandl
         try {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(group)
-                    .channel(NioSocketChannel.class)
+                    .channel(NettyChannelTypeChecker.getSocketChannelClass())
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) {
