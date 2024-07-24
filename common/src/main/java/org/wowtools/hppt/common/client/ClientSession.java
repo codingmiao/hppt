@@ -4,6 +4,10 @@ import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
 /**
  * 客户端会话
  *
@@ -14,12 +18,33 @@ import org.wowtools.hppt.common.util.BytesUtil;
 public class ClientSession {
     private final int sessionId;
     private final ChannelHandlerContext channelHandlerContext;
-    private final ClientSessionLifecycle lifecycle;
+
+    private final BlockingQueue<byte[]> sendToUserBytesQueue = new LinkedBlockingQueue<>();
+    private volatile boolean running = true;
 
     ClientSession(int sessionId, ChannelHandlerContext channelHandlerContext, ClientSessionLifecycle lifecycle) {
         this.sessionId = sessionId;
         this.channelHandlerContext = channelHandlerContext;
-        this.lifecycle = lifecycle;
+        Thread.startVirtualThread(() -> {
+            while (running) {
+                byte[] bytes;
+                try {
+                    bytes = sendToUserBytesQueue.poll(10, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    continue;
+                }
+                if (null == bytes) {
+                    continue;
+                }
+                bytes = lifecycle.beforeSendToUser(this, bytes);
+                if (null != bytes) {
+                    log.debug("ClientSession {} 向用户发送字节 {}", sessionId, bytes.length);
+                    BytesUtil.writeToChannelHandlerContext(channelHandlerContext, bytes);
+                    lifecycle.afterSendToUser(this, bytes);
+                }
+            }
+            log.debug("ClientSession {} 接收线程结束", sessionId);
+        });
     }
 
     /**
@@ -28,12 +53,7 @@ public class ClientSession {
      * @param bytes bytes
      */
     public void sendToUser(byte[] bytes) {
-        bytes = lifecycle.beforeSendToUser(this, bytes);
-        if (null != bytes) {
-            log.debug("ClientSession {} 向用户发送字节 {}", sessionId, bytes.length);
-            BytesUtil.writeToChannelHandlerContext(channelHandlerContext, bytes);
-            lifecycle.afterSendToUser(this, bytes);
-        }
+        sendToUserBytesQueue.add(bytes);
     }
 
 
@@ -46,6 +66,7 @@ public class ClientSession {
     }
 
     void close() {
+        running = false;
         channelHandlerContext.close();
     }
 
