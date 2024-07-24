@@ -109,6 +109,13 @@ public class ScConfig extends CommonConfig {
         public long waitBytesTime = 10000;
     }
 
+    public static final class FileConfig {
+        /**
+         * 共享文件夹路径
+         */
+        public String fileDir;
+    }
+
     /**
      * 运行类型 支持 websocket(以websocket协议传输数据)、post(以http post协议传输数据)、hppt(以hppt自定义的协议传输数据)
      */
@@ -145,4 +152,6 @@ public class ScConfig extends CommonConfig {
     public RHpptConfig rhppt = new RHpptConfig();
 
     public RPostConfig rpost = new RPostConfig();
+
+    public FileConfig file = new FileConfig();
 }

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.wowtools.common.utils.ResourcesReader;
 import org.wowtools.hppt.common.util.Constant;
+import org.wowtools.hppt.run.sc.file.FileClientSessionService;
 import org.wowtools.hppt.run.sc.hppt.HpptClientSessionService;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
 import org.wowtools.hppt.run.sc.post.PostClientSessionService;
@@ -54,6 +55,9 @@ public class RunSc {
                         break;
                     case "rpost":
                         new RPostClientSessionService(config).sync();
+                        break;
+                    case "file":
+                        new FileClientSessionService(config).sync();
                         break;
                     default:
                         throw new IllegalStateException("Unexpected config.type: " + config.type);

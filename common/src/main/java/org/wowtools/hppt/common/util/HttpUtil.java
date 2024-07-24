@@ -8,11 +8,14 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
+
+import java.net.Proxy;
 
 /**
  * @author liuyu
@@ -36,10 +39,6 @@ public class HttpUtil {
                 .readTimeout(60L, TimeUnit.SECONDS)
                 .writeTimeout(60L, TimeUnit.SECONDS)
                 .hostnameVerifier((hostname, session) -> true)
-                // 设置代理
-//                .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8888)))
-                // 拦截器
-//                .addInterceptor()
                 .build();
 
     }

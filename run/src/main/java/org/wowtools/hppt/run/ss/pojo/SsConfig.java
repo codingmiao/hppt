@@ -2,6 +2,7 @@ package org.wowtools.hppt.run.ss.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.wowtools.hppt.common.util.CommonConfig;
+import org.wowtools.hppt.run.sc.pojo.ScConfig;
 
 import java.util.ArrayList;
 
@@ -107,4 +108,14 @@ public class SsConfig extends CommonConfig {
     }
 
     public RPostConfig rpost = new RPostConfig();
+
+    public static final class FileConfig {
+        /**
+         * 共享文件夹路径
+         */
+        public String fileDir;
+
+    }
+
+    public FileConfig file = new FileConfig();
 }

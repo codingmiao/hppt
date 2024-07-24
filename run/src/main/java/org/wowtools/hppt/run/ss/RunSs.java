@@ -5,6 +5,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.wowtools.common.utils.ResourcesReader;
 import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.run.ss.common.ServerSessionService;
+import org.wowtools.hppt.run.ss.file.FileServerSessionService;
 import org.wowtools.hppt.run.ss.hppt.HpptServerSessionService;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
 import org.wowtools.hppt.run.ss.post.PostServerSessionService;
@@ -51,6 +52,7 @@ public class RunSs {
                     case "hppt" -> new HpptServerSessionService(config);
                     case "rhppt" -> new RHpptServerSessionService(config);
                     case "rpost" -> new RPostServerSessionService(config);
+                    case "file" -> new FileServerSessionService(config);
                     default -> throw new IllegalStateException("Unexpected config.type: " + config.type);
                 };
                 final ServerSessionService<?> fs = sessionService;

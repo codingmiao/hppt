@@ -99,6 +99,13 @@ public class PostClientSessionService extends ClientSessionService {
 
     private void startReplyThread() {
         Thread.startVirtualThread(() -> {
+            while (null == sendUrl) {
+                log.info("wait url init");
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                }
+            }
             boolean empty = false;
             final long sendSleepTime = config.post.sendSleepTime;
             while (running) {
