@@ -53,7 +53,12 @@ public abstract class ServerSessionService<CTX> {
 
     public ServerSessionService(SsConfig ssConfig) {
         this.ssConfig = ssConfig;
-        loginClientService = new LoginClientService(ssConfig.clientIds);
+        LoginClientService.Config lConfig = new LoginClientService.Config();
+        for (SsConfig.Client client : ssConfig.clients) {
+            lConfig.users.add(new String[]{client.user, client.password});
+        }
+        lConfig.passwordRetryNum = ssConfig.passwordRetryNum;
+        loginClientService = new LoginClientService(lConfig);
         serverSessionManager = SsUtil.createServerSessionManagerBuilder(ssConfig).build();
     }
 
@@ -102,31 +107,31 @@ public abstract class ServerSessionService<CTX> {
                     LoginClientService.Client client;
                     String loginCode = cmd[1];
                     log.debug("请求login {}", loginCode);
-                    client = loginClientService.login(loginCode, clientCell.clientActiveWatcher);
-                    if (client == null) {
-                        log.warn("登录失败 {}", loginCode);
-                        byte[] login = ("login 0").getBytes(StandardCharsets.UTF_8);
+                    try {
+                        client = loginClientService.login(loginCode, clientCell.clientActiveWatcher);
+                    } catch (Exception e) {
+                        log.warn("登录失败 {} {}", loginCode, e.getMessage());
+                        byte[] login = ("login " + e.getMessage()).getBytes(StandardCharsets.UTF_8);
                         login = GridAesCipherUtil.encrypt(login);
                         sendBytesToClient(ctx, login);
-                    } else {
-                        clientCell.client = client;
-                        clientCell.ctx = ctx;
-                        synchronized (ctxClientCellMap) {
-                            ctxClientCellMap.forEach((oldCtx, oldCell) -> {
-                                if (oldCell.client.clientId.equals(client.clientId)) {
-                                    log.info("重复登录，移除旧client {} {}", oldCell.client.clientId, ctx);
-                                    removeCtx(oldCtx);
-                                }
-                            });
-                            ctxClientCellMap.put(ctx, clientCell);
-                        }
-                        log.info("客户端接入成功 {}", clientCell.client.clientId);
-                        startSendThread(clientCell);
-                        String code = BytesUtil.bytes2base64(client.aesCipherUtil.encryptor.encrypt(clientCell.reConnectToken.getBytes(StandardCharsets.UTF_8)));
-                        byte[] login = ("login " + code).getBytes(StandardCharsets.UTF_8);
-                        login = GridAesCipherUtil.encrypt(login);
-                        sendBytesToClient(ctx, login);
+                        break;
                     }
+                    clientCell.client = client;
+                    clientCell.ctx = ctx;
+                    synchronized (ctxClientCellMap) {
+                        ctxClientCellMap.forEach((oldCtx, oldCell) -> {
+                            if (oldCell.client.clientId.equals(client.clientId)) {
+                                log.info("重复登录，移除旧client {} {}", oldCell.client.clientId, ctx);
+                                removeCtx(oldCtx);
+                            }
+                        });
+                        ctxClientCellMap.put(ctx, clientCell);
+                    }
+                    log.info("客户端接入成功 {}", clientCell.client.clientId);
+                    startSendThread(clientCell);
+                    byte[] login = ("login 0").getBytes(StandardCharsets.UTF_8);
+                    login = GridAesCipherUtil.encrypt(login);
+                    sendBytesToClient(ctx, login);
                     break;
                 case "reConnect":
                     byte[] base64Bytes = BytesUtil.base642bytes(cmd[1]);

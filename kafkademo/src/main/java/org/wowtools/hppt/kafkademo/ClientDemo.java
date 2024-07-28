@@ -47,7 +47,8 @@ public class ClientDemo extends ClientSessionService {
 
     public static void main(String[] args) throws Exception{
         ScConfig cfg = new ScConfig();
-        cfg.clientId = "user1";
+        cfg.clientUser = "user1";
+        cfg.clientPassword = "12345";
         ScConfig.Forward forward = new ScConfig.Forward();
         forward.localPort = 10022;
         forward.remoteHost = "wsl";

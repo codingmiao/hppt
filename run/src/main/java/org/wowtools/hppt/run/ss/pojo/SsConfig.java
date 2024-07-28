@@ -2,7 +2,6 @@ package org.wowtools.hppt.run.ss.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.wowtools.hppt.common.util.CommonConfig;
-import org.wowtools.hppt.run.sc.pojo.ScConfig;
 
 import java.util.ArrayList;
 
@@ -41,8 +40,24 @@ public class SsConfig extends CommonConfig {
     /**
      * 允许的客户端
      */
-    public ArrayList<String> clientIds;
+    public ArrayList<Client> clients;
 
+    /**
+     * 密码最大尝试次数，超过次数没输入对会锁定账号直至重启
+     */
+    public int passwordRetryNum = 5;
+
+    public static final class Client {
+        /**
+         * 用户名
+         */
+        public String user;
+
+        /**
+         * 密码
+         */
+        public String password;
+    }
 
     public static final class PostConfig {
         /**
@@ -100,7 +115,7 @@ public class SsConfig extends CommonConfig {
 
     public RHpptConfig rhppt = new RHpptConfig();
 
-    public static final class RPostConfig{
+    public static final class RPostConfig {
         /**
          * 服务端http地址，可以填nginx转发过的地址
          */

@@ -122,10 +122,13 @@ public class ScConfig extends CommonConfig {
     public String type;
 
     /**
-     * 客户端id，每个sc.jar用一个，不要重复
+     * 客户端用户名，每个sc进程用一个，不要重复
      */
-    public String clientId;
-
+    public String clientUser;
+    /**
+     * 客户端密码
+     */
+    public String clientPassword;
 
     /**
      * 向服务端发数据请求体的字节数最大值

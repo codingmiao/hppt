@@ -16,6 +16,18 @@ import java.util.concurrent.TimeUnit;
  */
 public class LoginClientService {
 
+    public static final class Config {
+        /**
+         * 每行一条用户名和密码
+         */
+        public ArrayList<String[]> users = new ArrayList<>();
+
+        /**
+         * 密码重试次数
+         */
+        public int passwordRetryNum;
+    }
+
 
     public static final class Client {
         public final String clientId;
@@ -164,18 +176,28 @@ public class LoginClientService {
     }
 
 
-    private final String[] allowClientIds;
+    private static final class ClientInfo {
+        private final String user;
+        private final String password;
 
-    public LoginClientService(String[] allowClientIds) {
-        this.allowClientIds = allowClientIds;
+        public ClientInfo(String user, String password) {
+            this.user = user;
+            this.password = password;
+        }
+
+        private int passwordErrorNum;
     }
 
-    /**
-     * @param allowClientIds 允许的clientId
-     */
-    public LoginClientService(Collection<String> allowClientIds) {
-        this.allowClientIds = new String[allowClientIds.size()];
-        allowClientIds.toArray(this.allowClientIds);
+    private final Map<String, ClientInfo> users;
+    private final int passwordRetryNum;
+
+    public LoginClientService(Config config) {
+        Map<String, ClientInfo> _users = new HashMap<>();
+        for (String[] u : config.users) {
+            _users.put(u[0], new ClientInfo(u[0], u[1]));
+        }
+        users = Map.copyOf(_users);
+        passwordRetryNum = config.passwordRetryNum;
     }
 
     /**
@@ -183,20 +205,29 @@ public class LoginClientService {
      *
      * @param code                loginCode
      * @param clientActiveWatcher 用以观察客户端活跃状态的变化
-     * @return 登录成功则返回Client对象，否则返回null
+     * @return 登录成功则返回Client对象，否则抛出异常
      */
     public Client login(String code, ClientActiveWatcher clientActiveWatcher) {
-        byte[] bytesCode = BytesUtil.base642bytes(code);
-        for (String clientId : allowClientIds) {
-            AesCipherUtil aesCipherUtil = new AesCipherUtil(clientId, System.currentTimeMillis());
-            try {
-                if (new String(aesCipherUtil.descriptor.decrypt(bytesCode), StandardCharsets.UTF_8).equals(clientId)) {
-                    return new Client(clientId, aesCipherUtil, clientActiveWatcher);
-                }
-            } catch (Exception e) {
-            }
+        String[] strs = code.split(" ", 2);
+        String user = strs[0];
+        String pwdCode = strs[1];
+        ClientInfo clientInfo = users.get(user);
+        if (null == clientInfo) {
+            throw new RuntimeException("用户名不存在");
         }
-        return null;
+        if (clientInfo.passwordErrorNum > passwordRetryNum) {
+            throw new RuntimeException("多次登录失败，用户已锁定");
+        }
+        AesCipherUtil aesCipherUtil = new AesCipherUtil(clientInfo.password, System.currentTimeMillis());
+        try {
+            if (new String(aesCipherUtil.descriptor.decrypt(BytesUtil.base642bytes(pwdCode)), StandardCharsets.UTF_8).equals(clientInfo.password)) {
+                clientInfo.passwordErrorNum = 0;
+                return new Client(user, aesCipherUtil, clientActiveWatcher);
+            }
+        } catch (Exception ignored) {
+        }
+        clientInfo.passwordErrorNum++;//理论上会有并发导致次数不准，可忽略
+        throw new RuntimeException("密码不正确或对时时差过长");
     }
 
 }

@@ -57,8 +57,11 @@ public class ServerDemo extends ServerSessionService<KafkaCtx> {
 
     public static void main(String[] args) throws Exception{
         SsConfig cfg = new SsConfig();
-        cfg.clientIds = new ArrayList<>();
-        cfg.clientIds.add("user1");
+        SsConfig.Client client = new SsConfig.Client();
+        client.user = "user1";
+        client.password = "12345";
+        cfg.clients = new ArrayList<>(1);
+        cfg.clients.add(client);
         ServerDemo server = new ServerDemo(cfg);
         server.init(cfg);
         server.sync();
