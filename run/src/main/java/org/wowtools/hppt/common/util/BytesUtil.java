@@ -145,7 +145,7 @@ public class BytesUtil {
     }
 
     private static void waitChannelWritable(Channel channel) {
-        while (!channel.isWritable()) {
+        while (!channel.isWritable() && channel.isOpen()) {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {

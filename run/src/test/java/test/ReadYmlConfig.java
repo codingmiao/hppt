@@ -2,7 +2,7 @@ package test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.wowtools.common.utils.ResourcesReader;
+import org.wowtools.hppt.common.util.ResourcesReader;
 
 /**
  * @author liuyu

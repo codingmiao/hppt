@@ -1,9 +1,15 @@
 package org.wowtools.hppt.run;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.util.StatusPrinter;
 import io.netty.util.ResourceLeakDetector;
-import org.wowtools.common.utils.ResourcesReader;
+import org.slf4j.LoggerFactory;
+import org.wowtools.hppt.common.util.ResourcesReader;
 import org.wowtools.hppt.run.sc.RunSc;
 import org.wowtools.hppt.run.ss.RunSs;
+
+import java.io.File;
 
 /**
  * @author liuyu
@@ -12,15 +18,24 @@ import org.wowtools.hppt.run.ss.RunSs;
 public class Run {
 
     public static void main(String[] args) throws Exception {
+        System.setProperty("logFileName", args.length > 0 ? String.join("-", args).replace(".", "_") : "hppt");
+        try {
+            LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+            File externalConfigFile = new File(ResourcesReader.getRootPath(Run.class) + "/logback.xml");
+            JoranConfigurator configurator = new JoranConfigurator();
+            configurator.setContext(context);
+            context.reset();
+            configurator.doConfigure(externalConfigFile);
+            StatusPrinter.printInCaseOfErrorsOrWarnings(context);
+        } catch (Exception e) {
+            System.out.println("未加载到根目录下logback.xml文件，使用默认配置 " + e.getMessage());
+        }
         try {
             if ("1".equals(ResourcesReader.readStr(Run.class, "/debug.txt").trim())) {
                 ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.PARANOID);
                 System.out.println("开启调试");
-            } else {
-                System.out.println("不开启调试");
             }
         } catch (Exception e) {
-            System.out.println("不开启调试");
         }
         String type = args[0];
         switch (type) {

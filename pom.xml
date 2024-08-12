@@ -11,7 +11,6 @@
 
 
     <modules>
-        <module>common</module>
         <module>run</module>
         <module>_localtest</module>
         <module>kafkademo</module>
@@ -19,6 +18,7 @@
 
     <properties>
         <java.version>21</java.version>
+        <native.maven.plugin.version>0.10.2</native.maven.plugin.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

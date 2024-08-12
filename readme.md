@@ -14,10 +14,23 @@ hppt，一款可通过任意协议转发tcp端口的工具。
 ![hppt](_doc/img/1.jpg)
 
 # 快速开始
+在[releases](https://github.com/codingmiao/hppt/releases)
+页面下载最新版本编译好的hppt，或自行下载源码编译。
+```shell
+#jar
+mvn clean package -DskipTests
 
-本项目需要jdk21启动，请先前往[jdk官网](https://jdk.java.net/21/)
-下载对应你操作系统版本的jdk，然后在[releases](https://github.com/codingmiao/hppt/releases)
-页面下载最新版本编译好的hppt.zip，或自行下载源码编译
+#可选操作 打native包
+su graalvm
+cd run
+mvn org.graalvm.buildtools:native-maven-plugin:build
+```
+
+本项目编译成了可执行文件及jar包。
+
+可执行文件无环境依赖、内存占用，小单因为没有jit支持，性能略逊于jar包执行；
+
+jar包执行性能更好，但多消耗一些内存，如需jar包执行，请先前往[jdk官网](https://jdk.java.net/archive/)下载对应你操作系统版本的jdk21。
 
 ## 示例1 通过http端口，反向代理访问内部服务器SSH端口
 
@@ -25,7 +38,7 @@ hppt，一款可通过任意协议转发tcp端口的工具。
 
 ![示例1](_doc/img/3.jpg)
 
-1、在集群中任一服务器上新建一个hppt目录，并上传hppt.jar、ss.yml、log4j2.xml文件到此目录下:
+1、在集群中任一服务器上新建一个hppt目录，并上传hppt.jar（也可用可执行文件 hppt.ext 或 hppt）、ss.yml、log4j2.xml文件到此目录下:
 
 ```
 hppt
@@ -41,22 +54,42 @@ hppt
 type: post
 #服务http端口
 port: 20871
-# 允许的客户端id
-clientIds:
-  - user1
-  - user2
+# 允许的客户端账号和密码
+clients:
+  - user: user1
+    password: 12345
+  - user: user2
+    password: 112233
 
 ```
 （注1：作为快速演示，这里的type选择了最简单的post类型，此场景下最佳性能的协议为websocket，或是有独立端口的话可以配置hppt协议，ws、hppt版的说明奋力码字中。。）
 
 （注2：实际应用中，为了确保安全，建议把clientId设置得更复杂一些）
 
-执行如下命令运行服务端的hppt
+执行如下命令运行服务端的hppt（3选1）
 
+jar包运行
 ```shell
 cd hppt
 <jdk21_path>/bin/java -jar hppt.jar ss ss.yml
 ```
+
+windows下可执行文件运行
+```shell
+cd hppt
+chcp 65001
+title "hppt"
+hppt.exe ss ss.yml
+pause
+```
+
+linux下可执行文件运行
+```shell
+cd hppt
+./hppt ss ss.yml
+#后台运行用命令  nohup ./hppt ss ss.yml >/dev/null &
+```
+
 
 在nginx上增加一段配置指向hppt
 
@@ -87,8 +120,10 @@ hppt
 ```yaml
 # 和服务端的type保持一致
 type: post
-# 客户端id，必须在服务端的clientIds列表里才能成功连接，每个客户端用一个id，不要重复
-clientId: user1
+# 客户端用户名，每个sc进程用一个，不要重复
+clientUser: user1
+# 客户端密码
+clientPassword: 12345
 
 post:
   # 服务端http地址，如无法直连，用nginx代理几次填nginx的地址也ok
@@ -108,11 +143,28 @@ forwards:
 
 ```
 
-执行如下命令启动客户端的hppt
+执行如下命令启动客户端的hppt（3选1）
 
+jar包运行
 ```shell
 cd hppt
 <jdk21_path>/bin/java -jar hppt.jar sc sc.yml
+```
+
+windows下可执行文件运行
+```shell
+cd hppt
+chcp 65001
+title "hppt"
+hppt.exe sc sc.yml
+pause
+```
+
+linux下可执行文件运行
+```shell
+cd hppt
+./hppt sc sc.yml
+#后台运行用命令  nohup ./hppt ss ss.yml >/dev/null &
 ```
 
 随后，你就可以在公司用linux连接工具访问localhost的10022端口，来登录应用服务器了
@@ -138,8 +190,10 @@ hppt
 ```yaml
 # 通讯协议 本示例使用了性能最好的hppt协议，加r前缀表示客户端和服务端角色互换。这里也可以配http post或websocket
 type: rhppt
-# 客户端id
-clientId: user1
+# 客户端用户名，每个sc进程用一个，不要重复
+clientUser: user1
+# 客户端密码
+clientPassword: 12345
 
 # 服务端口
 rhppt:
@@ -185,9 +239,12 @@ rhppt:
   host: "111.222.33.44"
   port: 20871
 
-# 对应的的客户端id
-clientIds:
-  - user1
+# 允许的客户端账号和密码
+clients:
+  - user: user1
+    password: 12345
+  - user: user2
+    password: 112233
 
 ```
 

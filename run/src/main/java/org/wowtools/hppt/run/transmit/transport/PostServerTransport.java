@@ -10,6 +10,7 @@ import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.wowtools.hppt.common.util.BytesUtil;
+import org.wowtools.hppt.common.util.DisableTraceFilter;
 import org.wowtools.hppt.common.util.JsonConfig;
 import org.wowtools.hppt.run.ss.post.PostServerSessionService;
 
@@ -77,7 +78,7 @@ class HttpServer {
         errorHandler.setServer(new Server());
 
         context.setErrorHandler(errorHandler);
-        context.addFilter(PostServerSessionService.DisableTraceFilter.class, "/*", null);
+        context.addFilter(DisableTraceFilter.class, "/*", null);
 
         server.start();
 //        server.join();

@@ -1,9 +1,8 @@
 package org.wowtools.hppt.run.ss;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.core.config.Configurator;
-import org.wowtools.common.utils.ResourcesReader;
 import org.wowtools.hppt.common.util.Constant;
+import org.wowtools.hppt.common.util.ResourcesReader;
 import org.wowtools.hppt.run.ss.common.ServerSessionService;
 import org.wowtools.hppt.run.ss.file.FileServerSessionService;
 import org.wowtools.hppt.run.ss.hppt.HpptServerSessionService;
@@ -13,20 +12,12 @@ import org.wowtools.hppt.run.ss.rhppt.RHpptServerSessionService;
 import org.wowtools.hppt.run.ss.rpost.RPostServerSessionService;
 import org.wowtools.hppt.run.ss.websocket.WebsocketServerSessionService;
 
-import java.io.File;
-
 /**
  * @author liuyu
  * @date 2024/1/24
  */
 @Slf4j
 public class RunSs {
-
-
-    static {
-        Configurator.reconfigure(new File(ResourcesReader.getRootPath(RunSs.class) + "/log4j2.xml").toURI());
-    }
-
 
     public static void main(String[] args) throws Exception {
         String configPath;

@@ -1,0 +1,37 @@
+<configuration>
+    <!-- Define a pattern for log output -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n" />
+
+    <!-- Define the log file name, default to 'application' -->
+    <property name="LOG_FILE_NAME" value="${logFileName:-application}" />
+
+    <!-- Define the rolling policy for daily log files -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/${LOG_FILE_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Daily rollover -->
+            <fileNamePattern>logs/${LOG_FILE_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- Keep 30 days' worth of history -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Console appender configuration -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Root logger configuration -->
+    <root level="info">
+        <appender-ref ref="FILE" />
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <!-- Package-specific logger configuration -->
+    <logger name="xx.xx" level="info" />
+</configuration>

@@ -1,0 +1,1032 @@
+[ {
+  "name" : "ch.qos.logback.classic.encoder.PatternLayoutEncoder",
+  "queryAllPublicMethods" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.classic.joran.SerializedModelConfigurator",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.classic.pattern.DateConverter",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.classic.pattern.LevelConverter",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.classic.pattern.LineSeparatorConverter",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.classic.pattern.LoggerConverter",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.classic.pattern.MessageConverter",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.classic.util.DefaultJoranConfigurator",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.core.ConsoleAppender",
+  "queryAllPublicMethods" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.core.FileAppender",
+  "methods" : [ {
+    "name" : "valueOf",
+    "parameterTypes" : [ "java.lang.String" ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.core.OutputStreamAppender",
+  "methods" : [ {
+    "name" : "setEncoder",
+    "parameterTypes" : [ "ch.qos.logback.core.encoder.Encoder" ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.core.encoder.Encoder",
+  "methods" : [ {
+    "name" : "valueOf",
+    "parameterTypes" : [ "java.lang.String" ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.core.encoder.LayoutWrappingEncoder",
+  "methods" : [ {
+    "name" : "setParent",
+    "parameterTypes" : [ "ch.qos.logback.core.spi.ContextAware" ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.core.pattern.PatternLayoutEncoderBase",
+  "methods" : [ {
+    "name" : "setPattern",
+    "parameterTypes" : [ "java.lang.String" ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.core.rolling.RollingFileAppender",
+  "queryAllPublicMethods" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  }, {
+    "name" : "setFile",
+    "parameterTypes" : [ "java.lang.String" ]
+  }, {
+    "name" : "setRollingPolicy",
+    "parameterTypes" : [ "ch.qos.logback.core.rolling.RollingPolicy" ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.core.rolling.RollingPolicy",
+  "methods" : [ {
+    "name" : "valueOf",
+    "parameterTypes" : [ "java.lang.String" ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.core.rolling.RollingPolicyBase",
+  "methods" : [ {
+    "name" : "setFileNamePattern",
+    "parameterTypes" : [ "java.lang.String" ]
+  }, {
+    "name" : "setParent",
+    "parameterTypes" : [ "ch.qos.logback.core.FileAppender" ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.core.rolling.TimeBasedRollingPolicy",
+  "queryAllPublicMethods" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  }, {
+    "name" : "setMaxHistory",
+    "parameterTypes" : [ "int" ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.core.rolling.helper.DateTokenConverter",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "ch.qos.logback.core.spi.ContextAware",
+  "methods" : [ {
+    "name" : "valueOf",
+    "parameterTypes" : [ "java.lang.String" ]
+  } ]
+}, {
+  "name" : "com.fasterxml.jackson.databind.ext.Java7HandlersImpl",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "com.fasterxml.jackson.databind.ext.Java7SupportImpl",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "com.google.protobuf.ExtensionRegistry",
+  "methods" : [ {
+    "name" : "getEmptyRegistry",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "com.sun.crypto.provider.AESCipher$General",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "com.sun.crypto.provider.AESKeyGenerator",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "com.sun.crypto.provider.ARCFOURCipher",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "com.sun.crypto.provider.ChaCha20Cipher$ChaCha20Poly1305",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "com.sun.crypto.provider.DESCipher",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "com.sun.crypto.provider.DESedeCipher",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "com.sun.crypto.provider.GaloisCounterMode$AESGCM",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "io.netty.bootstrap.ServerBootstrap$1",
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.bootstrap.ServerBootstrap$ServerBootstrapAcceptor",
+  "methods" : [ {
+    "name" : "channelRead",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Object" ]
+  }, {
+    "name" : "exceptionCaught",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Throwable" ]
+  } ]
+}, {
+  "name" : "io.netty.buffer.AbstractByteBufAllocator",
+  "queryAllDeclaredMethods" : true,
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.buffer.AbstractReferenceCountedByteBuf",
+  "fields" : [ {
+    "name" : "refCnt"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.channel.AbstractChannelHandlerContext",
+  "fields" : [ {
+    "name" : "handlerState"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.channel.ChannelInboundHandlerAdapter",
+  "methods" : [ {
+    "name" : "channelActive",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelInactive",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelRead",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Object" ]
+  }, {
+    "name" : "channelReadComplete",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelRegistered",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelUnregistered",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelWritabilityChanged",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "userEventTriggered",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Object" ]
+  } ]
+}, {
+  "name" : "io.netty.channel.ChannelInitializer",
+  "methods" : [ {
+    "name" : "channelRegistered",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "exceptionCaught",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Throwable" ]
+  } ]
+}, {
+  "name" : "io.netty.channel.ChannelOutboundBuffer",
+  "fields" : [ {
+    "name" : "totalPendingSize"
+  }, {
+    "name" : "unwritable"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.channel.DefaultChannelConfig",
+  "fields" : [ {
+    "name" : "autoRead"
+  }, {
+    "name" : "writeBufferWaterMark"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.channel.DefaultChannelPipeline",
+  "fields" : [ {
+    "name" : "estimatorHandle"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.channel.DefaultChannelPipeline$HeadContext",
+  "methods" : [ {
+    "name" : "bind",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.net.SocketAddress", "io.netty.channel.ChannelPromise" ]
+  }, {
+    "name" : "channelActive",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelInactive",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelRead",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Object" ]
+  }, {
+    "name" : "channelReadComplete",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelRegistered",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelUnregistered",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelWritabilityChanged",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "close",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "io.netty.channel.ChannelPromise" ]
+  }, {
+    "name" : "connect",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.net.SocketAddress", "java.net.SocketAddress", "io.netty.channel.ChannelPromise" ]
+  }, {
+    "name" : "deregister",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "io.netty.channel.ChannelPromise" ]
+  }, {
+    "name" : "disconnect",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "io.netty.channel.ChannelPromise" ]
+  }, {
+    "name" : "exceptionCaught",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Throwable" ]
+  }, {
+    "name" : "flush",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "read",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "userEventTriggered",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Object" ]
+  }, {
+    "name" : "write",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Object", "io.netty.channel.ChannelPromise" ]
+  } ]
+}, {
+  "name" : "io.netty.channel.DefaultChannelPipeline$TailContext",
+  "methods" : [ {
+    "name" : "channelActive",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelInactive",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelRead",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Object" ]
+  }, {
+    "name" : "channelReadComplete",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelRegistered",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelUnregistered",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelWritabilityChanged",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "exceptionCaught",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Throwable" ]
+  }, {
+    "name" : "userEventTriggered",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Object" ]
+  } ]
+}, {
+  "name" : "io.netty.channel.socket.nio.NioServerSocketChannel",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "io.netty.handler.codec.ByteToMessageDecoder",
+  "methods" : [ {
+    "name" : "channelRead",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Object" ]
+  }, {
+    "name" : "channelReadComplete",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "userEventTriggered",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Object" ]
+  } ]
+}, {
+  "name" : "io.netty.util.DefaultAttributeMap",
+  "fields" : [ {
+    "name" : "attributes"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.util.Recycler$DefaultHandle",
+  "fields" : [ {
+    "name" : "state"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.util.ReferenceCountUtil",
+  "queryAllDeclaredMethods" : true,
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.util.ResourceLeakDetector$DefaultResourceLeak",
+  "fields" : [ {
+    "name" : "droppedRecords"
+  }, {
+    "name" : "head"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.util.concurrent.DefaultPromise",
+  "fields" : [ {
+    "name" : "result"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.util.concurrent.SingleThreadEventExecutor",
+  "fields" : [ {
+    "name" : "state"
+  }, {
+    "name" : "threadProperties"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueColdProducerFields",
+  "fields" : [ {
+    "name" : "producerLimit"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueConsumerFields",
+  "fields" : [ {
+    "name" : "consumerIndex"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueProducerFields",
+  "fields" : [ {
+    "name" : "producerIndex"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.util.internal.shaded.org.jctools.queues.MpscArrayQueueConsumerIndexField",
+  "fields" : [ {
+    "name" : "consumerIndex"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.util.internal.shaded.org.jctools.queues.MpscArrayQueueProducerIndexField",
+  "fields" : [ {
+    "name" : "producerIndex"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "io.netty.util.internal.shaded.org.jctools.queues.MpscArrayQueueProducerLimitField",
+  "fields" : [ {
+    "name" : "producerLimit"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "java.io.FilePermission",
+  "methods" : [ ]
+}, {
+  "name" : "java.lang.ProcessHandle",
+  "methods" : [ {
+    "name" : "current",
+    "parameterTypes" : [ ]
+  }, {
+    "name" : "pid",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "java.lang.RuntimePermission",
+  "methods" : [ ]
+}, {
+  "name" : "java.lang.Thread",
+  "fields" : [ {
+    "name" : "threadLocalRandomProbe"
+  } ],
+  "methods" : [ {
+    "name" : "isVirtual",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "java.lang.Throwable",
+  "methods" : [ {
+    "name" : "addSuppressed",
+    "parameterTypes" : [ "java.lang.Throwable" ]
+  } ]
+}, {
+  "name" : "java.lang.management.ManagementFactory",
+  "methods" : [ {
+    "name" : "getRuntimeMXBean",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "java.lang.management.RuntimeMXBean",
+  "methods" : [ {
+    "name" : "getInputArguments",
+    "parameterTypes" : [ ]
+  }, {
+    "name" : "getUptime",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "java.net.NetPermission",
+  "methods" : [ ]
+}, {
+  "name" : "java.net.SocketPermission",
+  "methods" : [ ]
+}, {
+  "name" : "java.net.URLPermission",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ "java.lang.String", "java.lang.String" ]
+  } ]
+}, {
+  "name" : "java.nio.Bits",
+  "fields" : [ {
+    "name" : "UNALIGNED"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "java.nio.Buffer",
+  "fields" : [ {
+    "name" : "address"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "java.nio.ByteBuffer",
+  "methods" : [ {
+    "name" : "alignedSlice",
+    "parameterTypes" : [ "int" ]
+  } ]
+}, {
+  "name" : "java.nio.DirectByteBuffer",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ "long", "int" ]
+  } ]
+}, {
+  "name" : "java.nio.channels.spi.SelectorProvider",
+  "methods" : [ {
+    "name" : "openServerSocketChannel",
+    "parameterTypes" : [ "java.net.ProtocolFamily" ]
+  }, {
+    "name" : "openSocketChannel",
+    "parameterTypes" : [ "java.net.ProtocolFamily" ]
+  } ]
+}, {
+  "name" : "java.security.AlgorithmParametersSpi",
+  "methods" : [ ]
+}, {
+  "name" : "java.security.AllPermission",
+  "methods" : [ ]
+}, {
+  "name" : "java.security.SecureRandomParameters",
+  "methods" : [ ]
+}, {
+  "name" : "java.security.SecurityPermission",
+  "methods" : [ ]
+}, {
+  "name" : "java.sql.Date",
+  "methods" : [ ]
+}, {
+  "name" : "java.sql.Timestamp",
+  "methods" : [ ]
+}, {
+  "name" : "java.util.PropertyPermission",
+  "methods" : [ ]
+}, {
+  "name" : "java.util.concurrent.ForkJoinTask",
+  "fields" : [ {
+    "name" : "aux"
+  }, {
+    "name" : "status"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "java.util.concurrent.atomic.AtomicBoolean",
+  "fields" : [ {
+    "name" : "value"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "java.util.concurrent.atomic.AtomicReference",
+  "fields" : [ {
+    "name" : "value"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "java.util.concurrent.atomic.Striped64",
+  "fields" : [ {
+    "name" : "base"
+  }, {
+    "name" : "cellsBusy"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "javax.net.ssl.SSLParameters",
+  "methods" : [ {
+    "name" : "setApplicationProtocols",
+    "parameterTypes" : [ "java.lang.String[]" ]
+  } ]
+}, {
+  "name" : "javax.net.ssl.SSLSocket",
+  "methods" : [ {
+    "name" : "getApplicationProtocol",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "javax.smartcardio.CardPermission",
+  "methods" : [ ]
+}, {
+  "name" : "jdk.internal.misc.Unsafe",
+  "methods" : [ {
+    "name" : "getUnsafe",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "libcore.io.Memory",
+  "methods" : [ ]
+}, {
+  "name" : "org.robolectric.Robolectric",
+  "methods" : [ ]
+}, {
+  "name" : "org.wowtools.hppt.common.client.ClientSessionManager$1",
+  "methods" : [ ]
+}, {
+  "name" : "org.wowtools.hppt.common.client.ClientSessionManager$SimpleHandler",
+  "methods" : [ {
+    "name" : "channelActive",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelInactive",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "exceptionCaught",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Throwable" ]
+  } ]
+}, {
+  "name" : "org.wowtools.hppt.common.util.CommonConfig",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "methods" : [ ]
+}, {
+  "name" : "org.wowtools.hppt.run.sc.pojo.ScConfig",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "queryAllDeclaredConstructors" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "org.wowtools.hppt.run.sc.pojo.ScConfig$FileConfig",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "queryAllDeclaredConstructors" : true,
+  "methods" : [ ]
+}, {
+  "name" : "org.wowtools.hppt.run.sc.pojo.ScConfig$Forward",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "queryAllDeclaredConstructors" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "org.wowtools.hppt.run.sc.pojo.ScConfig$HpptConfig",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "queryAllDeclaredConstructors" : true,
+  "methods" : [ ]
+}, {
+  "name" : "org.wowtools.hppt.run.sc.pojo.ScConfig$PostConfig",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "queryAllDeclaredConstructors" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "org.wowtools.hppt.run.sc.pojo.ScConfig$RHpptConfig",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "queryAllDeclaredConstructors" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "org.wowtools.hppt.run.sc.pojo.ScConfig$RPostConfig",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "queryAllDeclaredConstructors" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "org.wowtools.hppt.run.sc.pojo.ScConfig$WebSocketConfig",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "queryAllDeclaredConstructors" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "sun.misc.Unsafe",
+  "allDeclaredFields" : true,
+  "methods" : [ {
+    "name" : "arrayBaseOffset",
+    "parameterTypes" : [ "java.lang.Class" ]
+  }, {
+    "name" : "arrayIndexScale",
+    "parameterTypes" : [ "java.lang.Class" ]
+  }, {
+    "name" : "copyMemory",
+    "parameterTypes" : [ "long", "long", "long" ]
+  }, {
+    "name" : "copyMemory",
+    "parameterTypes" : [ "java.lang.Object", "long", "java.lang.Object", "long", "long" ]
+  }, {
+    "name" : "getAndAddLong",
+    "parameterTypes" : [ "java.lang.Object", "long", "long" ]
+  }, {
+    "name" : "getAndSetObject",
+    "parameterTypes" : [ "java.lang.Object", "long", "java.lang.Object" ]
+  }, {
+    "name" : "getBoolean",
+    "parameterTypes" : [ "java.lang.Object", "long" ]
+  }, {
+    "name" : "getByte",
+    "parameterTypes" : [ "long" ]
+  }, {
+    "name" : "getByte",
+    "parameterTypes" : [ "java.lang.Object", "long" ]
+  }, {
+    "name" : "getDouble",
+    "parameterTypes" : [ "java.lang.Object", "long" ]
+  }, {
+    "name" : "getFloat",
+    "parameterTypes" : [ "java.lang.Object", "long" ]
+  }, {
+    "name" : "getInt",
+    "parameterTypes" : [ "long" ]
+  }, {
+    "name" : "getInt",
+    "parameterTypes" : [ "java.lang.Object", "long" ]
+  }, {
+    "name" : "getLong",
+    "parameterTypes" : [ "long" ]
+  }, {
+    "name" : "getLong",
+    "parameterTypes" : [ "java.lang.Object", "long" ]
+  }, {
+    "name" : "getObject",
+    "parameterTypes" : [ "java.lang.Object", "long" ]
+  }, {
+    "name" : "invokeCleaner",
+    "parameterTypes" : [ "java.nio.ByteBuffer" ]
+  }, {
+    "name" : "objectFieldOffset",
+    "parameterTypes" : [ "java.lang.reflect.Field" ]
+  }, {
+    "name" : "putBoolean",
+    "parameterTypes" : [ "java.lang.Object", "long", "boolean" ]
+  }, {
+    "name" : "putByte",
+    "parameterTypes" : [ "long", "byte" ]
+  }, {
+    "name" : "putByte",
+    "parameterTypes" : [ "java.lang.Object", "long", "byte" ]
+  }, {
+    "name" : "putDouble",
+    "parameterTypes" : [ "java.lang.Object", "long", "double" ]
+  }, {
+    "name" : "putFloat",
+    "parameterTypes" : [ "java.lang.Object", "long", "float" ]
+  }, {
+    "name" : "putInt",
+    "parameterTypes" : [ "long", "int" ]
+  }, {
+    "name" : "putInt",
+    "parameterTypes" : [ "java.lang.Object", "long", "int" ]
+  }, {
+    "name" : "putLong",
+    "parameterTypes" : [ "long", "long" ]
+  }, {
+    "name" : "putLong",
+    "parameterTypes" : [ "java.lang.Object", "long", "long" ]
+  }, {
+    "name" : "putObject",
+    "parameterTypes" : [ "java.lang.Object", "long", "java.lang.Object" ]
+  }, {
+    "name" : "storeFence",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "sun.misc.VM",
+  "methods" : [ ]
+}, {
+  "name" : "sun.nio.ch.SelectorImpl",
+  "fields" : [ {
+    "name" : "publicSelectedKeys"
+  }, {
+    "name" : "selectedKeys"
+  } ],
+  "methods" : [ ]
+}, {
+  "name" : "sun.security.provider.DRBG",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ "java.security.SecureRandomParameters" ]
+  } ]
+}, {
+  "name" : "sun.security.provider.SHA",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "sun.security.provider.SHA2$SHA256",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "sun.security.provider.SecureRandom",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  }, {
+    "name" : "<init>",
+    "parameterTypes" : [ "java.security.SecureRandomParameters" ]
+  } ]
+}, {
+  "name" : "sun.security.ssl.SSLContextImpl$TLSContext",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "io.netty.channel.socket.nio.NioSocketChannel",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "java.lang.Boolean",
+  "methods" : [ {
+    "name" : "valueOf",
+    "parameterTypes" : [ "java.lang.String" ]
+  } ]
+}, {
+  "name" : "java.lang.Byte",
+  "methods" : [ {
+    "name" : "valueOf",
+    "parameterTypes" : [ "java.lang.String" ]
+  } ]
+}, {
+  "name" : "java.lang.Double",
+  "methods" : [ {
+    "name" : "valueOf",
+    "parameterTypes" : [ "java.lang.String" ]
+  } ]
+}, {
+  "name" : "java.lang.Float",
+  "methods" : [ {
+    "name" : "valueOf",
+    "parameterTypes" : [ "java.lang.String" ]
+  } ]
+}, {
+  "name" : "java.lang.Integer",
+  "methods" : [ {
+    "name" : "valueOf",
+    "parameterTypes" : [ "java.lang.String" ]
+  } ]
+}, {
+  "name" : "java.lang.Long",
+  "methods" : [ {
+    "name" : "valueOf",
+    "parameterTypes" : [ "java.lang.String" ]
+  } ]
+}, {
+  "name" : "java.lang.Short",
+  "methods" : [ {
+    "name" : "valueOf",
+    "parameterTypes" : [ "java.lang.String" ]
+  } ]
+}, {
+  "name" : "java.lang.System",
+  "methods" : [ {
+    "name" : "getSecurityManager",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "java.security.AccessController",
+  "methods" : [ {
+    "name" : "doPrivileged",
+    "parameterTypes" : [ "java.security.PrivilegedAction" ]
+  } ]
+}, {
+  "name" : "java.util.concurrent.Executors",
+  "methods" : [ {
+    "name" : "newVirtualThreadPerTaskExecutor",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "org.eclipse.jetty.util.TypeUtil",
+  "methods" : [ {
+    "name" : "getClassLoaderLocation",
+    "parameterTypes" : [ "java.lang.Class" ]
+  }, {
+    "name" : "getCodeSourceLocation",
+    "parameterTypes" : [ "java.lang.Class" ]
+  }, {
+    "name" : "getModuleLocation",
+    "parameterTypes" : [ "java.lang.Class" ]
+  }, {
+    "name" : "getSystemClassLoaderLocation",
+    "parameterTypes" : [ "java.lang.Class" ]
+  } ]
+}, {
+  "name" : "org.wowtools.hppt.common.server.ServerSessionManager$1",
+  "methods" : [ ]
+}, {
+  "name" : "org.wowtools.hppt.common.server.ServerSessionManager$SimpleHandler",
+  "methods" : [ {
+    "name" : "channelActive",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelInactive",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "channelRead",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Object" ]
+  }, {
+    "name" : "channelReadComplete",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext" ]
+  }, {
+    "name" : "exceptionCaught",
+    "parameterTypes" : [ "io.netty.channel.ChannelHandlerContext", "java.lang.Throwable" ]
+  } ]
+}, {
+  "name" : "org.wowtools.hppt.common.util.DisableTraceFilter",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "org.wowtools.hppt.run.ss.pojo.SsConfig",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "queryAllDeclaredConstructors" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "org.wowtools.hppt.run.ss.pojo.SsConfig$Client",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "queryAllDeclaredConstructors" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "org.wowtools.hppt.run.ss.pojo.SsConfig$FileConfig",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "queryAllDeclaredConstructors" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "org.wowtools.hppt.run.ss.pojo.SsConfig$HpptConfig",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "queryAllDeclaredConstructors" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "org.wowtools.hppt.run.ss.pojo.SsConfig$PostConfig",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "queryAllDeclaredConstructors" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "org.wowtools.hppt.run.ss.pojo.SsConfig$RHpptConfig",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "queryAllDeclaredConstructors" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "org.wowtools.hppt.run.ss.pojo.SsConfig$RPostConfig",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "queryAllDeclaredConstructors" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "org.wowtools.hppt.run.ss.pojo.SsConfig$WebSocketConfig",
+  "allDeclaredFields" : true,
+  "queryAllDeclaredMethods" : true,
+  "queryAllDeclaredConstructors" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+} ]

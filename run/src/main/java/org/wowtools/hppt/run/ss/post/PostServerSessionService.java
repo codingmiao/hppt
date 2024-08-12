@@ -1,8 +1,5 @@
 package org.wowtools.hppt.run.ss.post;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -10,10 +7,10 @@ import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.wowtools.common.utils.LruCache;
+import org.wowtools.hppt.common.util.DisableTraceFilter;
 import org.wowtools.hppt.run.ss.common.ServerSessionService;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -78,20 +75,5 @@ public class PostServerSessionService extends ServerSessionService<PostCtx> {
         server.stop();
     }
 
-
-    //禁用TRACE、TRACK
-    public static final class DisableTraceFilter implements Filter {
-        @Override
-        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-            HttpServletRequest httpRequest = (HttpServletRequest) request;
-            String m = httpRequest.getMethod();
-            if ("TRACE".equalsIgnoreCase(m) || "TRACK".equalsIgnoreCase(m)) {
-                HttpServletResponse httpResponse = (HttpServletResponse) response;
-                httpResponse.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-                return;
-            }
-            chain.doFilter(request, response);
-        }
-    }
 
 }

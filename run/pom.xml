@@ -12,16 +12,48 @@
     <artifactId>run</artifactId>
     <dependencies>
         <dependency>
-            <groupId>org.wowtools.hppt</groupId>
-            <artifactId>common</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lz4</groupId>
+            <artifactId>lz4-java</artifactId>
+            <version>1.8.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.4.11</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wowtools</groupId>
+            <artifactId>catframe-common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty.toolchain</groupId>
             <artifactId>jetty-jakarta-servlet-api</artifactId>
             <version>5.0.2</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
@@ -83,7 +115,33 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- 打native包 -->
+            <plugin>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <version>${native.maven.plugin.version}</version>
+                <configuration>
+                    <buildArgs>
+                        <arg>-H:+AddAllCharsets</arg>
+                    </buildArgs>
+                    <mainClass>org.wowtools.hppt.run.Run</mainClass>
+                    <imageName>hppt</imageName>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <id>graalvm-native-build-tools-snapshots</id>
+            <name>GraalVM native-build-tools Snapshots</name>
+            <url>https://raw.githubusercontent.com/graalvm/native-build-tools/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 </project>
