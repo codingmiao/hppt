@@ -662,7 +662,10 @@
   "allDeclaredFields" : true,
   "queryAllDeclaredMethods" : true,
   "queryAllDeclaredConstructors" : true,
-  "methods" : [ ]
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
 }, {
   "name" : "org.wowtools.hppt.run.sc.pojo.ScConfig$Forward",
   "allDeclaredFields" : true,
@@ -677,7 +680,10 @@
   "allDeclaredFields" : true,
   "queryAllDeclaredMethods" : true,
   "queryAllDeclaredConstructors" : true,
-  "methods" : [ ]
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
 }, {
   "name" : "org.wowtools.hppt.run.sc.pojo.ScConfig$PostConfig",
   "allDeclaredFields" : true,

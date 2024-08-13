@@ -15,7 +15,9 @@ hppt，一款可通过任意协议转发tcp端口的工具。
 
 # 快速开始
 在[releases](https://github.com/codingmiao/hppt/releases)
-页面下载最新版本编译好的hppt，或自行下载源码编译。
+页面下载最新版本编译好的hppt。
+
+或自行下载源码编译：
 ```shell
 #jar
 mvn clean package -DskipTests
@@ -38,11 +40,11 @@ jar包执行性能更好，但多消耗一些内存，如需jar包执行，请�
 
 ![示例1](_doc/img/3.jpg)
 
-1、在集群中任一服务器上新建一个hppt目录，并上传hppt.jar（也可用可执行文件 hppt.ext 或 hppt）、ss.yml、log4j2.xml文件到此目录下:
+1、在集群中任一服务器上新建一个hppt目录，并上传hppt.jar（也可用可执行文件 hppt.exe 或 hppt）、ss.yml、log4j2.xml文件到此目录下:
 
 ```
 hppt
-    - hppt.jar
+    - hppt.jar (or hppt.exe or hppt_linux_file)
     - ss.yml
     - log4j2.xml
 ```
@@ -62,7 +64,7 @@ clients:
     password: 112233
 
 ```
-（注1：作为快速演示，这里的type选择了最简单的post类型，此场景下最佳性能的协议为websocket，或是有独立端口的话可以配置hppt协议，ws、hppt版的说明奋力码字中。。）
+（注1：作为快速演示，这里的type选择了最简单的post类型，此场景下可按[这篇文档](_doc/demo/websocket.md)配置websocket以获得更高性能，或是有独立端口的话可以按[这篇文档](_doc/demo/hppt.md)配置hppt协议）
 
 （注2：实际应用中，为了确保安全，建议把clientId设置得更复杂一些）
 
@@ -78,9 +80,7 @@ windows下可执行文件运行
 ```shell
 cd hppt
 chcp 65001
-title "hppt"
 hppt.exe ss ss.yml
-pause
 ```
 
 linux下可执行文件运行
@@ -106,11 +106,11 @@ server {
 
 随后，访问`http://111.222.33.44:80/xxx/` 能看到“error 404”字样即证明服务端部署成功。
 
-2、自己笔记本上，新建一个hppt目录，拷贝hppt.jar、sc.yml、log4j2.xml文件到此目录下:
+2、自己笔记本上，新建一个hppt目录，拷贝hppt.jar (or hppt.exe or hppt_linux_file)、sc.yml、log4j2.xml文件到此目录下:
 
 ```
 hppt
-    - hppt.jar
+    - hppt.jar (or hppt.exe or hppt_linux_file)
     - sc.yml
     - log4j2.xml
 ```
@@ -128,6 +128,8 @@ clientPassword: 12345
 post:
   # 服务端http地址，如无法直连，用nginx代理几次填nginx的地址也ok
   serverUrl: "http://111.222.33.44:80/xxx"
+  # 这个示例中，不用nginx的话直接配原始的服务端端口
+  #serverUrl: "http://111.222.33.44:20871"
   # 人为设置的延迟（毫秒），一般填0即可，如果传文件等数据量大、延迟要求低的场景，可以设一个几百毫秒的延迟来降低post请求发送频率
   sendSleepTime: 0
 forwards:
@@ -155,9 +157,7 @@ windows下可执行文件运行
 ```shell
 cd hppt
 chcp 65001
-title "hppt"
 hppt.exe sc sc.yml
-pause
 ```
 
 linux下可执行文件运行
@@ -176,11 +176,11 @@ cd hppt
 
 ![示例2](_doc/img/4.jpg)
 
-1、公网服务器上，新建一个hppt目录，拷贝hppt.jar、sc.yml、log4j2.xml文件到此目录下:
+1、公网服务器上，新建一个hppt目录，拷贝hppt.jar（也可用可执行文件 hppt.exe 或 hppt）、sc.yml、log4j2.xml文件到此目录下:
 
 ```
 hppt
-    - hppt.jar
+    - hppt.jar (or hppt.exe or hppt_linux_file)
     - sc.yml
     - log4j2.xml
 ```
@@ -211,17 +211,35 @@ forwards:
 
 ```
 
-执行如下命令启动公网服务器上的hppt
+执行如下命令启动公网服务器上的hppt（3选1）
 
+jar包运行
 ```shell
+cd hppt
 <jdk21_path>/bin/java -jar hppt.jar sc sc.yml
 ```
 
-2、家里的台式机上，新建一个hppt目录，拷贝hppt.jar、ss.yml、log4j2.xml文件到此目录下：
+windows下可执行文件运行
+```shell
+cd hppt
+chcp 65001
+title "hppt"
+hppt.exe sc sc.yml
+pause
+```
+
+linux下可执行文件运行
+```shell
+cd hppt
+./hppt sc sc.yml
+#后台运行用命令  nohup ./hppt ss ss.yml >/dev/null &
+```
+
+2、家里的台式机上，新建一个hppt目录，拷贝hppt.jar (or hppt.exe or hppt_linux_file)、ss.yml、log4j2.xml文件到此目录下：
 
 ```
 hppt
-    - hppt.jar
+    - hppt.jar (or hppt.exe or hppt_linux_file)
     - ss.yml
     - log4j2.xml
 ```
@@ -249,11 +267,28 @@ clients:
 ```
 
 
-执行如下命令启动家里台式机上的hppt
+执行如下命令启动家里台式机上的hppt（3选1）
 
+jar包运行
 ```shell
 cd hppt
 <jdk21_path>/bin/java -jar hppt.jar ss ss.yml
+```
+
+windows下可执行文件运行
+```shell
+cd hppt
+chcp 65001
+title "hppt"
+hppt.exe ss ss.yml
+pause
+```
+
+linux下可执行文件运行
+```shell
+cd hppt
+./hppt ss ss.yml
+#后台运行用命令  nohup ./hppt ss ss.yml >/dev/null &
 ```
 
 随后，你就可以在公司用linux连接工具访问111.222.33.44的10022端口，来登录家里的台式机了
@@ -350,7 +385,7 @@ scp -P 10022 jdk-21_linux-aarch64_bin.tar.gz   root@xxx:/xxx
 
 ## 安全性如何？
 
-必须使用指定的clientId才能连接，数据传输过程中对字节进行了加密，如果你还需要更多的个性化验证，比如用户登录，可以发邮件到[liuyu@wowtools.org](liuyu@wowtools.org)
+必须使用指定的用户才能连接，数据传输过程中对字节进行了加密以防监听，如果你还需要更多的个性化验证，比如用户登录，可以发邮件到[liuyu@wowtools.org](liuyu@wowtools.org)
 进行定制化开发。
 
 # 后续计划
