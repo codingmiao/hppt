@@ -2,9 +2,9 @@
 
 hppt，一款可通过任意协议转发tcp端口的工具。
 
-[github](https://github.com/codingmiao/hppt)
+[中文](./readme.md)&nbsp;&nbsp;&nbsp;&nbsp;[English](./readme_en.md)
 
-[gitee](https://gitee.com/wowtools/hppt)
+[github](https://github.com/codingmiao/hppt)&nbsp;&nbsp;&nbsp;&nbsp;[gitee](https://gitee.com/wowtools/hppt)
 
 
 # 简介
@@ -30,7 +30,7 @@ mvn org.graalvm.buildtools:native-maven-plugin:build
 
 本项目编译成了可执行文件及jar包。
 
-可执行文件无环境依赖、内存占用，小单因为没有jit支持，性能略逊于jar包执行；
+可执行文件无环境依赖、内存占用较少，但因为没有jit支持，性能略逊于jar包执行；
 
 jar包执行性能更好，但多消耗一些内存，如需jar包执行，请先前往[jdk官网](https://jdk.java.net/archive/)下载对应你操作系统版本的jdk21。
 
@@ -40,13 +40,13 @@ jar包执行性能更好，但多消耗一些内存，如需jar包执行，请�
 
 ![示例1](_doc/img/3.jpg)
 
-1、在集群中任一服务器上新建一个hppt目录，并上传hppt.jar（也可用可执行文件 hppt.exe 或 hppt）、ss.yml、log4j2.xml文件到此目录下:
+1、在集群中任一服务器上新建一个hppt目录，并上传hppt.jar（也可用可执行文件 hppt.exe 或 hppt）、ss.yml、logback.xml文件到此目录下:
 
 ```
 hppt
     - hppt.jar (or hppt.exe or hppt_linux_file)
     - ss.yml
-    - log4j2.xml
+    - logback.xml
 ```
 
 并调整ss.yml的配置信息:
@@ -106,13 +106,13 @@ server {
 
 随后，访问`http://111.222.33.44:80/xxx/` 能看到“error 404”字样即证明服务端部署成功。
 
-2、自己笔记本上，新建一个hppt目录，拷贝hppt.jar (or hppt.exe or hppt_linux_file)、sc.yml、log4j2.xml文件到此目录下:
+2、自己笔记本上，新建一个hppt目录，拷贝hppt.jar (or hppt.exe or hppt_linux_file)、sc.yml、logback.xml文件到此目录下:
 
 ```
 hppt
     - hppt.jar (or hppt.exe or hppt_linux_file)
     - sc.yml
-    - log4j2.xml
+    - logback.xml
 ```
 
 并调整sc.yml的配置信息:
@@ -176,13 +176,13 @@ cd hppt
 
 ![示例2](_doc/img/4.jpg)
 
-1、公网服务器上，新建一个hppt目录，拷贝hppt.jar（也可用可执行文件 hppt.exe 或 hppt）、sc.yml、log4j2.xml文件到此目录下:
+1、公网服务器上，新建一个hppt目录，拷贝hppt.jar（也可用可执行文件 hppt.exe 或 hppt）、sc.yml、logback.xml文件到此目录下:
 
 ```
 hppt
     - hppt.jar (or hppt.exe or hppt_linux_file)
     - sc.yml
-    - log4j2.xml
+    - logback.xml
 ```
 
 并调整sc.yml的配置信息:
@@ -235,13 +235,13 @@ cd hppt
 #后台运行用命令  nohup ./hppt ss ss.yml >/dev/null &
 ```
 
-2、家里的台式机上，新建一个hppt目录，拷贝hppt.jar (or hppt.exe or hppt_linux_file)、ss.yml、log4j2.xml文件到此目录下：
+2、家里的台式机上，新建一个hppt目录，拷贝hppt.jar (or hppt.exe or hppt_linux_file)、ss.yml、logback.xml文件到此目录下：
 
 ```
 hppt
     - hppt.jar (or hppt.exe or hppt_linux_file)
     - ss.yml
-    - log4j2.xml
+    - logback.xml
 ```
 
 修改ss.yml
