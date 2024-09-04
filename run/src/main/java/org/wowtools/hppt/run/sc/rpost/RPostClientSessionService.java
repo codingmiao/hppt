@@ -1,6 +1,5 @@
 package org.wowtools.hppt.run.sc.rpost;
 
-import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,7 +15,6 @@ import org.wowtools.hppt.run.sc.pojo.ScConfig;
 import org.wowtools.hppt.run.ss.post.ErrorServlet;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.LinkedList;
@@ -32,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class RPostClientSessionService extends ClientSessionService {
 
-    private static final byte[] empty = new byte[0];
 
     private final BlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<>();
     private Server server;
@@ -46,8 +43,8 @@ public class RPostClientSessionService extends ClientSessionService {
         log.info("*********");
         server = new Server(config.rpost.port);
         ServletContextHandler context = new ServletContextHandler(server, "/");
-        context.addServlet(new ServletHolder(new TalkServlet()), "/t");
-        context.addServlet(new ServletHolder(new InterruptServlet()), "/i");
+        context.addServlet(new ServletHolder(new SendServlet()), "/s");
+        context.addServlet(new ServletHolder(new ReceiveServlet()), "/r");
         context.addServlet(new ServletHolder(new ErrorServlet()), "/err");
 
         ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();
@@ -74,75 +71,74 @@ public class RPostClientSessionService extends ClientSessionService {
         server.stop();
     }
 
-    private final class InterruptServlet extends HttpServlet {
+    private final class SendServlet extends HttpServlet {
         @Override
         protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
-            sendQueue.add(empty);
-            log.debug("收到打断等待请求");
+            try {
+                s(req, resp);
+            } catch (Exception e) {
+                log.error("SendServlet err", e);
+//                exit();
+            }
+        }
+
+        private void s(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+            if (config.rpost.replyDelayTime > 0) {
+                Thread.sleep(config.rpost.replyDelayTime);
+            }
+            resp.setHeader("Server", "");
+            byte[] rBytes;
+            try {
+                rBytes = sendQueue.poll(config.rpost.waitResponseTime, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                rBytes = null;
+            }
+            if (null != rBytes) {
+                List<byte[]> bytesList = new LinkedList<>();
+                bytesList.add(rBytes);
+                sendQueue.drainTo(bytesList);
+                rBytes = BytesUtil.bytesCollection2PbBytes(bytesList);
+                log.debug("向客户端发送字节 {}", rBytes.length);
+                try (OutputStream os = resp.getOutputStream()) {
+                    os.write(rBytes);
+                }
+            }
         }
     }
 
-    private final class TalkServlet extends HttpServlet {
+    private final class ReceiveServlet extends HttpServlet {
         @Override
         protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
             try {
                 r(req, resp);
             } catch (Exception e) {
-                log.error("doPost err", e);
-                exit();
+                log.error("ReceiveServlet err", e);
+//                exit();
             }
         }
 
         private void r(HttpServletRequest req, HttpServletResponse resp) throws Exception {
             resp.setHeader("Server", "");
-            //读请求体里带过来的bytes并接收
-            boolean reqEmpty;
-            {
-                byte[] bytes;
-                try (InputStream inputStream = req.getInputStream(); ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-                    byte[] buffer = new byte[1024];
-                    int bytesRead;
-                    while ((bytesRead = inputStream.read(buffer)) != -1) {
-                        byteArrayOutputStream.write(buffer, 0, bytesRead);
-                    }
-                    bytes = byteArrayOutputStream.toByteArray();
+            byte[] bytes;
+            try (InputStream inputStream = req.getInputStream(); ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    byteArrayOutputStream.write(buffer, 0, bytesRead);
                 }
-
-                List<byte[]> bytesList = BytesUtil.pbBytes2BytesList(bytes);
-                reqEmpty = bytesList.isEmpty();
-                for (byte[] sub : bytesList) {
-                    try {
-                        receiveServerBytes(sub);
-                    } catch (Exception e) {
-                        log.warn("接收字节异常", e);
-                        exit();
-                    }
-                }
+                bytes = byteArrayOutputStream.toByteArray();
+            }
+            if (null == bytes) {
+                return;
             }
 
-            //取缓冲区中的数据返回
-            {
-                byte[] rBytes;
-                if (reqEmpty) {
-                    //请求体非空的话立即返回，否则等待用户侧输入
-                    try {
-                        rBytes = sendQueue.poll(config.rpost.waitBytesTime, TimeUnit.MILLISECONDS);
-                    } catch (InterruptedException e) {
-                        rBytes = null;
-                    }
-                } else {
-                    rBytes = sendQueue.poll();
-                }
-
-                if (null != rBytes && empty != rBytes) {
-                    List<byte[]> bytesList = new LinkedList<>();
-                    bytesList.add(rBytes);
-                    sendQueue.drainTo(bytesList);
-                    rBytes = BytesUtil.bytesCollection2PbBytes(bytesList);
-                    log.debug("向客户端发送字节 {}", rBytes.length);
-                    try (OutputStream os = resp.getOutputStream()) {
-                        os.write(rBytes);
-                    }
+            List<byte[]> bytesList = BytesUtil.pbBytes2BytesList(bytes);
+            for (byte[] sub : bytesList) {
+                try {
+                    receiveServerBytes(sub);
+                } catch (Exception e) {
+                    log.warn("接收字节异常", e);
+                    exit();
                 }
             }
         }

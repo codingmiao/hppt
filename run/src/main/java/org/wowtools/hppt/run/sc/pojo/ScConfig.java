@@ -104,9 +104,14 @@ public class ScConfig extends CommonConfig {
         public int port;
 
         /**
-         * 等待用户输入字节多少毫秒
+         * 等待真实端口返回数据的毫秒数，一般设一个略小于http服务超时时间的值
          */
-        public long waitBytesTime = 10000;
+        public long waitResponseTime = 30000;
+
+        /**
+         * 回复的servlet人为设置的延迟，避免客户端过于频繁的发请求
+         */
+        public long replyDelayTime = 0;
     }
 
     public static final class FileConfig {

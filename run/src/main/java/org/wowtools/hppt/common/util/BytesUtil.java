@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -135,7 +136,10 @@ public class BytesUtil {
     }
 
     private static boolean afterWrite(ChannelFuture future, Object msg) {
-        future.awaitUninterruptibly(); // 同步等待完成
+        boolean completed = future.awaitUninterruptibly(10, TimeUnit.SECONDS); // 同步等待完成
+        if (!completed) {
+            return false;
+        }
         if (future.isSuccess()) {
             return true;
         }
@@ -165,14 +169,14 @@ public class BytesUtil {
     public static boolean writeToChannel(Channel channel, byte[] bytes) {
         waitChannelWritable(channel);
         ByteBuf byteBuf = bytes2byteBuf(channel, bytes);
-        ChannelFuture future = channel.writeAndFlush(byteBuf).awaitUninterruptibly();
+        ChannelFuture future = channel.writeAndFlush(byteBuf);
         return afterWrite(future, byteBuf);
     }
 
     //把对象写入Channel
     public static boolean writeObjToChannel(Channel channel, Object obj) {
         waitChannelWritable(channel);
-        ChannelFuture future = channel.writeAndFlush(obj).awaitUninterruptibly();
+        ChannelFuture future = channel.writeAndFlush(obj);
         return afterWrite(future, obj);
     }
 
