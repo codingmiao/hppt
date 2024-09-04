@@ -137,13 +137,12 @@ public class BytesUtil {
 
     private static boolean afterWrite(ChannelFuture future, Object msg) {
         boolean completed = future.awaitUninterruptibly(10, TimeUnit.SECONDS); // 同步等待完成
-        if (!completed) {
-            return false;
+        if (completed) {
+            if (future.isSuccess()) {
+                return true;
+            }
         }
-        if (future.isSuccess()) {
-            return true;
-        }
-        log.warn("写入消息未成功!!!", future.cause());
+        log.warn("写入消息未成功!!! timeout? {}", !completed, future.cause());
         ReferenceCountUtil.safeRelease(msg);
         return false;
     }
