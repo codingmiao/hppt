@@ -162,4 +162,9 @@ public class ScConfig extends CommonConfig {
     public RPostConfig rpost = new RPostConfig();
 
     public FileConfig file = new FileConfig();
+
+    /**
+     * 内部字段，是否中继模式，不要尝试从配置文件中配置它
+     */
+    public boolean isRelay = false;
 }

@@ -110,7 +110,7 @@ public class PostClientSessionService extends ClientSessionService {
             final long sendSleepTime = config.post.sendSleepTime;
             while (running) {
                 //检测是否需要挂起接收线程
-                if (empty && !isNoLogin() && clientSessionManager.getSessionNum() == 0) {
+                if (empty && notUsed()) {
                     synchronized (replyThreadEmptyLock) {
                         log.info("无客户端,挂起接收线程");
                         try {
