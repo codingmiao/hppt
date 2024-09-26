@@ -80,7 +80,7 @@ public class RHpptServerSessionService extends ServerSessionService<ChannelHandl
     }
 
     @Override
-    public void doClose() {
+    public void onExit() {
         group.shutdownGracefully();
     }
 }

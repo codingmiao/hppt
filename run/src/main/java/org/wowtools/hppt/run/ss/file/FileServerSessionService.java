@@ -82,7 +82,7 @@ public class FileServerSessionService extends ServerSessionService<FileCtx> {
     }
 
     @Override
-    protected void doClose() throws Exception {
+    protected void onExit() throws Exception {
         dirChangeWatcher.close();
     }
 }

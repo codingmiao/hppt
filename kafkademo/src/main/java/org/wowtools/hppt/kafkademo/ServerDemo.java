@@ -51,7 +51,7 @@ public class ServerDemo extends ServerSessionService<KafkaCtx> {
     }
 
     @Override
-    protected void doClose() throws Exception {
+    protected void onExit() throws Exception {
         //TODO 关闭kafka生产者和消费者
     }
 

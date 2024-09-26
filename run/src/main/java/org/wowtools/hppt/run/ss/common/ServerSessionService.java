@@ -1,18 +1,7 @@
 package org.wowtools.hppt.run.ss.common;
 
 import lombok.extern.slf4j.Slf4j;
-import org.wowtools.hppt.common.server.LoginClientService;
-import org.wowtools.hppt.common.server.ServerSessionManager;
-import org.wowtools.hppt.common.server.ServerTalker;
-import org.wowtools.hppt.common.util.GridAesCipherUtil;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
-import org.wowtools.hppt.run.ss.util.SsUtil;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * ServerSessionService抽象类
@@ -22,42 +11,18 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public abstract class ServerSessionService<CTX> {
-    private final class ClientCell {
-        LoginClientService.Client client;
-        volatile boolean running = true;
-        volatile boolean actived = true;
 
-        CTX ctx;
-        final LoginClientService.ClientActiveWatcher clientActiveWatcher = new LoginClientService.ClientActiveWatcher() {
-            @Override
-            public void toInactivity() {
-                actived = false;
-            }
-
-            @Override
-            public void toActivity() {
-                actived = true;
-                synchronized (clientActiveWatcher) {
-                    clientActiveWatcher.notifyAll();
-                }
-            }
-        };
-    }
-
-    private final Map<CTX, ClientCell> ctxClientCellMap = new ConcurrentHashMap<>();
     protected final SsConfig ssConfig;
-    protected final ServerSessionManager serverSessionManager;
-    protected final LoginClientService loginClientService;
+
+    private final Receiver<CTX> receiver;
 
     public ServerSessionService(SsConfig ssConfig) {
         this.ssConfig = ssConfig;
-        LoginClientService.Config lConfig = new LoginClientService.Config();
-        for (SsConfig.Client client : ssConfig.clients) {
-            lConfig.users.add(new String[]{client.user, client.password});
+        if (null == ssConfig.relayScConfig) {
+            receiver = new PortReceiver<>(ssConfig, this);
+        } else {
+            throw new UnsupportedOperationException("暂未实现");
         }
-        lConfig.passwordRetryNum = ssConfig.passwordRetryNum;
-        loginClientService = new LoginClientService(lConfig);
-        serverSessionManager = SsUtil.createServerSessionManagerBuilder(ssConfig).build();
     }
 
     /**
@@ -87,63 +52,9 @@ public abstract class ServerSessionService<CTX> {
             return;
         }
         log.debug("收到客户端字节数 {}", bytes.length);
-        // 若客户端为空,则进行对时或登录
-        ClientCell clientCell = ctxClientCellMap.get(ctx);
-        if (null == clientCell) {
-            bytes = GridAesCipherUtil.decrypt(bytes);
-            String s = new String(bytes, StandardCharsets.UTF_8);
-            String[] cmd = s.split(" ", 2);
-            switch (cmd[0]) {
-                case "dt":
-                    log.debug("请求dt");
-                    byte[] dt = ("dt " + System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8);
-                    dt = GridAesCipherUtil.encrypt(dt);
-                    sendBytesToClient(ctx, dt);
-                    break;
-                case "login":
-                    clientCell = new ClientCell();
-                    LoginClientService.Client client;
-                    String loginCode = cmd[1];
-                    log.debug("请求login {}", loginCode);
-                    try {
-                        client = loginClientService.login(loginCode, clientCell.clientActiveWatcher);
-                    } catch (Exception e) {
-                        log.warn("登录失败 {} {}", loginCode, e.getMessage());
-                        byte[] login = ("login " + e.getMessage()).getBytes(StandardCharsets.UTF_8);
-                        login = GridAesCipherUtil.encrypt(login);
-                        sendBytesToClient(ctx, login);
-                        break;
-                    }
-                    clientCell.client = client;
-                    clientCell.ctx = ctx;
-                    synchronized (ctxClientCellMap) {
-                        ctxClientCellMap.forEach((oldCtx, oldCell) -> {
-                            if (oldCell.client.clientId.equals(client.clientId)) {
-                                log.info("重复登录，移除旧client {} {}", oldCell.client.clientId, ctx);
-                                removeCtx(oldCtx);
-                            }
-                        });
-                        ctxClientCellMap.put(ctx, clientCell);
-                    }
-                    log.info("客户端接入成功 {}", clientCell.client.clientId);
-                    startSendThread(clientCell);
-                    byte[] login = ("login 0").getBytes(StandardCharsets.UTF_8);
-                    login = GridAesCipherUtil.encrypt(login);
-                    sendBytesToClient(ctx, login);
-                    break;
-                default:
-                    log.warn("未知命令 {} ", s);
-                    removeCtx(ctx);
-            }
-            return;
-        }
-        // 否则进行常规数据接收操作
-        LoginClientService.Client client = clientCell.client;
-        client.receiveClientBytes.add(bytes);
-        if (!clientCell.actived) {
-            clientCell.clientActiveWatcher.toActivity();
-        }
+        receiver.receiveClientBytes(ctx, bytes);
     }
+
 
     /**
      * 关闭上下文
@@ -153,18 +64,18 @@ public abstract class ServerSessionService<CTX> {
     protected abstract void closeCtx(CTX ctx) throws Exception;
 
     /**
-     * 关闭当前服务时需要做的事情
+     * 退出当前服务时需要做的事情
      */
-    protected abstract void doClose() throws Exception;
+    protected abstract void onExit() throws Exception;
 
     /**
      * 当发生难以修复的异常等情况时，主动调用此方法结束当前服务，以便后续自动重启等操作
      */
     public void exit() {
         log.warn("ServerSessionService exit {}", this);
-        serverSessionManager.close();
+        receiver.exit();
         try {
-            doClose();
+            onExit();
         } catch (Exception e) {
             log.warn("doClose error ", e);
         }
@@ -193,10 +104,7 @@ public abstract class ServerSessionService<CTX> {
      * @param ctx
      */
     protected void removeCtx(CTX ctx) {
-        ClientCell cell = ctxClientCellMap.remove(ctx);
-        if (null != cell) {
-            cell.running = false;
-        }
+        receiver.removeCtx(ctx);
         try {
             closeCtx(ctx);
         } catch (Exception e) {
@@ -204,63 +112,5 @@ public abstract class ServerSessionService<CTX> {
         }
     }
 
-    private void startSendThread(ClientCell cell) {
-        LoginClientService.Client client = cell.client;
-        Thread.startVirtualThread(() -> {
-            while (cell.running) {
-                try {
-                    byte[] bytes = ServerTalker.replyToClient(ssConfig, serverSessionManager, client, -1, true);
-                    if (null != bytes) {
-                        sendBytesToClient(cell.ctx, bytes);
-                    } else if (!cell.actived) {
-                        synchronized (cell.clientActiveWatcher) {
-                            log.info("客户端 {} 非活跃，挂起回复消息线程", cell.client.clientId);
-                            try {
-                                cell.clientActiveWatcher.wait();
-                            } catch (InterruptedException e) {
-                                log.info("客户端 {} 活跃，恢复回复消息线程", cell.client.clientId);
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    log.warn("向用户端发送消息异常", e);
-                    removeCtx(cell.ctx);
-                }
-            }
-            log.info("回复消息线程结束 {} {}", cell.client.clientId, cell.ctx);
-        });
-        Thread.startVirtualThread(() -> {
-            while (cell.running) {
-                byte[] bytes;
-                try {
-                    bytes = client.receiveClientBytes.poll(10, TimeUnit.SECONDS);
-                } catch (Exception e) {
-                    log.warn("e", e);
-                    continue;
-                }
-                if (null != bytes) {
-                    //接消息
-                    try {
-                        ServerTalker.receiveClientBytes(ssConfig, serverSessionManager, client, bytes);
-                    } catch (Exception e) {
-                        log.warn("接收客户端消息异常", e);
-                        removeCtx(cell.ctx);
-                    } catch (Throwable t) {
-                        log.error("接收客户端消息错误", t);
-                        exit();
-                    }
-                } else if (!cell.actived) {
-                    synchronized (cell.clientActiveWatcher) {
-                        log.info("客户端 {} 非活跃，挂起接收消息线程", cell.client.clientId);
-                        try {
-                            cell.clientActiveWatcher.wait();
-                        } catch (InterruptedException e) {
-                            log.info("客户端 {} 活跃，恢复接收消息线程", cell.client.clientId);
-                        }
-                    }
-                }
-            }
-            log.info("接收消息线程结束 {} {}", cell.client.clientId, cell.ctx);
-        });
-    }
+
 }

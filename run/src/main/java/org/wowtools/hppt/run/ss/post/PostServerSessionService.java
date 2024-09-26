@@ -71,7 +71,7 @@ public class PostServerSessionService extends ServerSessionService<PostCtx> {
     }
 
     @Override
-    public void doClose() throws Exception {
+    public void onExit() throws Exception {
         server.stop();
     }
 

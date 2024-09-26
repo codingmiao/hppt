@@ -64,7 +64,7 @@ public class HpptServerSessionService extends ServerSessionService<ChannelHandle
     }
 
     @Override
-    public void doClose() {
+    public void onExit() {
         try {
             bossGroup.shutdownGracefully();
         } catch (Exception e) {

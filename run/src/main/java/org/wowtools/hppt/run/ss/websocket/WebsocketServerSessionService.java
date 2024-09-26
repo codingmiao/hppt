@@ -90,7 +90,7 @@ public class WebsocketServerSessionService extends ServerSessionService<ChannelH
     }
 
     @Override
-    public void doClose() {
+    public void onExit() {
         try {
             boss.shutdownGracefully();
         } catch (Exception e) {

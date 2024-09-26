@@ -106,7 +106,7 @@ public class RPostServerSessionService extends ServerSessionService<RPostCtx> {
     }
 
     @Override
-    protected void doClose() throws Exception {
+    protected void onExit() throws Exception {
         actived = false;
     }
 }

@@ -2,6 +2,7 @@ package org.wowtools.hppt.run.ss.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.wowtools.hppt.common.util.CommonConfig;
+import org.wowtools.hppt.run.sc.pojo.ScConfig;
 
 import java.util.ArrayList;
 
@@ -16,6 +17,11 @@ public class SsConfig extends CommonConfig {
      * 运行类型 支持 websocket(以websocket协议传输数据)、post(以http post协议传输数据)、hppt(以hppt自定义的协议传输数据)
      */
     public String type;
+
+    /**
+     * 中继模式下，配置一个ScConfig，即构造一个sc转发给下一个ss
+     */
+    public ScConfig relayScConfig;
 
     /**
      * 服务端口
