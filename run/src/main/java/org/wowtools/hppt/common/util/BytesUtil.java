@@ -148,9 +148,14 @@ public class BytesUtil {
     }
 
     private static void waitChannelWritable(Channel channel) {
+        int i = 0;
         while (!channel.isWritable() && channel.isOpen()) {
+            i++;
+            if (i > 30) {
+                throw new RuntimeException("waitChannelWritable timeout");
+            }
             try {
-                Thread.sleep(200);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
             }
         }

@@ -89,7 +89,7 @@ public abstract class ClientSessionService {
                     continue;
                 }
                 for (Map.Entry<Integer, ClientBytesSender.SessionIdCallBack> entry : sessionIdCallBackMap.entrySet()) {
-                    if (RoughTimeUtil.getTimestamp() - entry.getValue().createTime > 10000) {
+                    if (RoughTimeUtil.getTimestamp() - entry.getValue().createTime > 60000) {
                         log.warn("session长期未连接成功，疑似连接故障，重启");
                         exit();
                         return;
