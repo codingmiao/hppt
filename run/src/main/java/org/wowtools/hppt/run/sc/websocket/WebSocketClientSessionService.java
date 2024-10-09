@@ -31,7 +31,7 @@ public class WebSocketClientSessionService extends ClientSessionService {
     }
 
     @Override
-    protected void connectToServer(ScConfig config, Cb cb) throws Exception {
+    public void connectToServer(ScConfig config, Cb cb) throws Exception {
         newWsConn(config, cb);
     }
 
@@ -104,7 +104,7 @@ public class WebSocketClientSessionService extends ClientSessionService {
     }
 
     @Override
-    protected void sendBytesToServer(byte[] bytes) {
+    public void sendBytesToServer(byte[] bytes) {
         BinaryWebSocketFrame frame = new BinaryWebSocketFrame(BytesUtil.bytes2byteBuf(wsChannel, bytes));
         if (!BytesUtil.writeObjToChannel(wsChannel, frame)) {
             exit();

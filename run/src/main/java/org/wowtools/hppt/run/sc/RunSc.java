@@ -3,6 +3,7 @@ package org.wowtools.hppt.run.sc;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.common.util.ResourcesReader;
+import org.wowtools.hppt.run.sc.common.ClientSessionService;
 import org.wowtools.hppt.run.sc.file.FileClientSessionService;
 import org.wowtools.hppt.run.sc.hppt.HpptClientSessionService;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
@@ -34,30 +35,9 @@ public class RunSc {
             throw new RuntimeException("读取配置文件异常", e);
         }
         while (true) {
-            log.info("type {}", config.type);
             try {
-                switch (config.type) {
-                    case "post":
-                        new PostClientSessionService(config).sync();
-                        break;
-                    case "websocket":
-                        new WebSocketClientSessionService(config).sync();
-                        break;
-                    case "hppt":
-                        new HpptClientSessionService(config).sync();
-                        break;
-                    case "rhppt":
-                        new RHpptClientSessionService(config).sync();
-                        break;
-                    case "rpost":
-                        new RPostClientSessionService(config).sync();
-                        break;
-                    case "file":
-                        new FileClientSessionService(config).sync();
-                        break;
-                    default:
-                        throw new IllegalStateException("Unexpected config.type: " + config.type);
-                }
+                ClientSessionService clientSessionService = ClientSessionServiceBuilder.build(config);
+                clientSessionService.sync();
             } catch (Exception e) {
                 log.warn("服务异常", e);
             }

@@ -27,7 +27,7 @@ public class HpptClientSessionService extends ClientSessionService {
     }
 
     @Override
-    protected void connectToServer(ScConfig config, Cb cb) {
+    public void connectToServer(ScConfig config, Cb cb) {
         Thread.startVirtualThread(() -> {
             EventLoopGroup workerGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup(config.hppt.workerGroupNum);
             try {
@@ -63,7 +63,7 @@ public class HpptClientSessionService extends ClientSessionService {
     }
 
     @Override
-    protected void sendBytesToServer(byte[] bytes) {
+    public void sendBytesToServer(byte[] bytes) {
         if (!BytesUtil.writeToChannelHandlerContext(_ctx, bytes)) {
             exit();
         }

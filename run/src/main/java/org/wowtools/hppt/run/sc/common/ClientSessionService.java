@@ -19,18 +19,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 public abstract class ClientSessionService {
     protected final ScConfig config;
 
-    protected final BlockingQueue<String> sendCommandQueue = new LinkedBlockingQueue<>();
-    protected final BlockingQueue<SessionBytes> sendBytesQueue = new LinkedBlockingQueue<>();
 
-
-    protected final Receiver receiver;
+    public final Receiver receiver;
     protected volatile boolean running = true;
 
     /**
      * 当一个事件结束时发起的回调
      */
     @FunctionalInterface
-    protected interface Cb {
+    public interface Cb {
         void end();
     }
 
@@ -38,8 +35,10 @@ public abstract class ClientSessionService {
         this.config = config;
         if (!config.isRelay) {
             receiver = new PortReceiver(config, this);
+            log.info("--- 普通模式");
         } else {
-            throw new RuntimeException("中继模式暂未实现");
+            receiver = new SsReceiver(config, this);
+            log.info("--- 中继模式");
         }
     }
 
@@ -50,14 +49,14 @@ public abstract class ClientSessionService {
      * @param config 配置文件
      * @param cb     请在连接完成后主动调用cb.end()
      */
-    protected abstract void connectToServer(ScConfig config, Cb cb) throws Exception;
+    public abstract void connectToServer(ScConfig config, Cb cb) throws Exception;
 
     /**
      * 发送字节到服务端的具体方法
      *
      * @param bytes bytes
      */
-    protected abstract void sendBytesToServer(byte[] bytes);
+    public abstract void sendBytesToServer(byte[] bytes);
 
     /**
      * 收到服务端传过来的字节时，主动调用此方法进行接收操作
@@ -65,7 +64,7 @@ public abstract class ClientSessionService {
      * @param bytes
      * @throws Exception
      */
-    protected void receiveServerBytes(byte[] bytes) throws Exception {
+    public void receiveServerBytes(byte[] bytes) throws Exception {
         receiver.receiveServerBytes(bytes);
     }
 
@@ -111,7 +110,7 @@ public abstract class ClientSessionService {
         ClientSessionLifecycle common = new ClientSessionLifecycle() {
             @Override
             public void closed(ClientSession clientSession) {
-                sendCommandQueue.add(String.valueOf(Constant.SsCommands.CloseSession) + clientSession.getSessionId());
+                receiver.closeClientSession(clientSession);
             }
         };
         if (StringUtil.isNullOrEmpty(config.lifecycle)) {

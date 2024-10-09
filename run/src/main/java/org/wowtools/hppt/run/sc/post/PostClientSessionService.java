@@ -36,7 +36,7 @@ public class PostClientSessionService extends ClientSessionService {
 
 
     @Override
-    protected void connectToServer(ScConfig config, Cb cb) {
+    public void connectToServer(ScConfig config, Cb cb) {
         startSendThread(() -> {
             startReplyThread();
             cb.end();
@@ -174,7 +174,7 @@ public class PostClientSessionService extends ClientSessionService {
 
 
     @Override
-    protected void sendBytesToServer(byte[] bytes) {
+    public void sendBytesToServer(byte[] bytes) {
         sendQueue.add(bytes);
     }
 

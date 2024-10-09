@@ -5,7 +5,7 @@ package org.wowtools.hppt.run.ss.common;
  * @date 2024/9/26
  */
 sealed interface Receiver<CTX> permits PortReceiver, SsReceiver {
-    void receiveClientBytes(CTX ctx, byte[] bytes);
+    void receiveClientBytes(CTX ctx, byte[] bytes) throws Exception;
 
     void removeCtx(CTX ctx);
 

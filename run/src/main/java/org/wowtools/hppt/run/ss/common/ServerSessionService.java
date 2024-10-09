@@ -20,8 +20,10 @@ public abstract class ServerSessionService<CTX> {
         this.ssConfig = ssConfig;
         if (null == ssConfig.relayScConfig) {
             receiver = new PortReceiver<>(ssConfig, this);
+            log.info("--- 普通模式");
         } else {
-            throw new UnsupportedOperationException("暂未实现");
+            receiver = new SsReceiver<>(ssConfig.relayScConfig, this);
+            log.info("--- 中继模式");
         }
     }
 
@@ -45,14 +47,17 @@ public abstract class ServerSessionService<CTX> {
      *
      * @param ctx   实际和客户端连接的上下文
      * @param bytes bytes
-     * @throws Exception Exception
      */
     public void receiveClientBytes(CTX ctx, byte[] bytes) {
         if (null == bytes || bytes.length == 0) {
             return;
         }
         log.debug("收到客户端字节数 {}", bytes.length);
-        receiver.receiveClientBytes(ctx, bytes);
+        try {
+            receiver.receiveClientBytes(ctx, bytes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

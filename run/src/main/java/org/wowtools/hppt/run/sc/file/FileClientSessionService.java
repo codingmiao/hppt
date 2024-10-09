@@ -52,12 +52,12 @@ public class FileClientSessionService extends ClientSessionService {
     }
 
     @Override
-    protected void connectToServer(ScConfig config, Cb cb) throws Exception {
+    public void connectToServer(ScConfig config, Cb cb) throws Exception {
         cb.end();
     }
 
     @Override
-    protected void sendBytesToServer(byte[] bytes) {
+    public void sendBytesToServer(byte[] bytes) {
         while (null == fileProducerBuffer) {
             try {
                 Thread.sleep(10);

@@ -23,11 +23,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date 2024/9/27
  */
 @Slf4j
- final class PortReceiver implements Receiver {
-    protected final ScConfig config;
-    protected final ClientSessionManager clientSessionManager;
+final class PortReceiver implements Receiver {
+    private final ScConfig config;
+    private final ClientSessionManager clientSessionManager;
     private final ClientSessionService clientSessionService;
 
+
+    private final BlockingQueue<String> sendCommandQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<SessionBytes> sendBytesQueue = new LinkedBlockingQueue<>();
 
     private final Map<Integer, ClientBytesSender.SessionIdCallBack> sessionIdCallBackMap = new ConcurrentHashMap<>();//<newSessionFlag,cb>
     private AesCipherUtil aesCipherUtil;
@@ -35,12 +38,12 @@ import java.util.concurrent.atomic.AtomicInteger;
     private Long dt;
 
     private boolean firstLoginErr = true;
-    protected boolean noLogin = true;
+    private boolean noLogin = true;
 
-    protected volatile boolean running = true;
+    private volatile boolean running = true;
 
 
-    public PortReceiver(ScConfig config,ClientSessionService clientSessionService) throws Exception {
+    public PortReceiver(ScConfig config, ClientSessionService clientSessionService) throws Exception {
         this.config = config;
         this.clientSessionService = clientSessionService;
         clientSessionManager = ScUtil.createClientSessionManager(config,
@@ -109,8 +112,13 @@ import java.util.concurrent.atomic.AtomicInteger;
                     log.warn("未知命令 {}", s);
             }
         } else {
-            ClientTalker.receiveServerBytes(config, bytes, clientSessionManager, aesCipherUtil, clientSessionService.sendCommandQueue, sessionIdCallBackMap);
+            ClientTalker.receiveServerBytes(config, bytes, clientSessionManager, aesCipherUtil, sendCommandQueue, sessionIdCallBackMap);
         }
+    }
+
+    @Override
+    public void closeClientSession(ClientSession clientSession) {
+        sendCommandQueue.add(String.valueOf(Constant.SsCommands.CloseSession) + clientSession.getSessionId());
     }
 
     @Override
@@ -140,7 +148,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                     continue;
                 }
                 for (Map.Entry<Integer, ClientBytesSender.SessionIdCallBack> entry : sessionIdCallBackMap.entrySet()) {
-                    if (RoughTimeUtil.getTimestamp() - entry.getValue().createTime > 60000) {
+                    if (RoughTimeUtil.getTimestamp() - entry.getValue().createTime > 600_000) {
                         log.warn("session长期未连接成功，疑似连接故障，重启");
                         clientSessionService.exit();
                         return;
@@ -154,7 +162,7 @@ import java.util.concurrent.atomic.AtomicInteger;
         return new Thread(() -> {
             while (running) {
                 try {
-                    byte[] sendBytes = ClientTalker.buildSendToServerBytes(config, config.maxSendBodySize, clientSessionService.sendCommandQueue, clientSessionService.sendBytesQueue, aesCipherUtil, true);
+                    byte[] sendBytes = ClientTalker.buildSendToServerBytes(config, config.maxSendBodySize, sendCommandQueue, sendBytesQueue, aesCipherUtil, true);
                     if (null != sendBytes) {
                         log.debug("sendBytes {}", sendBytes.length);
                         clientSessionService.sendBytesToServer(sendBytes);
@@ -182,7 +190,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                     if (forward.localPort == port) {
                         int newSessionFlag = newSessionFlagIdx.addAndGet(1);
                         String cmd = Constant.SsCommands.CreateSession + forward.remoteHost + Constant.sessionIdJoinFlag + forward.remotePort + Constant.sessionIdJoinFlag + newSessionFlag;
-                        clientSessionService.sendCommandQueue.add(cmd);
+                        sendCommandQueue.add(cmd);
                         log.debug("connected command: {}", cmd);
                         sessionIdCallBackMap.put(newSessionFlag, cb);
                         log.info("建立连接 {}: {}->{}:{}", ctx.hashCode(), forward.localPort, forward.remoteHost, forward.remotePort);
@@ -199,7 +207,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
             @Override
             public void sendToTarget(ClientSession clientSession, byte[] bytes) {
-                clientSessionService.sendBytesQueue.add(new SessionBytes(clientSession.getSessionId(), bytes));
+                sendBytesQueue.add(new SessionBytes(clientSession.getSessionId(), bytes));
             }
         };
     }

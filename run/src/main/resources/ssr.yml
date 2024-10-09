@@ -1,0 +1,12 @@
+type: post
+#服务http端口
+port: 20871
+
+relayScConfig:
+
+  type: hppt
+  hppt:
+    #服务端地址
+    host: "localhost"
+    #服务端端口
+    port: 20872

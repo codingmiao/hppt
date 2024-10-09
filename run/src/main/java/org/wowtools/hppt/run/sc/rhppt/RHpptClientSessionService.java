@@ -29,7 +29,7 @@ public class RHpptClientSessionService extends ClientSessionService {
     }
 
     @Override
-    protected void connectToServer(ScConfig config, Cb cb) throws Exception {
+    public void connectToServer(ScConfig config, Cb cb) throws Exception {
         startServer(config, cb);
     }
 
@@ -114,7 +114,7 @@ public class RHpptClientSessionService extends ClientSessionService {
     }
 
     @Override
-    protected void sendBytesToServer(byte[] bytes) {
+    public void sendBytesToServer(byte[] bytes) {
         if (!BytesUtil.writeToChannelHandlerContext(_ctx, bytes)) {
             exit();
         }

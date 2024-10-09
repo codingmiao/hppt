@@ -24,10 +24,12 @@ public class ScUtil {
                 .setWorkerGroup(NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup(config.workerGroupNum))
                 .setClientBytesSender(clientBytesSender)
                 .build();
-        for (ScConfig.Forward forward : config.forwards) {
-            boolean res = clientSessionManager.bindPort(forward.localPort);
-            log.info("bind port {} {} -> {}:{}", res ? "success" : "fail",
-                    forward.localPort, forward.remoteHost, forward.remotePort);
+        if (null != config.forwards) {
+            for (ScConfig.Forward forward : config.forwards) {
+                boolean res = clientSessionManager.bindPort(forward.localPort);
+                log.info("bind port {} {} -> {}:{}", res ? "success" : "fail",
+                        forward.localPort, forward.remoteHost, forward.remotePort);
+            }
         }
         return clientSessionManager;
     }

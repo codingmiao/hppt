@@ -1,14 +1,9 @@
 package org.wowtools.hppt.kafkademo;
 
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.wowtools.hppt.run.sc.common.ClientSessionService;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
-import org.wowtools.hppt.run.ss.pojo.SsConfig;
 
 import java.util.ArrayList;
-import java.util.Properties;
 
 /**
  * 客户端，部署在电脑A上
@@ -24,7 +19,7 @@ public class ClientDemo extends ClientSessionService {
     private KafkaUtil.BytesFunction sendToServer;
     private KafkaUtil.BytesFunction clientConsumer;
     @Override
-    protected void connectToServer(ScConfig config, Cb cb) throws Exception {
+    public void connectToServer(ScConfig config, Cb cb) throws Exception {
         //初始化时构造好向kafka生产和消费数据的工具
         sendToServer = KafkaUtil.buildProducer(KafkaUtil.ClientSendTopic);
 
@@ -41,7 +36,7 @@ public class ClientDemo extends ClientSessionService {
     }
 
     @Override
-    protected void sendBytesToServer(byte[] bytes) {
+    public void sendBytesToServer(byte[] bytes) {
         sendToServer.f(bytes);
     }
 

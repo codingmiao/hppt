@@ -39,7 +39,7 @@ public class RPostClientSessionService extends ClientSessionService {
     }
 
     @Override
-    protected void connectToServer(ScConfig config, Cb cb) throws Exception {
+    public void connectToServer(ScConfig config, Cb cb) throws Exception {
         log.info("*********");
         server = new Server(config.rpost.port);
         ServletContextHandler context = new ServletContextHandler(server, "/");
@@ -62,7 +62,7 @@ public class RPostClientSessionService extends ClientSessionService {
     }
 
     @Override
-    protected void sendBytesToServer(byte[] bytes) {
+    public void sendBytesToServer(byte[] bytes) {
         sendQueue.add(bytes);
     }
 
