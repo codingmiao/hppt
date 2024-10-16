@@ -75,6 +75,16 @@ public class SsConfig extends CommonConfig {
          * 回复的servlet人为设置的延迟，避免客户端过于频繁的发请求
          */
         public long replyDelayTime = 0;
+
+        /**
+         * 服务端netty bossGroupNum
+         */
+        public int bossGroupNum = 16;
+
+        /**
+         * 服务端netty workerGroupNum
+         */
+        public int workerGroupNum = 128;
     }
 
     public PostConfig post = new PostConfig();
@@ -92,12 +102,12 @@ public class SsConfig extends CommonConfig {
         public int lengthFieldLength = 3;
 
         /**
-         * 服务端netty bossGroupNum 默认1
+         * 服务端netty bossGroupNum
          */
         public int bossGroupNum = 16;
 
         /**
-         * 服务端netty workerGroupNum 默认12
+         * 服务端netty workerGroupNum
          */
         public int workerGroupNum = 128;
     }

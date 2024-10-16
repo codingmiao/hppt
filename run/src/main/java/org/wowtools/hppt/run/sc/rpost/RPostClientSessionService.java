@@ -1,64 +1,62 @@
 package org.wowtools.hppt.run.sc.rpost;
 
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.*;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.*;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.wowtools.hppt.common.util.BytesUtil;
-import org.wowtools.hppt.common.util.DisableTraceFilter;
+import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
 import org.wowtools.hppt.run.sc.common.ClientSessionService;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
-import org.wowtools.hppt.run.ss.post.ErrorServlet;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author liuyu
- * @date 2024/4/16
- */
 @Slf4j
 public class RPostClientSessionService extends ClientSessionService {
 
-
     private final BlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<>();
-    private Server server;
+
+    private EventLoopGroup bossGroup;
+    private EventLoopGroup workerGroup;
+    private Channel channel;
 
     public RPostClientSessionService(ScConfig config) throws Exception {
         super(config);
     }
 
     @Override
-    public void connectToServer(ScConfig config, Cb cb) throws Exception {
-        log.info("*********");
-        server = new Server(config.rpost.port);
-        ServletContextHandler context = new ServletContextHandler(server, "/");
-        context.addServlet(new ServletHolder(new SendServlet()), "/s");
-        context.addServlet(new ServletHolder(new ReceiveServlet()), "/r");
-        context.addServlet(new ServletHolder(new ErrorServlet()), "/err");
+    public void connectToServer(ScConfig config, Cb cb) {
+        bossGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup(config.rpost.bossGroupNum);
+        workerGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup(config.rpost.workerGroupNum);
 
-        ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();
-        errorHandler.setShowServlet(false);
-        errorHandler.setShowStacks(false);
-        errorHandler.addErrorPage(400, 599, "/err");
-        errorHandler.setServer(new Server());
-
-        context.setErrorHandler(errorHandler);
-        context.addFilter(DisableTraceFilter.class, "/*", null);
-
-        log.info("服务端启动完成 端口 {}", config.rpost.port);
-        server.start();
-        cb.end();
+        try {
+            ServerBootstrap bootstrap = new ServerBootstrap();
+            bootstrap.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) {
+                            ch.pipeline().addLast(new HttpServerCodec());
+                            ch.pipeline().addLast(new HttpObjectAggregator(104857600)); // 100 MB
+                            ch.pipeline().addLast(new SendHandler());
+                            ch.pipeline().addLast(new ReceiveHandler());
+                        }
+                    });
+            int port = config.rpost.port;
+            ChannelFuture f = bootstrap.bind(port).sync();
+            channel = f.channel();
+            log.info("Netty服务端启动完成，端口 {}", port);
+            cb.end();
+        } catch (Exception e) {
+            log.warn("start err", e);
+            exit();
+        }
     }
 
     @Override
@@ -67,70 +65,61 @@ public class RPostClientSessionService extends ClientSessionService {
     }
 
     @Override
-    protected void doClose() throws Exception {
-        server.stop();
+    protected void doClose() {
+        // Netty的关闭逻辑将在connectToServer中处理
     }
 
-    private final class SendServlet extends HttpServlet {
+    private class SendHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         @Override
-        protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
-            try {
-                s(req, resp);
-            } catch (Exception e) {
-                log.error("SendServlet err", e);
-//                exit();
+        protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest req) {
+            if ("/s".equals(req.uri())) {
+                try {
+                    sendResponse(ctx);
+                } catch (Exception e) {
+                    log.error("SendHandler error", e);
+                }
+            } else {
+                ctx.fireChannelRead(req.retain());
             }
         }
 
-        private void s(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-            if (config.rpost.replyDelayTime > 0) {
-                Thread.sleep(config.rpost.replyDelayTime);
-            }
-            resp.setHeader("Server", "");
-            byte[] rBytes;
-            try {
-                rBytes = sendQueue.poll(config.rpost.waitResponseTime, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                rBytes = null;
-            }
-            if (null != rBytes) {
+        private void sendResponse(ChannelHandlerContext ctx) throws Exception {
+            byte[] rBytes = sendQueue.poll(config.rpost.waitResponseTime, TimeUnit.MILLISECONDS);
+            if (rBytes != null) {
                 List<byte[]> bytesList = new LinkedList<>();
                 bytesList.add(rBytes);
                 sendQueue.drainTo(bytesList);
                 rBytes = BytesUtil.bytesCollection2PbBytes(bytesList);
                 log.debug("向客户端发送字节 {}", rBytes.length);
-                try (OutputStream os = resp.getOutputStream()) {
-                    os.write(rBytes);
-                }
+
+                FullHttpResponse response = new DefaultFullHttpResponse(
+                        HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+                response.content().writeBytes(rBytes);
+                response.headers().set(HttpHeaderNames.CONTENT_LENGTH, rBytes.length);
+                ctx.writeAndFlush(response);
+            } else {
+                ctx.writeAndFlush(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NO_CONTENT));
             }
         }
     }
 
-    private final class ReceiveServlet extends HttpServlet {
+    private class ReceiveHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         @Override
-        protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
-            try {
-                r(req, resp);
-            } catch (Exception e) {
-                log.error("ReceiveServlet err", e);
-//                exit();
+        protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest req) {
+            if ("/r".equals(req.uri())) {
+                try {
+                    receiveBytes(ctx, req);
+                } catch (Exception e) {
+                    log.error("ReceiveHandler error", e);
+                }
+            } else {
+                ctx.fireChannelRead(req.retain());
             }
         }
 
-        private void r(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-            resp.setHeader("Server", "");
-            byte[] bytes;
-            try (InputStream inputStream = req.getInputStream(); ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    byteArrayOutputStream.write(buffer, 0, bytesRead);
-                }
-                bytes = byteArrayOutputStream.toByteArray();
-            }
-            if (null == bytes) {
-                return;
-            }
+        private void receiveBytes(ChannelHandlerContext ctx, FullHttpRequest req) throws Exception {
+            byte[] bytes = new byte[req.content().readableBytes()];
+            req.content().readBytes(bytes);
 
             List<byte[]> bytesList = BytesUtil.pbBytes2BytesList(bytes);
             for (byte[] sub : bytesList) {
@@ -141,7 +130,10 @@ public class RPostClientSessionService extends ClientSessionService {
                     exit();
                 }
             }
+
+            FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+            response.headers().set(HttpHeaderNames.CONTENT_LENGTH, 0);
+            ctx.writeAndFlush(response);
         }
     }
-
 }
