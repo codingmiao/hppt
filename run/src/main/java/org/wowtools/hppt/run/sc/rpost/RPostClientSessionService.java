@@ -66,7 +66,24 @@ public class RPostClientSessionService extends ClientSessionService {
 
     @Override
     protected void doClose() {
-        // Netty的关闭逻辑将在connectToServer中处理
+        if (channel.isOpen()) {
+            try {
+                channel.close();
+            } catch (Exception e) {
+                log.warn("channel.shutdownGracefully() err", e);
+            }
+        }
+
+        try {
+            bossGroup.shutdownGracefully();
+        } catch (Exception e) {
+            log.warn("bossGroup.shutdownGracefully() err", e);
+        }
+        try {
+            workerGroup.shutdownGracefully();
+        } catch (Exception e) {
+            log.warn("workerGroup.shutdownGracefully() err", e);
+        }
     }
 
     private class SendHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
