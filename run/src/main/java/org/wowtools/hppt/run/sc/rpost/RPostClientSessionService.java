@@ -44,8 +44,7 @@ public class RPostClientSessionService extends ClientSessionService {
                         protected void initChannel(SocketChannel ch) {
                             ch.pipeline().addLast(new HttpServerCodec());
                             ch.pipeline().addLast(new HttpObjectAggregator(104857600)); // 100 MB
-                            ch.pipeline().addLast(new SendHandler());
-                            ch.pipeline().addLast(new ReceiveHandler());
+                            ch.pipeline().addLast(new PostHandler());
                         }
                     });
             int port = config.rpost.port;
@@ -86,23 +85,36 @@ public class RPostClientSessionService extends ClientSessionService {
         }
     }
 
-    private class SendHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+    private class PostHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+        public static final byte[] emptyBytes = new byte[0];
+
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest req) {
-            if ("/s".equals(req.uri())) {
+            HttpResponse response;
+            String uri = req.uri();
+            if ("/s".equals(uri)) {
                 try {
-                    sendResponse(ctx);
+                    response = sendResponse();
                 } catch (Exception e) {
-                    log.error("SendHandler error", e);
+                    log.error("sendResponse error", e);
+                    response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                }
+            } else if ("/r".equals(uri)) {
+                try {
+                    response = receiveBytes(req);
+                } catch (Exception e) {
+                    log.error("receiveBytes error", e);
+                    response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
                 }
             } else {
-                ctx.fireChannelRead(req.retain());
+                response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
             }
+            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
         }
 
-        private void sendResponse(ChannelHandlerContext ctx) throws Exception {
+        private HttpResponse sendResponse() throws Exception {
             byte[] rBytes = sendQueue.poll(config.rpost.waitResponseTime, TimeUnit.MILLISECONDS);
-            if (rBytes != null) {
+            if (null != rBytes) {
                 List<byte[]> bytesList = new LinkedList<>();
                 bytesList.add(rBytes);
                 sendQueue.drainTo(bytesList);
@@ -113,31 +125,17 @@ public class RPostClientSessionService extends ClientSessionService {
                         HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
                 response.content().writeBytes(rBytes);
                 response.headers().set(HttpHeaderNames.CONTENT_LENGTH, rBytes.length);
-                ctx.writeAndFlush(response);
+                return response;
             } else {
-                ctx.writeAndFlush(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NO_CONTENT));
+                FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+                response.headers().set(HttpHeaderNames.CONTENT_LENGTH, 0);
+                return response;
             }
-        }
-    }
 
-    private class ReceiveHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-        @Override
-        protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest req) {
-            if ("/r".equals(req.uri())) {
-                try {
-                    receiveBytes(ctx, req);
-                } catch (Exception e) {
-                    log.error("ReceiveHandler error", e);
-                }
-            } else {
-                ctx.fireChannelRead(req.retain());
-            }
         }
 
-        private void receiveBytes(ChannelHandlerContext ctx, FullHttpRequest req) throws Exception {
-            byte[] bytes = new byte[req.content().readableBytes()];
-            req.content().readBytes(bytes);
-
+        private HttpResponse receiveBytes(FullHttpRequest req) throws Exception {
+            byte[] bytes = BytesUtil.byteBuf2bytes(req.content());
             List<byte[]> bytesList = BytesUtil.pbBytes2BytesList(bytes);
             for (byte[] sub : bytesList) {
                 try {
@@ -150,7 +148,7 @@ public class RPostClientSessionService extends ClientSessionService {
 
             FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
             response.headers().set(HttpHeaderNames.CONTENT_LENGTH, 0);
-            ctx.writeAndFlush(response);
+            return response;
         }
     }
 }

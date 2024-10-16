@@ -45,7 +45,6 @@ class NettyHttpServer {
                             ch.pipeline().addLast(new HttpServerCodec());
                             ch.pipeline().addLast(new HttpObjectAggregator(104857600)); // 100 MB
                             ch.pipeline().addLast(new HttpRequestHandler(postServerSessionService, ssConfig));
-                            ch.pipeline().addLast(new ErrorHandler());
                         }
                     });
 
@@ -168,22 +167,6 @@ class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         rBytes = BytesUtil.bytesCollection2PbBytes(bytesList);
         log.debug("向客户端发送字节 bytesList {} body {}", bytesList.size(), rBytes.length);
         return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(rBytes));
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
-        ctx.close();
-    }
-}
-
-// 错误处理
-class ErrorHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest req) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
-        response.headers().set("Server", "hppt");
-        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
 
     @Override
