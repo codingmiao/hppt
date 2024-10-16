@@ -1,0 +1,12 @@
+#使用http post协议传输数据，此协议最为简单，但性能略差，如有需要请查看websocket协议或hppt协议或自定义协议
+type: rpost
+
+rpost:
+  # 服务端http地址，可以填nginx转发过的地址
+  serverUrl: "http://localhost:20871"
+
+# 允许的客户端
+clients:
+  - user: user1
+    password: 12345
+

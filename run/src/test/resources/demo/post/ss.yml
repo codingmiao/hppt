@@ -1,0 +1,10 @@
+#使用http post协议传输数据，此协议最为简单，但性能略差，如有需要请查看websocket协议或hppt协议或自定义协议
+type: post
+#服务http端口
+port: 20871
+# 允许的客户端账号和密码
+clients:
+  - user: user1
+    password: 12345
+  - user: user2
+    password: 112233

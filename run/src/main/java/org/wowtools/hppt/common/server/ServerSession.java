@@ -7,6 +7,7 @@ import org.wowtools.hppt.common.util.RoughTimeUtil;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author liuyu
@@ -27,7 +28,8 @@ public class ServerSession {
     //上次活跃时间
     private long activeTime;
 
-    private final Thread sendThread;
+    private volatile boolean running = true;
+
 
     ServerSession(long sessionTimeout, int sessionId, LoginClientService.Client client, ServerSessionLifecycle lifecycle, Channel channel) {
         this.sessionId = sessionId;
@@ -36,26 +38,28 @@ public class ServerSession {
         this.lifecycle = lifecycle;
         this.client = client;
         activeSession();
-        sendThread = startSendThread();
+        startSendThread();
         client.addSession(this);
     }
 
-    private Thread startSendThread() {
-        return Thread.startVirtualThread(() -> {
-            while (true) {
-                byte[] bytes;
+    private void startSendThread() {
+        Thread.startVirtualThread(() -> {
+            while (running) {
                 try {
-                    bytes = sendBytesQueue.take();
-                } catch (InterruptedException e) {
-                    log.info("{} sendThread stop", this);
-                    break;
-                }
-                bytes = lifecycle.beforeSendToTarget(this, bytes);
-                if (bytes != null) {
-                    BytesUtil.writeToChannel(channel, bytes);
-                    lifecycle.afterSendToTarget(this, bytes);
+                    byte[] bytes = sendBytesQueue.poll(10, TimeUnit.SECONDS);
+                    if (null == bytes) {
+                        continue;
+                    }
+                    bytes = lifecycle.beforeSendToTarget(this, bytes);
+                    if (bytes != null) {
+                        BytesUtil.writeToChannel(channel, bytes);
+                        lifecycle.afterSendToTarget(this, bytes);
+                    }
+                } catch (Throwable e) {
+                    log.warn("SendThread err", e);
                 }
             }
+            log.info("{} sendThread stop", this);
         });
 
     }
@@ -95,7 +99,7 @@ public class ServerSession {
 
 
     void close() {
-        sendThread.interrupt();
+        running = false;
         channel.close();
         client.removeSession(this);
     }

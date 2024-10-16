@@ -38,11 +38,7 @@ logs
 /arthas-output/
 
 
-cc.yml
-cs.yml
-sc.yml
-ss.yml
-ssr.yml
+/run/src/main/resources/*.yml
 
 dependency-reduced-pom.xml
 

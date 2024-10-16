@@ -1,0 +1,24 @@
+type: post
+workerGroupNum: 128
+
+# 客户端用户名，每个sc进程用一个，不要重复
+clientUser: liuyu
+# 客户端密码
+clientPassword: 2asd0923hj1238
+#向服务端发数据请求体的字节数最大值 nginx代理的话，如果没办法修改配置，会出现413 Request Entity Too Large问题，没办法改nginx的话就用这个值限制
+maxSendBodySize: 1000000
+#是否启用压缩，默认启用 需和服务端保持一致
+enableCompress: true
+#是否启用内容加密，默认启用 需和服务端保持一致
+enableEncrypt: true
+post:
+  #服务端http地址，可以填nginx转发过的地址
+  serverUrl: "http://dev-soft-nw:29005/nw/gx/bgdGateway/gohomer_gd/auiwieh28937sa/"
+  #人为添加一个发送等待时间（毫秒），若网络质量不佳或发送请求过于频繁，可设置一个大于0的值来等待若干毫秒后一起发送
+  sendSleepTime: 1
+
+forwards:
+
+  - localPort: 31001
+    remoteHost: "127.0.0.1"
+    remotePort: 22

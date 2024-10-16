@@ -1,0 +1,9 @@
+type: hppt
+#服务端口
+port: 20871
+# 允许的客户端账号和密码
+clients:
+  - user: user1
+    password: 12345
+  - user: user2
+    password: 112233
