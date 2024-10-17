@@ -79,21 +79,30 @@ public class SsConfig extends CommonConfig {
         /**
          * 服务端netty bossGroupNum
          */
-        public int bossGroupNum = 16;
+        public int bossGroupNum = 1;
 
         /**
          * 服务端netty workerGroupNum
          */
-        public int workerGroupNum = 128;
+        public int workerGroupNum = 0;
     }
 
     public PostConfig post = new PostConfig();
 
 
     public static final class WebSocketConfig {
+        /**
+         * 服务端netty bossGroupNum
+         */
+        public int bossGroupNum = 1;
+
+        /**
+         * 服务端netty workerGroupNum
+         */
+        public int workerGroupNum = 0;
     }
 
-    public WebSocketConfig websocket;
+    public WebSocketConfig websocket = new WebSocketConfig();
 
     public static final class HpptConfig {
         /**
@@ -104,12 +113,12 @@ public class SsConfig extends CommonConfig {
         /**
          * 服务端netty bossGroupNum
          */
-        public int bossGroupNum = 16;
+        public int bossGroupNum = 1;
 
         /**
-         * 服务端netty workerGroupNum
+         * 服务端netty workerGroupNum 默认按CPU数动态计算
          */
-        public int workerGroupNum = 128;
+        public int workerGroupNum = 0;
     }
 
     public HpptConfig hppt = new HpptConfig();

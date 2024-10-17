@@ -7,13 +7,16 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
-import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
+import org.wowtools.hppt.common.util.NettyObjectBuilder;
 
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * ClientSession管理器
@@ -32,6 +35,7 @@ public class ClientSessionManager {
     private final List<Channel> channels = new LinkedList<>();
     private final ClientSessionManagerBuilder builder;
 
+
     ClientSessionManager(ClientSessionManagerBuilder builder) {
         this.builder = builder;
         lifecycle = builder.lifecycle;
@@ -43,7 +47,7 @@ public class ClientSessionManager {
             throw new RuntimeException("clientBytesSender不能为空");
         }
         serverBootstrap.group(builder.bossGroup, builder.workerGroup)
-                .channel(NettyChannelTypeChecker.getServerSocketChannelClass())
+                .channel(NettyObjectBuilder.getServerSocketChannelClass())
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_SNDBUF, builder.bufferSize)
                 .childOption(ChannelOption.SO_RCVBUF, builder.bufferSize)
@@ -105,7 +109,6 @@ public class ClientSessionManager {
     private final Map<ChannelHandlerContext, ClientSession> clientSessionMapByCtx = new ConcurrentHashMap<>();
 
     private final class SimpleHandler extends ByteToMessageDecoder {
-
         @Override
         public void channelActive(ChannelHandlerContext channelHandlerContext) throws Exception {
             super.channelActive(channelHandlerContext);
@@ -150,13 +153,13 @@ public class ClientSessionManager {
         protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
             byte[] bytes = BytesUtil.byteBuf2bytes(byteBuf);
             ClientSession clientSession = null;
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 1000; i++) {
                 clientSession = clientSessionMapByCtx.get(channelHandlerContext);
                 if (null != clientSession) {
                     break;
                 }
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     continue;
                 }
@@ -166,7 +169,9 @@ public class ClientSessionManager {
 //                    log.debug(new String(bytes, StandardCharsets.UTF_8));
 //                }
                 //触发数据回调事件 转发数据到真实端口
-                log.debug("ClientSession {} 收到用户端字节 {}", clientSession.getSessionId(), bytes.length);
+                if (log.isDebugEnabled()) {
+                    log.debug("ClientSession {} 收到用户端字节 {}", clientSession.getSessionId(), bytes.length);
+                }
                 bytes = lifecycle.beforeSendToTarget(clientSession, bytes);
                 if (null == bytes) {
                     return;

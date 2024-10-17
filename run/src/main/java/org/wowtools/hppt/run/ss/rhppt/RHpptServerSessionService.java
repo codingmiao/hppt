@@ -7,7 +7,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import org.wowtools.hppt.common.util.BytesUtil;
-import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
+import org.wowtools.hppt.common.util.NettyObjectBuilder;
 import org.wowtools.hppt.run.ss.common.ServerSessionService;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
 
@@ -25,11 +25,11 @@ public class RHpptServerSessionService extends ServerSessionService<ChannelHandl
 
     @Override
     public void init(SsConfig ssConfig) throws Exception {
-        group = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup();
+        group = NettyObjectBuilder.buildEventLoopGroup();
         try {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(group)
-                    .channel(NettyChannelTypeChecker.getSocketChannelClass())
+                    .channel(NettyObjectBuilder.getSocketChannelClass())
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) {
@@ -58,7 +58,9 @@ public class RHpptServerSessionService extends ServerSessionService<ChannelHandl
         protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
             // 处理接收到的消息
             byte[] bytes = BytesUtil.byteBuf2bytes(msg);
-            receiveClientBytes(ctx, bytes);
+            Thread.startVirtualThread(()->{
+                receiveClientBytes(ctx, bytes);
+            });
         }
 
         @Override

@@ -1,7 +1,7 @@
 package org.wowtools.hppt.common.server;
 
 import io.netty.channel.EventLoopGroup;
-import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
+import org.wowtools.hppt.common.util.NettyObjectBuilder;
 
 /**
  * @author liuyu
@@ -29,7 +29,7 @@ public class ServerSessionManagerBuilder {
 
     public ServerSessionManager build() {
         if (group == null) {
-            group = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup();
+            group = NettyObjectBuilder.buildVirtualThreadEventLoopGroup();
         }
 
         if (lifecycle == null) {

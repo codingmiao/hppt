@@ -16,14 +16,14 @@ import java.util.concurrent.ThreadFactory;
  * @date 2024/6/26
  */
 @Slf4j
-public class NettyChannelTypeChecker {
-    private static final int DEFAULT_EVENT_LOOP_THREADS;
+public class NettyObjectBuilder {
+    private static final int DEFAULT_EVENT_LOOP_VIRTUAL_THREADS;
 
     static {
         //本项目用了虚拟线程，且写数据用了阻塞等待，所以把线程数调高一些
-        DEFAULT_EVENT_LOOP_THREADS = Math.max(128, SystemPropertyUtil.getInt(
-                "io.netty.eventLoopThreads", NettyRuntime.availableProcessors() * 16));
-        log.debug("-Dio.netty.eventLoopThreads: {}", DEFAULT_EVENT_LOOP_THREADS);
+        DEFAULT_EVENT_LOOP_VIRTUAL_THREADS = Math.max(32, SystemPropertyUtil.getInt(
+                "io.netty.eventLoopVirtualThreads", NettyRuntime.availableProcessors() * 16));
+        log.debug("-Dio.netty.eventLoopVirtualThreads: {}", DEFAULT_EVENT_LOOP_VIRTUAL_THREADS);
     }
 
 
@@ -36,12 +36,20 @@ public class NettyChannelTypeChecker {
     }
 
 
+    public static EventLoopGroup buildEventLoopGroup(int nThread) {
+        return new NioEventLoopGroup(nThread);
+    }
+
+    public static EventLoopGroup buildEventLoopGroup() {
+        return buildEventLoopGroup(0);
+    }
+
     public static EventLoopGroup buildVirtualThreadEventLoopGroup(int nThread) {
         return new NioEventLoopGroup(nThread, new VirtualThreadFactory());
     }
 
     public static EventLoopGroup buildVirtualThreadEventLoopGroup() {
-        return buildVirtualThreadEventLoopGroup(DEFAULT_EVENT_LOOP_THREADS);
+        return buildVirtualThreadEventLoopGroup(DEFAULT_EVENT_LOOP_VIRTUAL_THREADS);
     }
 
     private static final class VirtualThreadFactory implements ThreadFactory {
@@ -50,4 +58,5 @@ public class NettyChannelTypeChecker {
             return Thread.ofVirtual().unstarted(r);
         }
     }
+
 }

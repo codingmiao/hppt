@@ -8,7 +8,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
-import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
+import org.wowtools.hppt.common.util.NettyObjectBuilder;
 import org.wowtools.hppt.run.sc.common.ClientSessionService;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
 
@@ -35,10 +35,10 @@ public class RHpptClientSessionService extends ClientSessionService {
 
     private void startServer(ScConfig config, Cb cb) throws Exception {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
-        bossGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup();
-        workerGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup();
+        bossGroup = NettyObjectBuilder.buildEventLoopGroup(1);
+        workerGroup = NettyObjectBuilder.buildEventLoopGroup();
         serverBootstrap.group(bossGroup, workerGroup)
-                .channel(NettyChannelTypeChecker.getServerSocketChannelClass())
+                .channel(NettyObjectBuilder.getServerSocketChannelClass())
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
@@ -53,8 +53,7 @@ public class RHpptClientSessionService extends ClientSessionService {
                         pipeline.addLast(new MessageHandler(cb));
                     }
                 });
-
-        serverBootstrap.bind(config.rhppt.port).sync().channel().closeFuture().sync();
+        serverBootstrap.bind(config.rhppt.port).sync();
     }
 
     @Override

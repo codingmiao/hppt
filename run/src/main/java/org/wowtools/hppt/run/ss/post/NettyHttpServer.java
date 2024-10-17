@@ -9,7 +9,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.*;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
-import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
+import org.wowtools.hppt.common.util.NettyObjectBuilder;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
 
 import java.util.LinkedList;
@@ -33,8 +33,8 @@ class NettyHttpServer {
     }
 
     public void start() throws InterruptedException {
-        bossGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup(ssConfig.post.bossGroupNum);
-        workerGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup(ssConfig.post.workerGroupNum);
+        bossGroup = NettyObjectBuilder.buildEventLoopGroup(ssConfig.post.bossGroupNum);
+        workerGroup = NettyObjectBuilder.buildEventLoopGroup(ssConfig.post.workerGroupNum);
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
@@ -83,6 +83,43 @@ class NettyHttpServer {
 @Slf4j
 // 处理请求
 class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+    private final class ChannelReader implements Runnable {
+        private final ChannelHandlerContext ctx;
+        private final FullHttpRequest req;
+
+        public ChannelReader(ChannelHandlerContext ctx, FullHttpRequest req) {
+            this.ctx = ctx;
+            this.req = req;
+        }
+
+        @Override
+        public void run() {
+            try {
+                HttpResponse response;
+                try {
+                    String uri = req.uri();
+                    String[] arr = uri.split("\\?", 2);
+                    String path = arr[0];
+                    String cookie = arr[1].substring(2);
+                    if (path.equals("/s") && req.method() == HttpMethod.POST) {
+                        response = handleSend(req, cookie);
+                    } else if (path.equals("/r") && req.method() == HttpMethod.POST) {
+                        response = handleReply(req, cookie);
+                    } else {
+                        response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
+                    }
+                } catch (Exception e) {
+                    log.warn("channelRead0 err ", e);
+                    response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                }
+                // Write the response
+                ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+            } finally {
+                req.release();
+            }
+        }
+    }
+
     private final PostServerSessionService postServerSessionService;
     private final long replyDelayTime;
     private final long waitResponseTime;
@@ -95,25 +132,8 @@ class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest req) {
-        HttpResponse response;
-        try {
-            String uri = req.uri();
-            String[] arr = uri.split("\\?", 2);
-            String path = arr[0];
-            String cookie = arr[1].substring(2);
-            if (path.equals("/s") && req.method() == HttpMethod.POST) {
-                response = handleSend(req, cookie);
-            } else if (path.equals("/r") && req.method() == HttpMethod.POST) {
-                response = handleReply(req, cookie);
-            } else {
-                response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
-            }
-        } catch (Exception e) {
-            log.warn("channelRead0 err ", e);
-            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
-        }
-        // Write the response
-        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        req.retain();
+        Thread.startVirtualThread(new ChannelReader(ctx, req));
     }
 
     private FullHttpResponse handleSend(FullHttpRequest req, String cookie) {

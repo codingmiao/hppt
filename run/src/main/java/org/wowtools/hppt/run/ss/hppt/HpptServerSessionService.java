@@ -8,7 +8,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
-import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
+import org.wowtools.hppt.common.util.NettyObjectBuilder;
 import org.wowtools.hppt.run.ss.common.ServerSessionService;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
 
@@ -27,12 +27,12 @@ public class HpptServerSessionService extends ServerSessionService<ChannelHandle
 
     @Override
     public void init(SsConfig ssConfig) {
-        bossGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup(ssConfig.hppt.bossGroupNum);
-        workerGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup(ssConfig.hppt.workerGroupNum);
+        bossGroup = NettyObjectBuilder.buildEventLoopGroup(ssConfig.hppt.bossGroupNum);
+        workerGroup = NettyObjectBuilder.buildEventLoopGroup(ssConfig.hppt.workerGroupNum);
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workerGroup)
-                .channel(NettyChannelTypeChecker.getServerSocketChannelClass())
+                .channel(NettyObjectBuilder.getServerSocketChannelClass())
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
@@ -82,7 +82,7 @@ public class HpptServerSessionService extends ServerSessionService<ChannelHandle
         protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
             // 处理接收到的消息
             byte[] content = BytesUtil.byteBuf2bytes(msg);
-            receiveClientBytes(ctx, content);
+            Thread.startVirtualThread(()-> receiveClientBytes(ctx, content));
         }
 
         @Override

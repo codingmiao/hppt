@@ -7,7 +7,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.*;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
-import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
+import org.wowtools.hppt.common.util.NettyObjectBuilder;
 import org.wowtools.hppt.run.sc.common.ClientSessionService;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
 
@@ -32,8 +32,8 @@ public class RPostClientSessionService extends ClientSessionService {
 
     @Override
     public void connectToServer(ScConfig config, Cb cb) {
-        bossGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup(config.rpost.bossGroupNum);
-        workerGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup(config.rpost.workerGroupNum);
+        bossGroup = NettyObjectBuilder.buildEventLoopGroup(config.rpost.bossGroupNum);
+        workerGroup = NettyObjectBuilder.buildEventLoopGroup(config.rpost.workerGroupNum);
 
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
@@ -86,30 +86,49 @@ public class RPostClientSessionService extends ClientSessionService {
     }
 
     private class PostHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-        public static final byte[] emptyBytes = new byte[0];
+
+        private final class ChannelReader implements Runnable{
+            private final ChannelHandlerContext ctx;
+            private final FullHttpRequest req;
+
+            public ChannelReader(ChannelHandlerContext ctx, FullHttpRequest req) {
+                this.ctx = ctx;
+                this.req = req;
+            }
+
+            @Override
+            public void run() {
+                try {
+                    HttpResponse response;
+                    String uri = req.uri();
+                    if ("/s".equals(uri)) {
+                        try {
+                            response = sendResponse();
+                        } catch (Exception e) {
+                            log.error("sendResponse error", e);
+                            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                        }
+                    } else if ("/r".equals(uri)) {
+                        try {
+                            response = receiveBytes(req);
+                        } catch (Exception e) {
+                            log.error("receiveBytes error", e);
+                            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                        }
+                    } else {
+                        response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
+                    }
+                    ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+                } finally {
+                    req.release();
+                }
+            }
+        }
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest req) {
-            HttpResponse response;
-            String uri = req.uri();
-            if ("/s".equals(uri)) {
-                try {
-                    response = sendResponse();
-                } catch (Exception e) {
-                    log.error("sendResponse error", e);
-                    response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
-                }
-            } else if ("/r".equals(uri)) {
-                try {
-                    response = receiveBytes(req);
-                } catch (Exception e) {
-                    log.error("receiveBytes error", e);
-                    response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
-                }
-            } else {
-                response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
-            }
-            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+            req.retain();
+            Thread.startVirtualThread(new ChannelReader(ctx,req));
         }
 
         private HttpResponse sendResponse() throws Exception {

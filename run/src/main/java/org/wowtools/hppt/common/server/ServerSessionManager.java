@@ -4,11 +4,10 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.Constant;
-import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
+import org.wowtools.hppt.common.util.NettyObjectBuilder;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -42,7 +41,8 @@ public class ServerSessionManager implements AutoCloseable {
         lifecycle = builder.lifecycle;
         sessionTimeout = builder.sessionTimeout;
         bootstrap.group(builder.group)
-                .channel(NettyChannelTypeChecker.getSocketChannelClass())
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) sessionTimeout)
+                .channel(NettyObjectBuilder.getSocketChannelClass())
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
@@ -155,17 +155,15 @@ public class ServerSessionManager implements AutoCloseable {
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
             ByteBuf buf = (ByteBuf) msg;
             byte[] bytes = BytesUtil.byteBuf2bytes(buf);
-            buf.release();
             ServerSession session = getServeSession(ctx);
-            if (null == session) {
+            if (null != session) {
+                session.activeSession();
+                log.debug("serverSession {} 收到目标端口字节 {}", session, bytes.length);
+                lifecycle.sendToClientBuffer(session, bytes, session.getClient());
+                lifecycle.afterSendToTarget(session, bytes);
+            } else {
                 log.warn("channelRead session不存在");
-                return;
             }
-            session.activeSession();
-            log.debug("serverSession {} 收到目标端口字节 {}", session, bytes.length);
-            lifecycle.sendToClientBuffer(session, bytes, session.getClient());
-            lifecycle.afterSendToTarget(session, bytes);
-
         }
 
         @Override

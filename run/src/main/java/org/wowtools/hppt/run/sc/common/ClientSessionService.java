@@ -8,8 +8,10 @@ import org.wowtools.hppt.common.pojo.SessionBytes;
 import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author liuyu
@@ -23,6 +25,7 @@ public abstract class ClientSessionService {
     public final Receiver receiver;
     protected volatile boolean running = true;
 
+    private final BlockingQueue<byte[]> receiveServerBytesQueue = new ArrayBlockingQueue<>(128);
     /**
      * 当一个事件结束时发起的回调
      */
@@ -40,6 +43,26 @@ public abstract class ClientSessionService {
             receiver = new SsReceiver(config, this);
             log.info("--- 中继模式");
         }
+        Thread.startVirtualThread(()->{
+            while (running) {
+                byte[] bytes;
+                try {
+                    bytes = receiveServerBytesQueue.poll(10, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    bytes = null;
+                }
+                if (null == bytes) {
+                    continue;
+                }
+                try {
+                    receiver.receiveServerBytes(bytes);
+                } catch (Exception e) {
+                    log.warn("receiver.receiveServerBytes err",e);
+                    exit();
+                }
+            }
+
+        });
     }
 
 
@@ -65,7 +88,10 @@ public abstract class ClientSessionService {
      * @throws Exception
      */
     public void receiveServerBytes(byte[] bytes) throws Exception {
-        receiver.receiveServerBytes(bytes);
+        if (!receiveServerBytesQueue.offer(bytes,30, TimeUnit.SECONDS)){
+            log.warn("缓冲区堆积过多数据，强制退出");
+            exit();
+        }
     }
 
     /**

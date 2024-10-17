@@ -3,14 +3,13 @@ package nettytest;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
-import org.wowtools.hppt.common.util.NettyChannelTypeChecker;
+import org.wowtools.hppt.common.util.NettyObjectBuilder;
 
 import java.nio.charset.StandardCharsets;
 
@@ -18,8 +17,8 @@ import java.nio.charset.StandardCharsets;
 public class NettyServer {
 
     public static void main(String[] args) throws InterruptedException {
-        EventLoopGroup bossGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup();
-        EventLoopGroup workerGroup = NettyChannelTypeChecker.buildVirtualThreadEventLoopGroup();
+        EventLoopGroup bossGroup = NettyObjectBuilder.buildEventLoopGroup();
+        EventLoopGroup workerGroup = NettyObjectBuilder.buildEventLoopGroup();
 
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();

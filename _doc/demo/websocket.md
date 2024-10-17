@@ -63,7 +63,7 @@ server {
     ...
     location /aaa/ {
         proxy_redirect off;
-        proxy_pass http://win10:20871/s;
+        proxy_pass http://192.168.0.1:20871/;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
