@@ -29,6 +29,11 @@ public class SsConfig extends CommonConfig {
     public int port;
 
     /**
+     * 发起一个新连接，连接到真实端口并构建会话超时时限(ms)，超时还连不上会关闭session
+     */
+    public long initSessionTimeout = 30000;
+
+    /**
      * 超过sessionTimeout，给客户端发送存活确认命令，若下一个sessionTimeout内未收到确认，则强制关闭服务
      */
     public long sessionTimeout = 120000;

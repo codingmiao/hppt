@@ -9,9 +9,12 @@ import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.common.util.NettyObjectBuilder;
 
+import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -32,7 +35,7 @@ public class ServerSessionManager implements AutoCloseable {
     //<clientId,Map<sessionId,session>>
     private final Map<String, Map<Integer, ServerSession>> clientIdServerSessionMap = new ConcurrentHashMap<>();
 
-    private final Bootstrap bootstrap = new Bootstrap();
+    private final Bootstrap bootstrap = new Bootstrap();//TODO 这里改到每个session里，减少eventloop数，实现阻塞等待，以此避免接收目标端数据过快
 
     private final ServerSessionLifecycle lifecycle;
     private final long sessionTimeout;
@@ -90,16 +93,77 @@ public class ServerSessionManager implements AutoCloseable {
         running = false;
     }
 
-    public ServerSession createServerSession(LoginClientService.Client client, String host, int port) {
+    //新建一个session并返回sessionId
+    public int createServerSession(LoginClientService.Client client, String host, int port, long timeoutMillis) {
         int sessionId = sessionIdBuilder.addAndGet(1);
-        log.info("new ServerSession {} {}:{} from {}", sessionId, host, port, client.clientId);
-        Channel channel = bootstrap.connect(host, port).channel();
+        Map<Integer, ServerSession> clientSessions = clientIdServerSessionMap.computeIfAbsent(client.clientId, (id) -> new ConcurrentHashMap<>());
+
+        class ChannelRes {
+            Throwable cause;
+            Channel channel;
+        }
+        CompletableFuture<ChannelRes> resFuture = new CompletableFuture<>();
+
+        ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port));
+        // 添加超时处理
+        future.addListener((ChannelFutureListener) f -> {
+            ChannelRes res = new ChannelRes();
+            try {
+                if (!f.isSuccess()) {
+                    try {
+                        future.cancel(true); // 取消未完成的连接尝试
+                    } catch (Exception e) {
+                        log.warn("future.channel, sessionId {}", sessionId, e);
+                    }
+                    res.cause = f.cause();
+                } else {
+                    // 设置连接超时
+                    boolean isConnected = future.awaitUninterruptibly(timeoutMillis, TimeUnit.MILLISECONDS);
+                    if (!isConnected) {
+                        try {
+                            future.cancel(true); // 取消未完成的连接尝试
+                        } catch (Exception e) {
+                            log.warn("future.channel, sessionId {}", sessionId, e);
+                        }
+                    } else {
+                        res.channel = future.channel();
+                        log.info("new ServerSession {} {}:{} from {}", sessionId, host, port, client.clientId);
+                    }
+                }
+            } catch (Exception e) {
+                res.cause = e;
+            } finally {
+                resFuture.complete(res);
+            }
+
+        });
+
+        ChannelRes res;
+        try {
+            res = resFuture.get(timeoutMillis, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            log.warn("获取ChannelRes异常 sessionId {}", sessionId, e);
+            return sessionId;
+        }
+        if (null == res) {
+            log.warn("获取channel超时 sessionId {}", sessionId);
+            return sessionId;
+        }
+        if (null != res.cause) {
+            log.warn("获取channel异常 sessionId {}", sessionId, res.cause);
+            return sessionId;
+        }
+
+        Channel channel = res.channel;
+        if (null == channel) {
+            log.warn("获取channel为空 sessionId {}", sessionId);
+            return sessionId;
+        }
         ServerSession serverSession = new ServerSession(sessionTimeout, sessionId, client, lifecycle, channel);
         channelServerSessionMap.put(channel, serverSession);
         serverSessionMap.put(sessionId, serverSession);
-        Map<Integer, ServerSession> clientSessions = clientIdServerSessionMap.computeIfAbsent(client.clientId, (id) -> new ConcurrentHashMap<>());
         clientSessions.put(sessionId, serverSession);
-        return serverSession;
+        return sessionId;
     }
 
     public void disposeServerSession(ServerSession serverSession, String type) {
@@ -154,7 +218,13 @@ public class ServerSessionManager implements AutoCloseable {
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
             ByteBuf buf = (ByteBuf) msg;
-            byte[] bytes = BytesUtil.byteBuf2bytes(buf);
+            byte[] bytes = null;
+            try {
+                bytes = BytesUtil.byteBuf2bytes(buf);
+            }finally {
+                //channelRead方法需要手动释放ByteBuf
+                buf.release();
+            }
             ServerSession session = getServeSession(ctx);
             if (null != session) {
                 session.activeSession();

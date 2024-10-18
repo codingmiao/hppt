@@ -1,8 +1,10 @@
 package org.wowtools.hppt.run.ss;
 
+import io.netty.util.ResourceLeakDetector;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.common.util.ResourcesReader;
+import org.wowtools.hppt.run.Run;
 import org.wowtools.hppt.run.ss.common.ServerSessionService;
 import org.wowtools.hppt.run.ss.file.FileServerSessionService;
 import org.wowtools.hppt.run.ss.hppt.HpptServerSessionService;
@@ -20,6 +22,14 @@ import org.wowtools.hppt.run.ss.websocket.WebsocketServerSessionService;
 public class RunSs {
 
     public static void main(String[] args) throws Exception {
+        try {
+            if ("1".equals(ResourcesReader.readStr(Run.class, "/debug.txt").trim())) {
+                ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.PARANOID);
+                System.out.println("开启调试");
+            }
+        } catch (Exception e) {
+        }
+
         String configPath;
         if (args.length <= 1) {
             configPath = "ss.yml";

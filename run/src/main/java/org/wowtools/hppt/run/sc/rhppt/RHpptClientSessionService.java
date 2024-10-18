@@ -114,7 +114,9 @@ public class RHpptClientSessionService extends ClientSessionService {
 
     @Override
     public void sendBytesToServer(byte[] bytes) {
-        if (!BytesUtil.writeToChannelHandlerContext(_ctx, bytes)) {
+        Throwable e = BytesUtil.writeToChannelHandlerContext(_ctx, bytes);
+        if (null!=e) {
+            log.warn("sendBytesToServer err", e);
             exit();
         }
     }

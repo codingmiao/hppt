@@ -52,11 +52,15 @@ public class ServerSession {
                     }
                     bytes = lifecycle.beforeSendToTarget(this, bytes);
                     if (bytes != null) {
-                        BytesUtil.writeToChannel(channel, bytes);
+                        Throwable e = BytesUtil.writeToChannel(channel, bytes);
+                        if (null != e) {
+                            throw e;
+                        }
                         lifecycle.afterSendToTarget(this, bytes);
                     }
                 } catch (Throwable e) {
                     log.warn("SendThread err", e);
+                    close();
                 }
             }
             log.info("{} sendThread stop", this);

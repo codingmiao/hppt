@@ -4,7 +4,6 @@ import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.pojo.SessionBytes;
 import org.wowtools.hppt.common.protobuf.ProtoMessage;
-import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.CommonConfig;
 import org.wowtools.hppt.common.util.Constant;
 
@@ -22,7 +21,7 @@ public class ServerTalker {
 
     //接收客户端发来的字节并做相应处理
     public static void receiveClientBytes(CommonConfig config, ServerSessionManager serverSessionManager,
-                                          LoginClientService.Client client, byte[] bytes) throws Exception {
+                                          LoginClientService.Client client, byte[] bytes, long timeoutMillis) throws Exception {
         if (null == bytes || bytes.length == 0) {
             return;
         }
@@ -36,7 +35,7 @@ public class ServerTalker {
         /* 发消息 */
         //发命令
         for (String command : inputMessage.getCommandListList()) {
-            receiveClientCommand(command, serverSessionManager, serverSessionMap, client);
+            receiveClientCommand(command, serverSessionManager, serverSessionMap, client, timeoutMillis);
         }
         //发bytes
         for (ProtoMessage.BytesPb bytesPb : inputMessage.getBytesPbListList()) {
@@ -51,16 +50,24 @@ public class ServerTalker {
     }
 
     private static void receiveClientCommand(String command,
-                                             ServerSessionManager serverSessionManager, Map<Integer, ServerSession> serverSessionMap, LoginClientService.Client client) {
+                                             ServerSessionManager serverSessionManager, Map<Integer, ServerSession> serverSessionMap, LoginClientService.Client client, long timeoutMillis) {
         log.debug("收到客户端命令 {} ", command);
         char type = command.charAt(0);
         switch (type) {
             case Constant.SsCommands.CreateSession -> {
                 String[] params = command.substring(1).split(Constant.sessionIdJoinFlag);
-                ServerSession session = serverSessionManager.createServerSession(client, params[0], Integer.parseInt(params[1]));
-                client.addCommand(String.valueOf(Constant.ScCommands.InitSession) + session.getSessionId() + Constant.sessionIdJoinFlag + params[2]);
+                int sessionId = serverSessionManager.createServerSession(client, params[0], Integer.parseInt(params[1]), timeoutMillis);
+                client.addCommand(String.valueOf(Constant.ScCommands.InitSession) + sessionId + Constant.sessionIdJoinFlag + params[2]);
+                if (null == serverSessionManager.getServerSessionBySessionId(sessionId)) {
+                    //获取sessionId为空，说明刚才serverSessionManager.createServerSession失败了，所以接着发一条关闭命令给客户端
+                    client.addCommand(String.valueOf(Constant.ScCommands.CloseSession) + sessionId);
+                }
             }
             case Constant.SsCommands.CloseSession -> {
+                if (null == serverSessionMap) {
+                    log.info("CloseSession, serverSessionMap尚未建立，忽略命令 {}", command);
+                    return;
+                }
                 int sessionId = Integer.parseInt(command.substring(1));
                 ServerSession serverSession = serverSessionMap.get(sessionId);
                 if (null != serverSession) {
@@ -68,6 +75,10 @@ public class ServerTalker {
                 }
             }
             case Constant.SsCommands.ActiveSession -> {
+                if (null == serverSessionMap) {
+                    log.info("ActiveSession, serverSessionMap尚未建立，忽略命令 {}", command);
+                    return;
+                }
                 int sessionId = Integer.parseInt(command.substring(1));
                 ServerSession serverSession = serverSessionMap.get(sessionId);
                 if (null != serverSession) {

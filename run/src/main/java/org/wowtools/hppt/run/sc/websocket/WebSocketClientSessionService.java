@@ -37,7 +37,7 @@ public class WebSocketClientSessionService extends ClientSessionService {
 
     private void newWsConn(ScConfig config, Cb cb) throws Exception {
         doClose();
-        final URI webSocketURL = new URI(config.websocket.serverUrl+"/s");//随便加一个后缀防止被nginx转发时识别不到
+        final URI webSocketURL = new URI(config.websocket.serverUrl + "/s");//随便加一个后缀防止被nginx转发时识别不到
         group = NettyObjectBuilder.buildEventLoopGroup(config.websocket.workerGroupNum);
         Bootstrap boot = new Bootstrap();
         boot.option(ChannelOption.SO_KEEPALIVE, true)
@@ -85,7 +85,9 @@ public class WebSocketClientSessionService extends ClientSessionService {
                                                 } catch (InterruptedException e) {
                                                     throw new RuntimeException(e);
                                                 }
-                                                if (!BytesUtil.writeObjToChannel(ctx.channel(), new PingWebSocketFrame())) {
+                                                Throwable e = BytesUtil.writeObjToChannel(ctx.channel(), new PingWebSocketFrame());
+                                                if (null != e) {
+                                                    log.warn("ping err", e);
                                                     exit();
                                                 }
                                             }
@@ -106,7 +108,9 @@ public class WebSocketClientSessionService extends ClientSessionService {
     @Override
     public void sendBytesToServer(byte[] bytes) {
         BinaryWebSocketFrame frame = new BinaryWebSocketFrame(BytesUtil.bytes2byteBuf(wsChannel, bytes));
-        if (!BytesUtil.writeObjToChannel(wsChannel, frame)) {
+        Throwable e = BytesUtil.writeObjToChannel(wsChannel, frame);
+        if (null != e) {
+            log.warn("sendBytesToServer err", e);
             exit();
         }
     }

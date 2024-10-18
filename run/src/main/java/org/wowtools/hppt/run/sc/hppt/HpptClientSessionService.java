@@ -64,7 +64,9 @@ public class HpptClientSessionService extends ClientSessionService {
 
     @Override
     public void sendBytesToServer(byte[] bytes) {
-        if (!BytesUtil.writeToChannelHandlerContext(_ctx, bytes)) {
+        Throwable e = BytesUtil.writeToChannelHandlerContext(_ctx, bytes);
+        if (null != e) {
+            log.warn("sendBytesToServer err", e);
             exit();
         }
     }
@@ -77,7 +79,7 @@ public class HpptClientSessionService extends ClientSessionService {
         }
 
         @Override
-        protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception{
+        protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
             // 处理接收到的消息
             byte[] bytes = BytesUtil.byteBuf2bytes(msg);
             receiveServerBytes(bytes);

@@ -135,16 +135,20 @@ public class BytesUtil {
         return byteBuf;
     }
 
-    private static boolean afterWrite(ChannelFuture future, Object msg) {
+    private static Throwable afterWrite(ChannelFuture future, Object msg) {
         boolean completed = future.awaitUninterruptibly(10, TimeUnit.SECONDS); // 同步等待完成
         if (completed) {
             if (future.isSuccess()) {
-                return true;
+                return null;
             }
         }
-        log.warn("写入消息未成功!!! timeout? {}", !completed, future.cause());
+        Throwable cause = future.cause();
+        if (null == cause) {
+            cause = new RuntimeException("写入消息未成功");
+        }
+        log.warn("写入消息未成功!!! timeout? {}", !completed, cause);
         ReferenceCountUtil.safeRelease(msg);
-        return false;
+        return cause;
     }
 
     private static void waitChannelWritable(Channel channel) {
@@ -161,24 +165,24 @@ public class BytesUtil {
         }
     }
 
-    //把字节写入ChannelHandlerContext
-    public static boolean writeToChannelHandlerContext(ChannelHandlerContext ctx, byte[] bytes) {
+    //把字节写入ChannelHandlerContext 如果有异常则返回异常
+    public static Throwable writeToChannelHandlerContext(ChannelHandlerContext ctx, byte[] bytes) {
         waitChannelWritable(ctx.channel());
         ByteBuf byteBuf = bytes2byteBuf(ctx, bytes);
         ChannelFuture future = ctx.writeAndFlush(byteBuf);
         return afterWrite(future, byteBuf);
     }
 
-    //把字节写入Channel
-    public static boolean writeToChannel(Channel channel, byte[] bytes) {
+    //把字节写入Channel 如果有异常则返回异常
+    public static Throwable writeToChannel(Channel channel, byte[] bytes) {
         waitChannelWritable(channel);
         ByteBuf byteBuf = bytes2byteBuf(channel, bytes);
         ChannelFuture future = channel.writeAndFlush(byteBuf);
         return afterWrite(future, byteBuf);
     }
 
-    //把对象写入Channel
-    public static boolean writeObjToChannel(Channel channel, Object obj) {
+    //把对象写入Channel 如果有异常则返回异常
+    public static Throwable writeObjToChannel(Channel channel, Object obj) {
         waitChannelWritable(channel);
         ChannelFuture future = channel.writeAndFlush(obj);
         return afterWrite(future, obj);

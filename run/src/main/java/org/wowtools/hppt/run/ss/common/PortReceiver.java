@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 普通模式下，数据被发送到真实端口
+ *
  * @author liuyu
  * @date 2024/9/26
  */
@@ -158,7 +159,7 @@ final class PortReceiver<CTX> implements Receiver<CTX> {
                 if (null != bytes) {
                     //接消息
                     try {
-                        ServerTalker.receiveClientBytes(ssConfig, serverSessionManager, client, bytes);
+                        ServerTalker.receiveClientBytes(ssConfig, serverSessionManager, client, bytes, ssConfig.initSessionTimeout);
                     } catch (Exception e) {
                         log.warn("接收客户端消息异常", e);
                         removeCtx(cell.ctx);

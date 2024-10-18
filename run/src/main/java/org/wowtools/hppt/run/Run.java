@@ -30,13 +30,6 @@ public class Run {
         } catch (Exception e) {
             System.out.println("未加载到根目录下logback.xml文件，使用默认配置 " + e.getMessage());
         }
-        try {
-            if ("1".equals(ResourcesReader.readStr(Run.class, "/debug.txt").trim())) {
-                ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.PARANOID);
-                System.out.println("开启调试");
-            }
-        } catch (Exception e) {
-        }
         String type = args[0];
         switch (type) {
             case "ss":
