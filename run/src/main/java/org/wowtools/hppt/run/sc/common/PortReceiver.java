@@ -12,6 +12,8 @@ import org.wowtools.hppt.run.sc.pojo.ScConfig;
 import org.wowtools.hppt.run.sc.util.ScUtil;
 
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -144,16 +146,22 @@ final class PortReceiver implements Receiver {
             while (running) {
                 try {
                     Thread.sleep(30000);
-                } catch (InterruptedException e) {
-                    continue;
-                }
-                for (Map.Entry<Integer, ClientBytesSender.SessionIdCallBack> entry : sessionIdCallBackMap.entrySet()) {
-                    if (RoughTimeUtil.getTimestamp() - entry.getValue().createTime > 600_000) {
-                        log.warn("session长期未连接成功，疑似连接故障，重启");
-                        clientSessionService.exit();
-                        return;
+
+                    List<Map.Entry<Integer, ClientBytesSender.SessionIdCallBack>> timeoutEntries = new LinkedList<>();
+                    for (Map.Entry<Integer, ClientBytesSender.SessionIdCallBack> entry : sessionIdCallBackMap.entrySet()) {
+                        if (RoughTimeUtil.getTimestamp() - entry.getValue().createTime > 30_000) {
+                            timeoutEntries.add(entry);
+                        }
                     }
+                    for (Map.Entry<Integer, ClientBytesSender.SessionIdCallBack> entry : timeoutEntries) {
+                        log.warn("session长期未连接成功，疑似连接故障，主动关闭");
+                        sessionIdCallBackMap.remove(entry.getKey());
+                        entry.getValue().channelHandlerContext.close();
+                    }
+                } catch (Exception e) {
+                    log.warn("checkSessionInit", e);
                 }
+
             }
         });
     }
@@ -164,7 +172,7 @@ final class PortReceiver implements Receiver {
                 try {
                     byte[] sendBytes = ClientTalker.buildSendToServerBytes(config, config.maxSendBodySize, sendCommandQueue, sendBytesQueue, aesCipherUtil, true);
                     if (null != sendBytes) {
-                        log.debug("sendBytes {}", sendBytes.length);
+                        log.debug("sendBytesToServer {}", sendBytes.length);
                         clientSessionService.sendBytesToServer(sendBytes);
                     }
                 } catch (Exception e) {

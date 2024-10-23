@@ -29,7 +29,7 @@ public class ServerSessionManagerBuilder {
 
     public ServerSessionManager build() {
         if (group == null) {
-            group = NettyObjectBuilder.buildVirtualThreadEventLoopGroup();
+            group = NettyObjectBuilder.buildEventLoopGroup();
         }
 
         if (lifecycle == null) {

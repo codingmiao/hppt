@@ -1,5 +1,6 @@
 package org.wowtools.hppt.common.server;
 
+import org.wowtools.hppt.common.pojo.SendAbleSessionBytes;
 import org.wowtools.hppt.common.pojo.SessionBytes;
 import org.wowtools.hppt.common.util.AesCipherUtil;
 import org.wowtools.hppt.common.util.BytesUtil;
@@ -35,7 +36,7 @@ public class LoginClientService {
 
         private final BlockingQueue<String> commandQueue = new LinkedBlockingQueue<>();
 
-        private final BlockingQueue<SessionBytes> sessionBytesQueue = new LinkedBlockingQueue<>();
+        private final BlockingQueue<SendAbleSessionBytes> sessionBytesQueue = new LinkedBlockingQueue<>();
         public final BlockingQueue<byte[]> receiveClientBytes = new LinkedBlockingQueue<>();
 
         private final HashMap<Integer, ServerSession> sessions = new HashMap<>();
@@ -83,28 +84,32 @@ public class LoginClientService {
         }
 
         //添加一条向客户端发送的bytes
-        public void addBytes(int sessionId, byte[] bytes) {
-            sessionBytesQueue.add(new SessionBytes(sessionId, bytes));
+        public void addBytes(int sessionId, byte[] bytes, SendAbleSessionBytes.CallBack callBack) {
+            SendAbleSessionBytes sessionBytes = new SendAbleSessionBytes(
+                    new SessionBytes(sessionId, bytes),
+                    callBack
+            );
+            sessionBytesQueue.add(sessionBytes);
         }
 
         //取出所有需要向客户端发送的bytes 取出的bytes会按相同sessionId进行整合 无bytes则返回null
-        public List<SessionBytes> fetchBytes(long maxReturnBodySize) {
+        public List<SendAbleSessionBytes> fetchBytes(long maxReturnBodySize) {
             if (sessionBytesQueue.isEmpty()) {
                 return null;
             }
-            List<SessionBytes> bytesList = new LinkedList<>();
+            List<SendAbleSessionBytes> bytesList = new LinkedList<>();
             if (maxReturnBodySize < 0) {
                 sessionBytesQueue.drainTo(bytesList);
             } else {
                 //根据maxReturnBodySize的限制取出队列中的数据返回
                 long currentReturnBodySize = 0L;
                 while (currentReturnBodySize < maxReturnBodySize) {
-                    SessionBytes next = sessionBytesQueue.poll();
+                    SendAbleSessionBytes next = sessionBytesQueue.poll();
                     if (null == next) {
                         break;
                     }
                     bytesList.add(next);
-                    currentReturnBodySize += next.getBytes().length;
+                    currentReturnBodySize += next.sessionBytes.getBytes().length;
                 }
             }
             return merge(bytesList);
@@ -112,9 +117,9 @@ public class LoginClientService {
         }
 
         //取出所有需要向客户端发送的bytes 取出的bytes会按相同sessionId进行整合 无bytes则阻塞3秒后返回
-        public List<SessionBytes> fetchBytesBlocked(long maxReturnBodySize) {
-            List<SessionBytes> bytesList = new LinkedList<>();
-            SessionBytes first;
+        public List<SendAbleSessionBytes> fetchBytesBlocked(long maxReturnBodySize) {
+            List<SendAbleSessionBytes> bytesList = new LinkedList<>();
+            SendAbleSessionBytes first;
             try {
                 first = sessionBytesQueue.poll(3, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
@@ -132,29 +137,46 @@ public class LoginClientService {
                 return merge(bytesList);
             } else {
                 //根据maxReturnBodySize的限制取出队列中的数据返回
-                long currentReturnBodySize = first.getBytes().length;
+                long currentReturnBodySize = first.sessionBytes.getBytes().length;
                 while (currentReturnBodySize < maxReturnBodySize) {
-                    SessionBytes next = sessionBytesQueue.poll();
+                    SendAbleSessionBytes next = sessionBytesQueue.poll();
                     if (null == next) {
                         break;
                     }
                     bytesList.add(next);
-                    currentReturnBodySize += next.getBytes().length;
+                    currentReturnBodySize += next.sessionBytes.getBytes().length;
                 }
                 return merge(bytesList);
             }
 
         }
 
-        private static List<SessionBytes> merge(List<SessionBytes> bytesList) {
-            Map<Integer, List<byte[]>> bytesMap = new HashMap<>();
-            for (SessionBytes bytes : bytesList) {
-                bytesMap.computeIfAbsent(bytes.getSessionId(), (r) -> new LinkedList<>())
-                        .add(bytes.getBytes());
+        private static final class MergeCell {
+            private final List<byte[]> bytesList = new LinkedList<>();
+            private final List<SendAbleSessionBytes.CallBack> callBacks = new LinkedList<>();
+        }
+
+        private static List<SendAbleSessionBytes> merge(List<SendAbleSessionBytes> bytesList) {
+            Map<Integer, MergeCell> bytesMap = new HashMap<>();
+            for (SendAbleSessionBytes ssb : bytesList) {
+                MergeCell mergeCell = bytesMap.computeIfAbsent(ssb.sessionBytes.getSessionId(), (r) -> new MergeCell());
+                mergeCell.bytesList.add(ssb.sessionBytes.getBytes());
+                mergeCell.callBacks.add(ssb.callBack);
             }
-            List<SessionBytes> res = new ArrayList<>(bytesMap.size());
-            bytesMap.forEach((sessionId, bytes) -> {
-                res.add(new SessionBytes(sessionId, BytesUtil.merge(bytes)));
+            List<SendAbleSessionBytes> res = new ArrayList<>(bytesMap.size());
+            bytesMap.forEach((sessionId, mergeCell) -> {
+                SessionBytes sessionBytes = new SessionBytes(sessionId, BytesUtil.merge(mergeCell.bytesList));
+                SendAbleSessionBytes.CallBack callBack;
+                if (mergeCell.callBacks.size() == 1) {
+                    callBack = mergeCell.callBacks.get(0);
+                } else {
+                    callBack = (success) -> {
+                        for (SendAbleSessionBytes.CallBack callBack1 : mergeCell.callBacks) {
+                            callBack1.cb(success);
+                        }
+                    };
+                }
+                res.add(new SendAbleSessionBytes(sessionBytes, callBack));
             });
             return res;
         }

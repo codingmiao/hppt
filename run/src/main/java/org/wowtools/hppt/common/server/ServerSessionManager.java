@@ -4,7 +4,10 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.wowtools.hppt.common.pojo.SendAbleSessionBytes;
 import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.common.util.NettyObjectBuilder;
@@ -43,13 +46,15 @@ public class ServerSessionManager implements AutoCloseable {
     ServerSessionManager(ServerSessionManagerBuilder builder) {
         lifecycle = builder.lifecycle;
         sessionTimeout = builder.sessionTimeout;
+//        bootstrap.option(ChannelOption.SO_RCVBUF, 1024 * 1024); // 设置接收缓冲区为1MB
+//        bootstrap.option(ChannelOption.SO_SNDBUF, 1024 * 1024); // 设置发送缓冲区为1MB
         bootstrap.group(builder.group)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) sessionTimeout)
                 .channel(NettyObjectBuilder.getSocketChannelClass())
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
                         ChannelPipeline pipeline = ch.pipeline();
+//                        pipeline.addLast(new LoggingHandler(LogLevel.INFO));
                         pipeline.addLast(new SimpleHandler());
                     }
                 });
@@ -215,21 +220,53 @@ public class ServerSessionManager implements AutoCloseable {
             disposeServerSession(session, "channelInactive");
         }
 
+        private static final class CallBack implements SendAbleSessionBytes.CallBack {
+            private final CompletableFuture<Boolean> future;
+
+            public CallBack(CompletableFuture<Boolean> future) {
+                this.future = future;
+            }
+
+            @Override
+            public void cb(boolean success) {
+                //锁住当前线程直至字节发送成功，避免缓冲区积压过多数据或后发先至问题
+                future.complete(success);
+            }
+        }
+
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
             ByteBuf buf = (ByteBuf) msg;
             byte[] bytes = null;
             try {
                 bytes = BytesUtil.byteBuf2bytes(buf);
-            }finally {
+            } finally {
                 //channelRead方法需要手动释放ByteBuf
                 buf.release();
             }
             ServerSession session = getServeSession(ctx);
             if (null != session) {
                 session.activeSession();
-                log.debug("serverSession {} 收到目标端口字节 {}", session, bytes.length);
-                lifecycle.sendToClientBuffer(session, bytes, session.getClient());
+                log.debug("serverSession {} 收到目标端口字节 {} {}", session, bytes.length, this);
+                CompletableFuture<Boolean> future = new CompletableFuture<>();
+                CallBack callBack = new CallBack(future);
+                lifecycle.sendToClientBuffer(session, bytes, session.getClient(), callBack);
+                Boolean success;
+                try {
+                    success = future.get(30, TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    log.warn("serverSession {} 字节发送异常 {}", session, bytes.length, e);
+                    throw new RuntimeException(e);
+                }
+                log.debug("serverSession {} 字节发送至客户端完成 {} success? {} {}", session, bytes.length, success, this);
+
+                if (null == success) {
+                    throw new RuntimeException("字节发送超时, session: " + session.getSessionId());
+                }
+                if (!success) {
+                    throw new RuntimeException("字节发送失败, session: " + session.getSessionId());
+                }
+
                 lifecycle.afterSendToTarget(session, bytes);
             } else {
                 log.warn("channelRead session不存在");
@@ -250,6 +287,7 @@ public class ServerSessionManager implements AutoCloseable {
         @Override
         public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
             super.channelReadComplete(ctx);
+            ctx.flush();
         }
     }
 

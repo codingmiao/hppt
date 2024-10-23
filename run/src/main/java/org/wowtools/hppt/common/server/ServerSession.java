@@ -51,10 +51,15 @@ public class ServerSession {
                         continue;
                     }
                     bytes = lifecycle.beforeSendToTarget(this, bytes);
+
                     if (bytes != null) {
                         Throwable e = BytesUtil.writeToChannel(channel, bytes);
                         if (null != e) {
+                            log.warn("BytesUtil.writeToChannel err", e);
                             throw e;
+                        }
+                        if (log.isDebugEnabled()) {
+                            log.debug("向目标端口发送字节 {}", bytes.length);
                         }
                         lifecycle.afterSendToTarget(this, bytes);
                     }

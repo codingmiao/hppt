@@ -39,7 +39,13 @@ public class ClientSession {
                 bytes = lifecycle.beforeSendToUser(this, bytes);
                 if (null != bytes) {
                     log.debug("ClientSession {} 向用户发送字节 {}", sessionId, bytes.length);
-                    BytesUtil.writeToChannelHandlerContext(channelHandlerContext, bytes);
+                    Throwable e = BytesUtil.writeToChannelHandlerContext(channelHandlerContext, bytes);
+                    if (null != e) {
+                        log.warn("向用户发送字节异常",e);
+                        close();
+                    }else if (log.isDebugEnabled()){
+                        log.debug("ClientSession {} 向用户发送字节完成 {}", sessionId, bytes.length);
+                    }
                     lifecycle.afterSendToUser(this, bytes);
                 }
             }

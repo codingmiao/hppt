@@ -37,7 +37,11 @@ public class NettyObjectBuilder {
 
 
     public static EventLoopGroup buildEventLoopGroup(int nThread) {
-        return new NioEventLoopGroup(nThread);
+        if (nThread > 0) {
+            return new NioEventLoopGroup(nThread);
+        }else {
+            return new NioEventLoopGroup();
+        }
     }
 
     public static EventLoopGroup buildEventLoopGroup() {

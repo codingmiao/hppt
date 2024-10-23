@@ -67,7 +67,14 @@ final class PortReceiver<CTX> implements Receiver<CTX> {
         // 若客户端为空,则进行对时或登录
         ClientCell clientCell = ctxClientCellMap.get(ctx);
         if (null == clientCell) {
-            bytes = GridAesCipherUtil.decrypt(bytes);
+            try {
+                bytes = GridAesCipherUtil.decrypt(bytes);
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("无效的字节，舍弃,ctx {}, bytes {}", ctx, new String(bytes, StandardCharsets.UTF_8), e);
+                }
+                return;
+            }
             String s = new String(bytes, StandardCharsets.UTF_8);
             String[] cmd = s.split(" ", 2);
             switch (cmd[0]) {
@@ -102,7 +109,7 @@ final class PortReceiver<CTX> implements Receiver<CTX> {
                         });
                         ctxClientCellMap.put(ctx, clientCell);
                     }
-                    log.info("客户端接入成功 {}", clientCell.client.clientId);
+                    log.info("客户端接入成功 user: {} ctx: {}", clientCell.client.clientId, ctx);
                     startSendThread(clientCell);
                     byte[] login = ("login 0").getBytes(StandardCharsets.UTF_8);
                     login = GridAesCipherUtil.encrypt(login);
@@ -125,9 +132,8 @@ final class PortReceiver<CTX> implements Receiver<CTX> {
     private void startSendThread(ClientCell cell) {
         LoginClientService.Client client = cell.client;
         Thread.startVirtualThread(() -> {
-            while (cell.running) {
+            ServerTalker.Replier replier = (bytes) -> {
                 try {
-                    byte[] bytes = ServerTalker.replyToClient(ssConfig, serverSessionManager, client, -1, true);
                     if (null != bytes) {
                         serverSessionService.sendBytesToClient(cell.ctx, bytes);
                     } else if (!cell.actived) {
@@ -140,6 +146,16 @@ final class PortReceiver<CTX> implements Receiver<CTX> {
                             }
                         }
                     }
+                } catch (Exception e) {
+                    log.warn("向用户端发送消息异常", e);
+                    removeCtx(cell.ctx);
+                    return false;
+                }
+                return true;
+            };
+            while (cell.running) {
+                try {
+                    ServerTalker.replyToClient(ssConfig, serverSessionManager, client, -1, true, replier);
                 } catch (Exception e) {
                     log.warn("向用户端发送消息异常", e);
                     removeCtx(cell.ctx);

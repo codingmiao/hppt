@@ -1,5 +1,6 @@
 package org.wowtools.hppt.common.client;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.wowtools.hppt.common.util.RoughTimeUtil;
 
@@ -14,6 +15,12 @@ public interface ClientBytesSender {
      */
     public static abstract class SessionIdCallBack {
         public final long createTime = RoughTimeUtil.getTimestamp();
+        public final ChannelHandlerContext channelHandlerContext;
+
+        public SessionIdCallBack(ChannelHandlerContext channelHandlerContext) {
+            this.channelHandlerContext = channelHandlerContext;
+        }
+
         public abstract void cb(int sessionId);
     }
 

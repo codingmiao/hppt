@@ -168,6 +168,9 @@ public class BytesUtil {
     //把字节写入ChannelHandlerContext 如果有异常则返回异常
     public static Throwable writeToChannelHandlerContext(ChannelHandlerContext ctx, byte[] bytes) {
         waitChannelWritable(ctx.channel());
+        if (!ctx.channel().isOpen()) {
+            return new RuntimeException("channel已关闭");
+        }
         ByteBuf byteBuf = bytes2byteBuf(ctx, bytes);
         ChannelFuture future = ctx.writeAndFlush(byteBuf);
         return afterWrite(future, byteBuf);
@@ -176,6 +179,9 @@ public class BytesUtil {
     //把字节写入Channel 如果有异常则返回异常
     public static Throwable writeToChannel(Channel channel, byte[] bytes) {
         waitChannelWritable(channel);
+        if (!channel.isOpen()) {
+            return new RuntimeException("channel已关闭");
+        }
         ByteBuf byteBuf = bytes2byteBuf(channel, bytes);
         ChannelFuture future = channel.writeAndFlush(byteBuf);
         return afterWrite(future, byteBuf);
@@ -184,6 +190,9 @@ public class BytesUtil {
     //把对象写入Channel 如果有异常则返回异常
     public static Throwable writeObjToChannel(Channel channel, Object obj) {
         waitChannelWritable(channel);
+        if (!channel.isOpen()) {
+            return new RuntimeException("channel已关闭");
+        }
         ChannelFuture future = channel.writeAndFlush(obj);
         return afterWrite(future, obj);
     }

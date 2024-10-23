@@ -117,7 +117,7 @@ public class ClientSessionManager {
             int localPort = localAddress.getPort();
             log.debug("client channelActive {}, port:{}", channelHandlerContext.hashCode(), localPort);
             //用户发起新连接 新建一个ClientSession
-            ClientBytesSender.SessionIdCallBack cb = new ClientBytesSender.SessionIdCallBack() {
+            ClientBytesSender.SessionIdCallBack cb = new ClientBytesSender.SessionIdCallBack(channelHandlerContext) {
                 @Override
                 public void cb(int sessionId) {
                     ClientSession clientSession = new ClientSession(sessionId, channelHandlerContext, lifecycle);
@@ -150,7 +150,7 @@ public class ClientSessionManager {
         }
 
         @Override
-        protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
+        protected synchronized void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
             byte[] bytes = BytesUtil.byteBuf2bytes(byteBuf);
             ClientSession clientSession = null;
             for (int i = 0; i < 1000; i++) {

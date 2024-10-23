@@ -56,7 +56,7 @@ public class HpptServerSessionService extends ServerSessionService<ChannelHandle
         Throwable e = BytesUtil.writeToChannelHandlerContext(ctx, bytes);
         if (null != e) {
             log.warn("sendBytesToClient err", e);
-            exit();
+            ctx.close();
         }
     }
 
@@ -84,7 +84,14 @@ public class HpptServerSessionService extends ServerSessionService<ChannelHandle
         protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
             // 处理接收到的消息
             byte[] content = BytesUtil.byteBuf2bytes(msg);
-            Thread.startVirtualThread(()-> receiveClientBytes(ctx, content));
+            Thread.startVirtualThread(()-> {
+                try {
+                    receiveClientBytes(ctx, content);
+                } catch (Exception e) {
+                    log.warn("receiveClientBytes err",e);
+                    ctx.close();
+                }
+            });
         }
 
         @Override

@@ -52,7 +52,7 @@ public abstract class ServerSessionService<CTX> {
         if (null == bytes || bytes.length == 0) {
             return;
         }
-        log.debug("收到客户端字节数 {}", bytes.length);
+        log.debug("收到客户端字节数 {} , {}", bytes.length, ctx);
         try {
             receiver.receiveClientBytes(ctx, bytes);
         } catch (Exception e) {

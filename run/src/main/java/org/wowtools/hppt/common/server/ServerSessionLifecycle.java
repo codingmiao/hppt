@@ -1,6 +1,8 @@
 package org.wowtools.hppt.common.server;
 
 
+import org.wowtools.hppt.common.pojo.SendAbleSessionBytes;
+
 /**
  * ServerSession的生命周期，包含ServerSession从创建、交互、销毁各过程的触发事件
  *
@@ -43,9 +45,10 @@ public interface ServerSessionLifecycle {
      *
      * @param serverSession ServerSession
      * @param bytes         发送的字节
+     * @param callBack      回调，not null
      */
-    default void sendToClientBuffer(ServerSession serverSession, byte[] bytes, LoginClientService.Client client) {
-        client.addBytes(serverSession.getSessionId(), bytes);
+    default void sendToClientBuffer(ServerSession serverSession, byte[] bytes, LoginClientService.Client client, SendAbleSessionBytes.CallBack callBack) {
+        client.addBytes(serverSession.getSessionId(), bytes,callBack);
     }
 
     /**
