@@ -5,13 +5,15 @@ clientUser: user1
 # 客户端密码
 clientPassword: 12345
 
+# 向服务端发数据包包体的最大字节数，默认10M.http post请求，在网络状态不佳引起阻塞时，有时会出现413 Request Entity Too Large问题，此时可适当调小这个值，
+maxSendBodySize: 1024000
 
 post:
   serverUrl: "http://localhost:20871"
 
 forwards:
   # 把192.168.0.2的22端口代理到本机的10022端口
-  - localPort: 30001
+  - localPort: 10022
     remoteHost: "wsl"
     remotePort: 22
     # 同理也可以代理数据库等任意TCP端口，只要服务端的hppt所在服务器能访问到的端口都行

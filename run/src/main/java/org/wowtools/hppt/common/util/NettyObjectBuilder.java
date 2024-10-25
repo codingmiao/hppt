@@ -1,17 +1,18 @@
 package org.wowtools.hppt.common.util;
 
-import io.netty.channel.*;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.ServerChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.NettyRuntime;
+import io.netty.util.ResourceLeakDetector;
 import io.netty.util.internal.SystemPropertyUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.ThreadFactory;
 
 /**
- *
  * @author liuyu
  * @date 2024/6/26
  */
@@ -24,6 +25,9 @@ public class NettyObjectBuilder {
         DEFAULT_EVENT_LOOP_VIRTUAL_THREADS = Math.max(32, SystemPropertyUtil.getInt(
                 "io.netty.eventLoopVirtualThreads", NettyRuntime.availableProcessors() * 16));
         log.debug("-Dio.netty.eventLoopVirtualThreads: {}", DEFAULT_EVENT_LOOP_VIRTUAL_THREADS);
+
+        ResourceLeakDetector.setLevel(DebugConfig.NettyResourceLeakDetectorLevel);
+        log.info("NettyResourceLeakDetectorLevel :{}", DebugConfig.NettyResourceLeakDetectorLevel);
     }
 
 
@@ -31,6 +35,7 @@ public class NettyObjectBuilder {
     public static Class<? extends ServerChannel> getServerSocketChannelClass() {
         return NioServerSocketChannel.class;
     }
+
     public static Class<? extends NioSocketChannel> getSocketChannelClass() {
         return NioSocketChannel.class;
     }
@@ -39,7 +44,7 @@ public class NettyObjectBuilder {
     public static EventLoopGroup buildEventLoopGroup(int nThread) {
         if (nThread > 0) {
             return new NioEventLoopGroup(nThread);
-        }else {
+        } else {
             return new NioEventLoopGroup();
         }
     }

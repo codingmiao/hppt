@@ -1,20 +1,10 @@
 package org.wowtools.hppt.run.sc;
 
-import io.netty.util.ResourceLeakDetector;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.common.util.ResourcesReader;
-import org.wowtools.hppt.run.Run;
 import org.wowtools.hppt.run.sc.common.ClientSessionService;
-import org.wowtools.hppt.run.sc.file.FileClientSessionService;
-import org.wowtools.hppt.run.sc.hppt.HpptClientSessionService;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
-import org.wowtools.hppt.run.sc.post.PostClientSessionService;
-import org.wowtools.hppt.run.sc.rhppt.RHpptClientSessionService;
-import org.wowtools.hppt.run.sc.rpost.RPostClientSessionService;
-import org.wowtools.hppt.run.sc.websocket.WebSocketClientSessionService;
-
-import java.io.File;
 
 /**
  * @author liuyu
@@ -24,13 +14,6 @@ import java.io.File;
 public class RunSc {
 
     public static void main(String[] args) {
-        try {
-            if ("1".equals(ResourcesReader.readStr(Run.class, "/debug.txt").trim())) {
-                ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.PARANOID);
-                System.out.println("开启调试");
-            }
-        } catch (Exception e) {
-        }
         String configPath;
         if (args.length <= 1) {
             configPath = "sc.yml";

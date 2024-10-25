@@ -214,8 +214,8 @@ final class PortReceiver implements Receiver {
             }
 
             @Override
-            public void sendToTarget(ClientSession clientSession, byte[] bytes) {
-                sendBytesQueue.add(new SessionBytes(clientSession.getSessionId(), bytes));
+            public void sendToTarget(ClientSession clientSession, SessionBytes sessionBytes) {
+                sendBytesQueue.add(sessionBytes);
             }
         };
     }

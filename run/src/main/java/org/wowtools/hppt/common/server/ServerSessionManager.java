@@ -4,12 +4,12 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.pojo.SendAbleSessionBytes;
+import org.wowtools.hppt.common.pojo.SessionBytes;
 import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.Constant;
+import org.wowtools.hppt.common.util.DebugConfig;
 import org.wowtools.hppt.common.util.NettyObjectBuilder;
 
 import java.net.InetSocketAddress;
@@ -196,7 +196,21 @@ public class ServerSessionManager implements AutoCloseable {
     private class SimpleHandler extends ChannelInboundHandlerAdapter {
 
         private ServerSession getServeSession(ChannelHandlerContext ctx) {
-            return channelServerSessionMap.get(ctx.channel());
+            ServerSession session = channelServerSessionMap.get(ctx.channel());
+            if (null == session && ctx.channel().isOpen()) {
+                for (int i = 0; i < 10; i++) {
+                    log.debug("获取ServerSession为空，重试");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ignored) {
+                    }
+                    session = channelServerSessionMap.get(ctx.channel());
+                    if (null != session || !ctx.channel().isOpen()) {
+                        break;
+                    }
+                }
+            }
+            return session;
         }
 
         @Override
@@ -250,7 +264,11 @@ public class ServerSessionManager implements AutoCloseable {
                 log.debug("serverSession {} 收到目标端口字节 {} {}", session, bytes.length, this);
                 CompletableFuture<Boolean> future = new CompletableFuture<>();
                 CallBack callBack = new CallBack(future);
-                lifecycle.sendToClientBuffer(session, bytes, session.getClient(), callBack);
+                SessionBytes sessionBytes = new SessionBytes(session.getSessionId(), bytes);
+                if (DebugConfig.OpenSerialNumber) {
+                    log.debug("目标端发来字节 <sessionBytes-SerialNumber {}", sessionBytes.getSerialNumber());
+                }
+                lifecycle.sendToClientBuffer(sessionBytes, session.getClient(), callBack);
                 Boolean success;
                 try {
                     success = future.get(30, TimeUnit.SECONDS);

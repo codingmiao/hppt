@@ -11,6 +11,7 @@ import org.wowtools.hppt.common.util.NettyObjectBuilder;
 import org.wowtools.hppt.run.sc.common.ClientSessionService;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -155,7 +156,7 @@ public class RPostClientSessionService extends ClientSessionService {
 
         private HttpResponse receiveBytes(FullHttpRequest req) throws Exception {
             byte[] bytes = BytesUtil.byteBuf2bytes(req.content());
-            List<byte[]> bytesList = BytesUtil.pbBytes2BytesList(bytes);
+            Collection<byte[]> bytesList = BytesUtil.pbBytes2BytesList(bytes).getBytes();
             for (byte[] sub : bytesList) {
                 try {
                     receiveServerBytes(sub);

@@ -2,6 +2,7 @@ package org.wowtools.hppt.common.client;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import org.wowtools.hppt.common.pojo.SessionBytes;
 import org.wowtools.hppt.common.util.RoughTimeUtil;
 
 /**
@@ -37,7 +38,7 @@ public interface ClientBytesSender {
      * 向目标发送字节的具体方式，如post请求，websocket等
      *
      * @param clientSession clientSession
-     * @param bytes         bytes
+     * @param sessionBytes         bytes
      */
-    void sendToTarget(ClientSession clientSession, byte[] bytes);
+    void sendToTarget(ClientSession clientSession, SessionBytes sessionBytes);
 }

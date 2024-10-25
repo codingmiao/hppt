@@ -43,7 +43,8 @@ public abstract class ServerSessionService<CTX> {
     protected abstract void sendBytesToClient(CTX ctx, byte[] bytes);
 
     /**
-     * 收到客户端传过来的字节时，主动调用此方法进行接收操作
+     * 收到客户端传过来的字节时，主动调用此方法进行接收操作。
+     * 此方法内部只是一个快速放入缓冲池的过程，所以速度很快，外部建议无需另起多线程来调此方法，不然外部的先后顺序不好控制
      *
      * @param ctx   实际和客户端连接的上下文
      * @param bytes bytes

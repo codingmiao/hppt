@@ -84,14 +84,12 @@ public class HpptServerSessionService extends ServerSessionService<ChannelHandle
         protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
             // 处理接收到的消息
             byte[] content = BytesUtil.byteBuf2bytes(msg);
-            Thread.startVirtualThread(()-> {
-                try {
-                    receiveClientBytes(ctx, content);
-                } catch (Exception e) {
-                    log.warn("receiveClientBytes err",e);
-                    ctx.close();
-                }
-            });
+            try {
+                receiveClientBytes(ctx, content);
+            } catch (Exception e) {
+                log.warn("receiveClientBytes err",e);
+                ctx.close();
+            }
         }
 
         @Override

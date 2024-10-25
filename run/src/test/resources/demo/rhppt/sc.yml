@@ -11,7 +11,7 @@ rhppt:
 
 forwards:
   # 把192.168.0.2的22端口代理到本机的10022端口
-  - localPort: 30001
+  - localPort: 10022
     remoteHost: "wsl"
     remotePort: 22
     # 同理也可以代理数据库等任意TCP端口，只要服务端的hppt所在服务器能访问到的端口都行

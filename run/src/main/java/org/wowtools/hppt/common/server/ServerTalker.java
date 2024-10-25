@@ -1,12 +1,12 @@
 package org.wowtools.hppt.common.server;
 
-import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.pojo.SendAbleSessionBytes;
 import org.wowtools.hppt.common.pojo.SessionBytes;
-import org.wowtools.hppt.common.protobuf.ProtoMessage;
+import org.wowtools.hppt.common.pojo.TalkMessage;
 import org.wowtools.hppt.common.util.CommonConfig;
 import org.wowtools.hppt.common.util.Constant;
+import org.wowtools.hppt.common.util.DebugConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,24 +32,36 @@ public class ServerTalker {
         if (config.enableEncrypt) {
             bytes = client.aesCipherUtil.descriptor.decrypt(bytes);
         }
-        ProtoMessage.MessagePb inputMessage = ProtoMessage.MessagePb.parseFrom(bytes);
+        TalkMessage talkMessage = new TalkMessage(bytes);
+        if (DebugConfig.OpenSerialNumber) {
+            log.debug("客户端发来的字节解析 >talkMessage-SerialNumber {}", talkMessage.getSerialNumber());
+        }
         Map<Integer, ServerSession> serverSessionMap = serverSessionManager.getServerSessionMapByClientId(client.clientId);
 
         /* 发消息 */
         //发命令
-        for (String command : inputMessage.getCommandListList()) {
-            receiveClientCommand(command, serverSessionManager, serverSessionMap, client, timeoutMillis);
-        }
-        //发bytes
-        for (ProtoMessage.BytesPb bytesPb : inputMessage.getBytesPbListList()) {
-            ServerSession severSession = serverSessionMap.get(bytesPb.getSessionId());
-            if (null == severSession) {
-                //服务端已经没有这个session了，给客户端发关闭命令
-                client.addCommand(String.valueOf(Constant.ScCommands.CloseSession) + bytesPb.getSessionId());
-            } else {
-                severSession.sendToTarget(bytesPb.getBytes().toByteArray());
+        if (null != talkMessage.getCommands()) {
+            for (String command : talkMessage.getCommands()) {
+                receiveClientCommand(command, serverSessionManager, serverSessionMap, client, timeoutMillis);
             }
         }
+
+        //发bytes
+        if (null != talkMessage.getSessionBytes()) {
+            for (SessionBytes sessionByte : talkMessage.getSessionBytes()) {
+                if (DebugConfig.OpenSerialNumber) {
+                    log.debug("客户端发来字节 >sessionBytes-SerialNumber {}", sessionByte.getSerialNumber());
+                }
+                ServerSession severSession = serverSessionMap.get(sessionByte.getSessionId());
+                if (null == severSession) {
+                    //服务端已经没有这个session了，给客户端发关闭命令
+                    client.addCommand(String.valueOf(Constant.ScCommands.CloseSession) + sessionByte.getSessionId());
+                } else {
+                    severSession.sendToTarget(sessionByte);
+                }
+            }
+        }
+
     }
 
     private static void receiveClientCommand(String command,
@@ -103,30 +115,31 @@ public class ServerTalker {
     //生成向客户端回复的消息
     public static void replyToClient(CommonConfig config, ServerSessionManager serverSessionManager,
                                      LoginClientService.Client client, long maxReturnBodySize, boolean blocked, Replier replier) throws Exception {
-        ProtoMessage.MessagePb.Builder rBuilder = ProtoMessage.MessagePb.newBuilder();
         boolean empty = true;
         /* 取消息 */
 
         //取命令
         List<String> fetchCommands = client.fetchCommands();
         if (null != fetchCommands && !fetchCommands.isEmpty()) {
-            rBuilder.addAllCommandList(fetchCommands);
             empty = false;
             blocked = false;
         }
 
         //取bytes
         List<SendAbleSessionBytes> fetchBytes = blocked ? client.fetchBytesBlocked(maxReturnBodySize) : client.fetchBytes(maxReturnBodySize);
+        List<SessionBytes> sessionBytes = null;
         if (null != fetchBytes && !fetchBytes.isEmpty()) {
-            List<ProtoMessage.BytesPb> bytesPbList = new ArrayList<>(fetchBytes.size());
+            if (DebugConfig.OpenSerialNumber) {
+                for (SendAbleSessionBytes ssb : fetchBytes) {
+                    log.debug("生成向客户端回复的消息 <sessionBytes-SerialNumber {}", ssb.sessionBytes.getSerialNumber());
+                }
+            }
+
+            sessionBytes = new ArrayList<>(fetchBytes.size());
             for (SendAbleSessionBytes ssb : fetchBytes) {
                 SessionBytes fetchByte = ssb.sessionBytes;
-                bytesPbList.add(ProtoMessage.BytesPb.newBuilder()
-                        .setSessionId(fetchByte.getSessionId())
-                        .setBytes(ByteString.copyFrom(fetchByte.getBytes()))
-                        .build());
+                sessionBytes.add(fetchByte);
             }
-            rBuilder.addAllBytesPbList(bytesPbList);
             empty = false;
         }
 
@@ -134,8 +147,11 @@ public class ServerTalker {
             return;
         }
 
-
-        byte[] bytes = rBuilder.build().toByteArray();
+        TalkMessage talkMessage = new TalkMessage(sessionBytes, fetchCommands);
+        if (DebugConfig.OpenSerialNumber) {
+            log.debug("ServerTalker组装 <talkMessage-SerialNumber {}", talkMessage.getSerialNumber());
+        }
+        byte[] bytes = talkMessage.toProto().build().toByteArray();
         //加密
         if (config.enableEncrypt) {
             bytes = client.aesCipherUtil.encryptor.encrypt(bytes);

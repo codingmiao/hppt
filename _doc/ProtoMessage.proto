@@ -1,0 +1,31 @@
+syntax = "proto3";
+package pojo;
+option java_package = "org.wowtools.hppt.common.protobuf";
+option java_outer_classname = "ProtoMessage";
+
+//消息字节
+message BytesPb{
+	//真实字节
+	bytes bytes = 1;
+	//会话id 通过此id确认字节该与哪个端口/哪个用户端交互
+	int32 sessionId = 2;
+	//流水号 用于调试消息后发先至等问题，非调试时流水号为空
+	int32 serialNumber = 3;
+
+}
+
+message MessagePb{
+	//消息字节list
+	repeated BytesPb bytesPbList = 1;
+	//客户端/服务端需要执行的命令
+	repeated string commandList = 2;
+	//流水号 用于调试消息后发先至等问题，非调试时流水号为空
+	int32 serialNumber = 3;
+}
+
+message BytesListPb{
+	//bytes list
+	repeated bytes bytesList = 1;
+	//流水号 用于调试消息后发先至等问题，非调试时流水号为空
+	int32 serialNumber = 2;
+}

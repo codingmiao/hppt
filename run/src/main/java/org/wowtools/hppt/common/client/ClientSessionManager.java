@@ -6,17 +6,16 @@ import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import lombok.extern.slf4j.Slf4j;
+import org.wowtools.hppt.common.pojo.SessionBytes;
 import org.wowtools.hppt.common.util.BytesUtil;
+import org.wowtools.hppt.common.util.DebugConfig;
 import org.wowtools.hppt.common.util.NettyObjectBuilder;
 
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 /**
  * ClientSession管理器
@@ -176,7 +175,11 @@ public class ClientSessionManager {
                 if (null == bytes) {
                     return;
                 }
-                clientBytesSender.sendToTarget(clientSession, bytes);
+                SessionBytes sessionBytes = new SessionBytes(clientSession.getSessionId(), bytes);
+                if (DebugConfig.OpenSerialNumber) {
+                    log.debug("用户端发来字节 >sessionBytes-SerialNumber {}", sessionBytes.getSerialNumber());
+                }
+                clientBytesSender.sendToTarget(clientSession, sessionBytes);
                 lifecycle.afterSendToTarget(clientSession, bytes);
             } else {
                 log.warn("找不到channelHandlerContext对应的client session");

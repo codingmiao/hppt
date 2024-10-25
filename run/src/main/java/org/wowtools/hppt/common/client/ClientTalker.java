@@ -1,13 +1,12 @@
 package org.wowtools.hppt.common.client;
 
-import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.pojo.SessionBytes;
-import org.wowtools.hppt.common.protobuf.ProtoMessage;
+import org.wowtools.hppt.common.pojo.TalkMessage;
 import org.wowtools.hppt.common.util.AesCipherUtil;
-import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.CommonConfig;
 import org.wowtools.hppt.common.util.Constant;
+import org.wowtools.hppt.common.util.DebugConfig;
 
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
@@ -56,7 +55,7 @@ public class ClientTalker {
             wait = false;
         }
         //bytes
-        List<ProtoMessage.BytesPb> bytesPbList = new LinkedList<>();
+        List<SessionBytes> bytesPbList = new LinkedList<>();
         do {
             if (sendBodySize >= maxSendBodySize) {
                 break;
@@ -72,24 +71,23 @@ public class ClientTalker {
                 break;
             }
             sendBodySize += bytes.getBytes().length;
-            bytesPbList.add(ProtoMessage.BytesPb.newBuilder()
-                    .setBytes(ByteString.copyFrom(bytes.getBytes()))
-                    .setSessionId(bytes.getSessionId())
-                    .build());
+            bytesPbList.add(bytes);
         } while (true);
 
         if (sendBodySize == 0) {
             return null;
         }
-        ProtoMessage.MessagePb.Builder rBuilder = ProtoMessage.MessagePb.newBuilder();
-        if (!commands.isEmpty()) {
-            rBuilder.addAllCommandList(commands);
-        }
-        if (!bytesPbList.isEmpty()) {
-            rBuilder.addAllBytesPbList(bytesPbList);
+        if (DebugConfig.OpenSerialNumber) {
+            for (SessionBytes sessionBytes : bytesPbList) {
+                log.debug("ClientTalker收集 >sessionBytes-SerialNumber {}", sessionBytes.getSerialNumber());
+            }
         }
 
-        byte[] bytes = rBuilder.build().toByteArray();
+        TalkMessage talkMessage = new TalkMessage(bytesPbList, commands);
+        if (DebugConfig.OpenSerialNumber) {
+            log.debug("ClientTalker组装 >talkMessage-SerialNumber {}", talkMessage.getSerialNumber());
+        }
+        byte[] bytes = talkMessage.toProto().build().toByteArray();
         //加密
         if (config.enableEncrypt) {
             bytes = aesCipherUtil.encryptor.encrypt(bytes);
@@ -106,14 +104,17 @@ public class ClientTalker {
         if (null == responseBody) {
             return true;
         }
-        ProtoMessage.MessagePb rMessagePb;
+        TalkMessage talkMessage;
         try {
             //解密
             if (config.enableEncrypt) {
                 responseBody = aesCipherUtil.descriptor.decrypt(responseBody);
             }
             log.debug("收到服务端发回字节数 {}", responseBody.length);
-            rMessagePb = ProtoMessage.MessagePb.parseFrom(responseBody);
+            talkMessage = new TalkMessage(responseBody);
+            if (DebugConfig.OpenSerialNumber) {
+                log.debug("ClientTalker收到服务端发回 <talkMessage-SerialNumber {}", talkMessage.getSerialNumber());
+            }
         } catch (Exception e) {
             log.warn("服务端响应错误  {}", new String(responseBody, StandardCharsets.UTF_8), e);
             Thread.sleep(10000);
@@ -122,51 +123,54 @@ public class ClientTalker {
 
         boolean isEmpty = true;
         //收命令
-        for (String command : rMessagePb.getCommandListList()) {
-            log.debug("收到服务端命令 {} ", command);
-            char type = command.charAt(0);
-            switch (type) {
-                case Constant.ScCommands.InitSession -> {
-                    //sessionId,initFlag
-                    String[] params = command.substring(1).split(Constant.sessionIdJoinFlag);
-                    int sessionId = Integer.parseInt(params[0]);
-                    int initFlag = Integer.parseInt(params[1]);
-                    ClientBytesSender.SessionIdCallBack sessionIdCallBack = sessionIdCallBackMap.remove(initFlag);
-                    if (null != sessionIdCallBack) {
-                        sessionIdCallBack.cb(sessionId);
-                    } else {
-                        log.warn("没有对应的SessionIdCallBack {}", sessionIdCallBack);
+        if (null != talkMessage.getCommands() && !talkMessage.getCommands().isEmpty()) {
+            for (String command : talkMessage.getCommands()) {
+                log.debug("收到服务端命令 {} ", command);
+                char type = command.charAt(0);
+                switch (type) {
+                    case Constant.ScCommands.InitSession -> {
+                        //sessionId,initFlag
+                        String[] params = command.substring(1).split(Constant.sessionIdJoinFlag);
+                        int sessionId = Integer.parseInt(params[0]);
+                        int initFlag = Integer.parseInt(params[1]);
+                        ClientBytesSender.SessionIdCallBack sessionIdCallBack = sessionIdCallBackMap.remove(initFlag);
+                        if (null != sessionIdCallBack) {
+                            sessionIdCallBack.cb(sessionId);
+                        } else {
+                            log.warn("没有对应的SessionIdCallBack {}", sessionIdCallBack);
+                        }
                     }
-                }
-                case Constant.ScCommands.CloseSession -> {
-                    int sessionId = Integer.parseInt(command.substring(1));
-                    ClientSession session = clientSessionManager.getClientSessionBySessionId(sessionId);
-                    if (null != session) {
-                        clientSessionManager.disposeClientSession(session, "服务端发送关闭命令");
+                    case Constant.ScCommands.CloseSession -> {
+                        int sessionId = Integer.parseInt(command.substring(1));
+                        ClientSession session = clientSessionManager.getClientSessionBySessionId(sessionId);
+                        if (null != session) {
+                            clientSessionManager.disposeClientSession(session, "服务端发送关闭命令");
+                        }
                     }
-                }
-                case Constant.ScCommands.CheckSessionActive -> {
-                    int sessionId = Integer.parseInt(command.substring(1));
-                    ClientSession session = clientSessionManager.getClientSessionBySessionId(sessionId);
-                    if (null != session) {
-                        //session存在，则发送存活消息
-                        sendCommandQueue.add(String.valueOf(Constant.SsCommands.ActiveSession) + sessionId);
-                    } else {
-                        //否则发送关闭消息
-                        sendCommandQueue.add(String.valueOf(Constant.SsCommands.CloseSession) + sessionId);
+                    case Constant.ScCommands.CheckSessionActive -> {
+                        int sessionId = Integer.parseInt(command.substring(1));
+                        ClientSession session = clientSessionManager.getClientSessionBySessionId(sessionId);
+                        if (null != session) {
+                            //session存在，则发送存活消息
+                            sendCommandQueue.add(String.valueOf(Constant.SsCommands.ActiveSession) + sessionId);
+                        } else {
+                            //否则发送关闭消息
+                            sendCommandQueue.add(String.valueOf(Constant.SsCommands.CloseSession) + sessionId);
+                        }
                     }
                 }
             }
         }
 
+
         //收字节
-        List<ProtoMessage.BytesPb> rBytesPbListList = rMessagePb.getBytesPbListList();
-        if (!rBytesPbListList.isEmpty()) {
+        List<SessionBytes> sessionBytes = talkMessage.getSessionBytes();
+        if (null != sessionBytes && !sessionBytes.isEmpty()) {
             isEmpty = false;
-            for (ProtoMessage.BytesPb bytesPb : rBytesPbListList) {
-                ClientSession clientSession = clientSessionManager.getClientSessionBySessionId(bytesPb.getSessionId());
+            for (SessionBytes sessionByte : sessionBytes) {
+                ClientSession clientSession = clientSessionManager.getClientSessionBySessionId(sessionByte.getSessionId());
                 if (clientSession != null) {
-                    clientSession.sendToUser(bytesPb.getBytes().toByteArray());
+                    clientSession.sendToUser(sessionByte.getBytes());
                 } else {
                     //客户端没有这个session，异步等待一下看是否是未初始化完成
                     Thread.startVirtualThread(() -> {
@@ -178,9 +182,9 @@ public class ClientTalker {
                             } catch (InterruptedException e) {
                                 continue;
                             }
-                            clientSession1 = clientSessionManager.getClientSessionBySessionId(bytesPb.getSessionId());
+                            clientSession1 = clientSessionManager.getClientSessionBySessionId(sessionByte.getSessionId());
                             if (null != clientSession1) {
-                                clientSession1.sendToUser(bytesPb.getBytes().toByteArray());
+                                clientSession1.sendToUser(sessionByte.getBytes());
                                 return;
                             }
                         }

@@ -131,6 +131,7 @@ final class PortReceiver<CTX> implements Receiver<CTX> {
 
     private void startSendThread(ClientCell cell) {
         LoginClientService.Client client = cell.client;
+        //回复消息到客户端的现场
         Thread.startVirtualThread(() -> {
             ServerTalker.Replier replier = (bytes) -> {
                 try {
@@ -139,11 +140,14 @@ final class PortReceiver<CTX> implements Receiver<CTX> {
                     } else if (!cell.actived) {
                         synchronized (cell.clientActiveWatcher) {
                             log.info("客户端 {} 非活跃，挂起回复消息线程", cell.client.clientId);
-                            try {
-                                cell.clientActiveWatcher.wait();
-                            } catch (InterruptedException e) {
-                                log.info("客户端 {} 活跃，恢复回复消息线程", cell.client.clientId);
-                            }
+                            do {
+                                try {
+                                    cell.clientActiveWatcher.wait(10_000);
+                                } catch (InterruptedException ignored) {
+                                }
+                            }while (!cell.actived);
+                            log.info("客户端 {} 活跃，恢复回复消息线程", cell.client.clientId);
+
                         }
                     }
                 } catch (Exception e) {
@@ -163,6 +167,7 @@ final class PortReceiver<CTX> implements Receiver<CTX> {
             }
             log.info("回复消息线程结束 {} {}", cell.client.clientId, cell.ctx);
         });
+        //接收客户端消息的线程
         Thread.startVirtualThread(() -> {
             while (cell.running) {
                 byte[] bytes;
@@ -186,11 +191,14 @@ final class PortReceiver<CTX> implements Receiver<CTX> {
                 } else if (!cell.actived) {
                     synchronized (cell.clientActiveWatcher) {
                         log.info("客户端 {} 非活跃，挂起接收消息线程", cell.client.clientId);
-                        try {
-                            cell.clientActiveWatcher.wait();
-                        } catch (InterruptedException e) {
-                            log.info("客户端 {} 活跃，恢复接收消息线程", cell.client.clientId);
-                        }
+                        do {
+                            try {
+                                cell.clientActiveWatcher.wait(10_000);
+                            } catch (InterruptedException ignored) {
+                            }
+                        }while (!cell.actived);
+                        log.info("客户端 {} 活跃，恢复接收消息线程", cell.client.clientId);
+
                     }
                 }
             }

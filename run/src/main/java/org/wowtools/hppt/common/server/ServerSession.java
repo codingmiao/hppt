@@ -2,7 +2,9 @@ package org.wowtools.hppt.common.server;
 
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
+import org.wowtools.hppt.common.pojo.SessionBytes;
 import org.wowtools.hppt.common.util.BytesUtil;
+import org.wowtools.hppt.common.util.DebugConfig;
 import org.wowtools.hppt.common.util.RoughTimeUtil;
 
 import java.util.concurrent.BlockingQueue;
@@ -24,7 +26,7 @@ public class ServerSession {
 
     private final ServerSessionLifecycle lifecycle;
 
-    private final BlockingQueue<byte[]> sendBytesQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<SessionBytes> sendBytesQueue = new LinkedBlockingQueue<>();
     //上次活跃时间
     private long activeTime;
 
@@ -46,10 +48,15 @@ public class ServerSession {
         Thread.startVirtualThread(() -> {
             while (running) {
                 try {
-                    byte[] bytes = sendBytesQueue.poll(10, TimeUnit.SECONDS);
-                    if (null == bytes) {
+                    SessionBytes sessionBytes = sendBytesQueue.poll(10, TimeUnit.SECONDS);
+                    if (null == sessionBytes) {
                         continue;
                     }
+                    if (DebugConfig.OpenSerialNumber) {
+                        log.debug("取出session待发送缓冲区数据 >sessionBytes-SerialNumber {}", sessionBytes.getSerialNumber());
+                    }
+                    byte[] bytes = sessionBytes.getBytes();
+
                     bytes = lifecycle.beforeSendToTarget(this, bytes);
 
                     if (bytes != null) {
@@ -78,7 +85,7 @@ public class ServerSession {
      *
      * @param bytes bytes
      */
-    public void sendToTarget(byte[] bytes) {
+    public void sendToTarget(SessionBytes bytes) {
         activeSession();
         if (bytes != null) {
             sendBytesQueue.add(bytes);

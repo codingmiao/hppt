@@ -146,10 +146,10 @@ public class ScConfig extends CommonConfig {
     public String clientPassword;
 
     /**
-     * 向服务端发数据请求体的字节数最大值
-     * 有时会出现413 Request Entity Too Large问题，没办法改nginx的话就用这个值限制，可能会有少量超出
+     * 向服务端发数据包包体的最大字节数，默认10M。包体过小影响传输性能，包体过大则可能导致发包超时或服务端拒绝等问题。
+     * 例如，在使用nginx代理服务端端口时，有时会出现413 Request Entity Too Large问题，没办法改nginx的话就用这个值限制。
      */
-    public int maxSendBodySize = Integer.MAX_VALUE;
+    public int maxSendBodySize = 10 * 1024 * 1024;
 
     /**
      * 端口转发

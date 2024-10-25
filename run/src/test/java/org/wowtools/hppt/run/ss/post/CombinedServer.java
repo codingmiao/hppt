@@ -13,6 +13,7 @@ import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -124,7 +125,7 @@ public final class CombinedServer {
 
             log.debug("Received request body {}", bytes.length);
 
-            List<byte[]> bytesList = BytesUtil.pbBytes2BytesList(bytes);
+            Collection<byte[]> bytesList = BytesUtil.pbBytes2BytesList(bytes).getBytes();
             for (byte[] sub : bytesList) {
                 postServerSessionService.receiveClientBytes(postCtx, sub);
             }

@@ -72,17 +72,9 @@ public class WebsocketServerSessionService extends ServerSessionService<ChannelH
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, BinaryWebSocketFrame msg) throws Exception {
-            msg.retain();
-            Thread.startVirtualThread(() -> {
-                try {
-                    byte[] bytes = new byte[msg.content().readableBytes()];
-                    msg.content().readBytes(bytes);
-                    receiveClientBytes(ctx, bytes);
-                } finally {
-                    msg.release();
-                }
-            });
-
+            byte[] bytes = new byte[msg.content().readableBytes()];
+            msg.content().readBytes(bytes);
+            receiveClientBytes(ctx, bytes);
         }
     }
 

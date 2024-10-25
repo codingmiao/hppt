@@ -9,11 +9,13 @@ import org.wowtools.hppt.run.sc.common.ClientSessionService;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author liuyu
@@ -96,6 +98,7 @@ public class PostClientSessionService extends ClientSessionService {
     }
 
     private final Object replyThreadEmptyLock = new Object();
+    private volatile boolean replyThreadEmptySleep = false;
 
     private void startReplyThread() {
         Thread.startVirtualThread(() -> {
@@ -111,29 +114,33 @@ public class PostClientSessionService extends ClientSessionService {
             while (running) {
                 //检测是否需要挂起接收线程
                 if (empty && notUsed()) {
-                    synchronized (replyThreadEmptyLock) {
-                        log.info("无客户端,挂起接收线程");
-                        try {
-                            replyThreadEmptyLock.wait();
-                        } catch (InterruptedException e) {
-                            log.info("唤醒接收线程");
-                            if (!running) {
-                                log.info("退出已停止ReplyThread");
-                                return;
+                    log.info("无客户端,挂起接收线程");
+                    do {
+                        synchronized (replyThreadEmptyLock) {
+                            try {
+                                replyThreadEmptyLock.wait(10_000);
+                            } catch (Exception e) {
                             }
                         }
+                    } while (notUsed() && replyThreadEmptySleep && running);
+                    log.info("唤醒接收线程");
+                    if (!running) {
+                        log.info("退出已停止ReplyThread");
+                        return;
                     }
                 }
                 //发一个接收请求接数据
                 try {
                     byte[] responseBytes;
                     if (log.isDebugEnabled()) {
+                        log.debug("ReplyThread 发起请求");
                         long t = System.currentTimeMillis();
-                        try (Response response = HttpUtil.doPost(replyUrl, null)) {
+                        try (Response response = HttpUtil.doPost(replyUrl, null)) {//TODO 这里卡住了
                             ResponseBody body = response.body();
                             responseBytes = null == body ? null : body.bytes();
+                        }finally {
+                            log.debug("ReplyThread 请求完成,cost {}", System.currentTimeMillis() - t);
                         }
-                        log.debug("ReplyThread 发送完成,cost {}", System.currentTimeMillis() - t);
                     }else {
                         try (Response response = HttpUtil.doPost(replyUrl, null)) {
                             ResponseBody body = response.body();
@@ -142,11 +149,11 @@ public class PostClientSessionService extends ClientSessionService {
                     }
                     if (null != responseBytes && responseBytes.length > 0) {
                         log.debug("收到服务端响应字节数 {}", responseBytes.length);
-                        List<byte[]> bytesList;
+                        Collection<byte[]> bytesList;
                         try {
-                            bytesList = BytesUtil.pbBytes2BytesList(responseBytes);
+                            bytesList = BytesUtil.pbBytes2BytesList(responseBytes).getBytes();
                         } catch (Exception e) {
-                            log.warn("解析protobuf字节异常 {}", new String(responseBytes, StandardCharsets.UTF_8));
+                            log.warn("解析字节异常 {}", new String(responseBytes, StandardCharsets.UTF_8));
                             throw e;
                         }
                         for (byte[] bytes : bytesList) {

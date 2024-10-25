@@ -6,17 +6,16 @@ import lombok.Getter;
 import org.wowtools.hppt.common.protobuf.ProtoMessage;
 import org.wowtools.hppt.common.util.DebugConfig;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * session发/收的bytes，包含sessionId和具体bytes
- *
  * @author liuyu
- * @date 2023/11/17
+ * @date 2024/10/23
  */
-@Getter
-public class SessionBytes {
-
+public class BytesList {
     private static final AtomicInteger serialNumberBuilder;
 
     static {
@@ -27,13 +26,11 @@ public class SessionBytes {
         }
     }
 
-    private final int sessionId;
-    private final byte[] bytes;
+    private final Collection<byte[]> bytesCollection;
     private final int serialNumber;
 
-    public SessionBytes(int sessionId, byte[] bytes) {
-        this.sessionId = sessionId;
-        this.bytes = bytes;
+    public BytesList(Collection<byte[]> bytesCollection) {
+        this.bytesCollection = bytesCollection;
         if (!DebugConfig.OpenSerialNumber) {
             serialNumber = 0;
         } else {
@@ -41,15 +38,20 @@ public class SessionBytes {
         }
     }
 
-    public SessionBytes(byte[] pbBytes) {
-        ProtoMessage.BytesPb pb;
+    public BytesList(byte[] pbBytes) {
+        ProtoMessage.BytesListPb pb;
         try {
-            pb = ProtoMessage.BytesPb.parseFrom(pbBytes);
+            pb = ProtoMessage.BytesListPb.parseFrom(pbBytes);
         } catch (InvalidProtocolBufferException e) {
             throw new RuntimeException(e);
         }
-        sessionId = pb.getSessionId();
-        bytes = pb.getBytes().toByteArray();
+        List<ByteString> byteStringList = pb.getBytesListList();
+        ArrayList<byte[]> res = new ArrayList<>(byteStringList.size());
+        for (ByteString s : byteStringList) {
+            res.add(s.toByteArray());
+        }
+        this.bytesCollection = res;
+
         if (!DebugConfig.OpenSerialNumber) {
             serialNumber = 0;
         } else {
@@ -57,29 +59,21 @@ public class SessionBytes {
         }
     }
 
-    protected SessionBytes(ProtoMessage.BytesPb pb) {
-        sessionId = pb.getSessionId();
-        bytes = pb.getBytes().toByteArray();
-        if (!DebugConfig.OpenSerialNumber) {
-            serialNumber = 0;
-        } else {
-            serialNumber = pb.getSerialNumber();
-        }
+    public Collection<byte[]> getBytes(){
+        return bytesCollection;
     }
 
     public int getSerialNumber() {
         return serialNumber;
     }
 
-    public ProtoMessage.BytesPb.Builder toProto() {
-        ProtoMessage.BytesPb.Builder builder = ProtoMessage.BytesPb.newBuilder()
-                .setBytes(ByteString.copyFrom(bytes))
-                .setSessionId(sessionId);
-        if (DebugConfig.OpenSerialNumber) {
-            builder.setSerialNumber(serialNumber);
+    public ProtoMessage.BytesListPb.Builder toProto() {
+        List<ByteString> byteStringList = new ArrayList<>(bytesCollection.size());
+        for (byte[] bytes : bytesCollection) {
+            byteStringList.add(ByteString.copyFrom(bytes));
         }
+        ProtoMessage.BytesListPb.Builder builder = ProtoMessage.BytesListPb.newBuilder();
+        builder.addAllBytesList(byteStringList);
         return builder;
     }
-
-
 }

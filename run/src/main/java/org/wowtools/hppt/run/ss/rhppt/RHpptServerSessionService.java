@@ -58,9 +58,7 @@ public class RHpptServerSessionService extends ServerSessionService<ChannelHandl
         protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
             // 处理接收到的消息
             byte[] bytes = BytesUtil.byteBuf2bytes(msg);
-            Thread.startVirtualThread(()->{
-                receiveClientBytes(ctx, bytes);
-            });
+            receiveClientBytes(ctx, bytes);
         }
 
         @Override

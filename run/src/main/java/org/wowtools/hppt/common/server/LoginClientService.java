@@ -84,12 +84,12 @@ public class LoginClientService {
         }
 
         //添加一条向客户端发送的bytes
-        public void addBytes(int sessionId, byte[] bytes, SendAbleSessionBytes.CallBack callBack) {
-            SendAbleSessionBytes sessionBytes = new SendAbleSessionBytes(
-                    new SessionBytes(sessionId, bytes),
+        public void addBytes(SessionBytes sessionBytes, SendAbleSessionBytes.CallBack callBack) {
+            SendAbleSessionBytes sasb = new SendAbleSessionBytes(
+                    sessionBytes,
                     callBack
             );
-            sessionBytesQueue.add(sessionBytes);
+            sessionBytesQueue.add(sasb);
         }
 
         //取出所有需要向客户端发送的bytes 取出的bytes会按相同sessionId进行整合 无bytes则返回null

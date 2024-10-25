@@ -8,6 +8,7 @@ import org.wowtools.hppt.common.util.HttpUtil;
 import org.wowtools.hppt.run.ss.common.ServerSessionService;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -78,7 +79,7 @@ public class RPostServerSessionService extends ServerSessionService<RPostCtx> {
                     }
                     if (null != responseBytes && responseBytes.length > 0) {
                         log.debug("收到服务端响应字节数 {}", responseBytes.length);
-                        List<byte[]> bytesList = BytesUtil.pbBytes2BytesList(responseBytes);
+                        Collection<byte[]> bytesList = BytesUtil.pbBytes2BytesList(responseBytes).getBytes();
                         for (byte[] bytes : bytesList) {
                             receiveClientBytes(rPostCtx, bytes);
                         }

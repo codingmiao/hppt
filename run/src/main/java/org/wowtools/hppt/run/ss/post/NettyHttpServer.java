@@ -8,6 +8,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.*;
 import lombok.extern.slf4j.Slf4j;
+import org.wowtools.hppt.common.pojo.BytesList;
 import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.NettyObjectBuilder;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
@@ -148,8 +149,8 @@ class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         byte[] bytes = BytesUtil.byteBuf2bytes(content);
         log.debug("收到请求body {}", bytes.length);
 
-        List<byte[]> bytesList = BytesUtil.pbBytes2BytesList(bytes);
-        for (byte[] sub : bytesList) {
+        BytesList bytesList = BytesUtil.pbBytes2BytesList(bytes);
+        for (byte[] sub : bytesList.getBytes()) {
             postServerSessionService.receiveClientBytes(ctx, sub);
         }
     }

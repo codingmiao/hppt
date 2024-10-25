@@ -1,22 +1,18 @@
 package org.wowtools.hppt.common.util;
 
-import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.wowtools.hppt.common.protobuf.ProtoMessage;
+import org.wowtools.hppt.common.pojo.BytesList;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
@@ -206,27 +202,12 @@ public class BytesUtil {
 
     //把bytes集合转成BytesListPb对应的bytes
     public static byte[] bytesCollection2PbBytes(Collection<byte[]> bytesCollection) {
-        List<ByteString> byteStringList = new ArrayList<>(bytesCollection.size());
-        for (byte[] bytes : bytesCollection) {
-            byteStringList.add(ByteString.copyFrom(bytes));
-        }
-        return ProtoMessage.BytesListPb.newBuilder().addAllBytesList(byteStringList).build().toByteArray();
+        return new BytesList(bytesCollection).toProto().build().toByteArray();
     }
 
     //BytesListPb对应的bytes转成list
-    public static ArrayList<byte[]> pbBytes2BytesList(byte[] pbBytes) {
-        ProtoMessage.BytesListPb bytesListPb;
-        try {
-            bytesListPb = ProtoMessage.BytesListPb.parseFrom(pbBytes);
-        } catch (InvalidProtocolBufferException e) {
-            throw new RuntimeException(e);
-        }
-        List<ByteString> byteStringList = bytesListPb.getBytesListList();
-        ArrayList<byte[]> res = new ArrayList<>(byteStringList.size());
-        for (ByteString s : byteStringList) {
-            res.add(s.toByteArray());
-        }
-        return res;
+    public static BytesList pbBytes2BytesList(byte[] pbBytes) {
+        return new BytesList(pbBytes);
     }
 
 }
