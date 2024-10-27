@@ -15,9 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -31,8 +29,8 @@ final class PortReceiver implements Receiver {
     private final ClientSessionService clientSessionService;
 
 
-    private final BlockingQueue<String> sendCommandQueue = new LinkedBlockingQueue<>();
-    private final BlockingQueue<SessionBytes> sendBytesQueue = new LinkedBlockingQueue<>();
+    private final BufferPool<String> sendCommandQueue = new BufferPool<>(">PortReceiver-sendCommand");
+    private final BufferPool<SessionBytes> sendBytesQueue = new BufferPool<>(">PortReceiver-sendBytesQueue");
 
     private final Map<Integer, ClientBytesSender.SessionIdCallBack> sessionIdCallBackMap = new ConcurrentHashMap<>();//<newSessionFlag,cb>
     private AesCipherUtil aesCipherUtil;

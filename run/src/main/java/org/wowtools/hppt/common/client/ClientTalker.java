@@ -3,10 +3,7 @@ package org.wowtools.hppt.common.client;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.pojo.SessionBytes;
 import org.wowtools.hppt.common.pojo.TalkMessage;
-import org.wowtools.hppt.common.util.AesCipherUtil;
-import org.wowtools.hppt.common.util.CommonConfig;
-import org.wowtools.hppt.common.util.Constant;
-import org.wowtools.hppt.common.util.DebugConfig;
+import org.wowtools.hppt.common.util.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
@@ -35,7 +32,7 @@ public class ClientTalker {
      * @throws Exception
      */
     public static byte[] buildSendToServerBytes(CommonConfig config, long maxSendBodySize,
-                                                BlockingQueue<String> sendCommandQueue, BlockingQueue<SessionBytes> sendBytesQueue,
+                                                BufferPool<String> sendCommandQueue, BufferPool<SessionBytes> sendBytesQueue,
                                                 AesCipherUtil aesCipherUtil, boolean wait) throws Exception {
         long sendBodySize = 0;//大致预估发送体积
         //命令
@@ -99,7 +96,7 @@ public class ClientTalker {
 
     //接收服务端发来的字节并做相应处理
     public static boolean receiveServerBytes(CommonConfig config, byte[] responseBody,
-                                             ClientSessionManager clientSessionManager, AesCipherUtil aesCipherUtil, BlockingQueue<String> sendCommandQueue,
+                                             ClientSessionManager clientSessionManager, AesCipherUtil aesCipherUtil, BufferPool<String> sendCommandQueue,
                                              Map<Integer, ClientBytesSender.SessionIdCallBack> sessionIdCallBackMap) throws Exception {
         if (null == responseBody) {
             return true;
