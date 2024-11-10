@@ -49,7 +49,11 @@ final class PortReceiver implements Receiver {
         clientSessionManager = ScUtil.createClientSessionManager(config,
                 clientSessionService.buildClientSessionLifecycle(), buildClientBytesSender());
         buildSendThread().start();
-        clientSessionService.connectToServer(config, () -> {
+        clientSessionService.connectToServer(config, (exceptionCb) -> {
+            if (null != exceptionCb) {
+                log.warn("建立连接异常");
+                exit();
+            }
             log.info("连接建立完成");
             Thread.startVirtualThread(() -> {
                 //建立连接后，获取时间戳

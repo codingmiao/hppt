@@ -151,11 +151,11 @@ public class BytesUtil {
         int i = 0;
         while (!channel.isWritable() && channel.isOpen()) {
             i++;
-            if (i > 30) {
+            if (i > 3000) {
                 throw new RuntimeException("waitChannelWritable timeout");
             }
             try {
-                Thread.sleep(1000);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
             }
         }

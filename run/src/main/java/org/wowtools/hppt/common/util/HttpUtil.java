@@ -30,8 +30,7 @@ public class HttpUtil {
     static {
         okHttpClient = new OkHttpClient.Builder()
                 .sslSocketFactory(sslSocketFactory(), x509TrustManager())
-                // 是否开启缓存
-                .retryOnConnectionFailure(false)
+                .retryOnConnectionFailure(true)
                 .connectionPool(pool())
                 .connectTimeout(60L, TimeUnit.SECONDS)
                 .readTimeout(60L, TimeUnit.SECONDS)

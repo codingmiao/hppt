@@ -39,16 +39,16 @@ public class PostClientSessionService extends ClientSessionService {
 
     @Override
     public void connectToServer(ScConfig config, Cb cb) {
-        startSendThread(() -> {
+        startSendThread((e) -> {
             startReplyThread();
-            cb.end();
+            cb.end(e);
         });
     }
 
     private void startSendThread(Cb cb) {
         Thread.startVirtualThread(() -> {
             //等待初始化完成
-            cb.end();
+            cb.end(null);
             //起一个while循环不断发送数据
             final long sendSleepTime = config.post.sendSleepTime;
             while (running) {
@@ -135,7 +135,7 @@ public class PostClientSessionService extends ClientSessionService {
                     if (log.isDebugEnabled()) {
                         log.debug("ReplyThread 发起请求");
                         long t = System.currentTimeMillis();
-                        try (Response response = HttpUtil.doPost(replyUrl, null)) {//TODO 这里卡住了
+                        try (Response response = HttpUtil.doPost(replyUrl, null)) {
                             ResponseBody body = response.body();
                             responseBytes = null == body ? null : body.bytes();
                         }finally {

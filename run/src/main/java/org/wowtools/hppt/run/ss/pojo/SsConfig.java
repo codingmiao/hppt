@@ -44,6 +44,11 @@ public class SsConfig extends CommonConfig {
     public int messageQueueSize = 2048;
 
     /**
+     * 每个数据包最大返回字节数，如通信协议或nginx等限制了最大包体，适当调整此值
+     */
+    public long maxReturnBodySize = 10 * 1024 * 1024;
+
+    /**
      * 生命周期实现类path，为空则使用默认
      */
     public String lifecycle;
@@ -74,7 +79,7 @@ public class SsConfig extends CommonConfig {
         /**
          * 等待真实端口返回数据的毫秒数，一般设一个略小于http服务超时时间的值
          */
-        public long waitResponseTime = 30000;
+        public long waitResponseTime = 10000;
 
         /**
          * 回复的servlet人为设置的延迟，避免客户端过于频繁的发请求

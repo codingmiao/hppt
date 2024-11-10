@@ -92,12 +92,12 @@ final class SsReceiver<CTX> implements Receiver<CTX> {
         if (null == cell) {
             ClientSessionService clientSessionService = ClientSessionServiceBuilder.build(scConfig);
             CompletableFuture<Boolean> future = new CompletableFuture<>();
-            ClientSessionService.Cb cb = () -> future.complete(true);
+            ClientSessionService.Cb cb = (e) -> future.complete(true);
             clientSessionService.connectToServer(scConfig, cb);
             future.get();
             cell = new Cell(clientSessionService, ctx);
             ctxClientSessionServiceMap.put(ctx, cell);
-            cb.end();
+            cb.end(null);
             log.info("new cell by ctx {}", ctx);
         }
         cell.clientSessionService.sendBytesToServer(bytes);

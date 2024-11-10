@@ -1,5 +1,7 @@
 package org.wowtools.hppt.common.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -11,14 +13,14 @@ import java.util.concurrent.TimeUnit;
  * @author liuyu
  * @date 2024/10/27
  */
+@Slf4j
 public class BufferPool<T> {
     private final LinkedBlockingQueue<T> queue = new LinkedBlockingQueue<>();
 
     private final String name;
 
     /**
-     *
-     * @param name 缓冲池名字，为便于排查，请保证业务功能上的唯一
+     * @param name 缓冲池名字，为便于排查，请保证名称在业务层面的准确清晰
      */
     public BufferPool(String name) {
         this.name = name;
@@ -30,7 +32,17 @@ public class BufferPool<T> {
      * @param t t
      */
     public void add(T t) {
-        queue.add(t);
+        if (!DebugConfig.OpenBufferPoolDetector) {
+            queue.add(t);
+        } else {
+            int n = queue.size();
+            queue.add(t);
+            int n1 = queue.size();
+            if (n < DebugConfig.BufferPoolWaterline && n1 >= DebugConfig.BufferPoolWaterline) {
+                log.debug("{} 缓冲池高水位线: {} -> {}", name, n, n1);
+            }
+        }
+
     }
 
     /**
@@ -83,5 +95,32 @@ public class BufferPool<T> {
         list.add(t0);
         queue.drainTo(list);
         return list;
+    }
+
+    /**
+     * 获取队列中当前可用的所有元素，队列为空则返回null
+     *
+     * @return list
+     */
+    public List<T> drainToList() {
+        if (queue.isEmpty()) {
+            return null;
+        }
+        List<T> list = new LinkedList<>();
+        queue.drainTo(list);
+        return list;
+    }
+
+    /**
+     * 获取队列中当前可用的所有元素添加到list中
+     *
+     * @param list list
+     */
+    public void drainToList(List<T> list) {
+        queue.drainTo(list);
+    }
+
+    public boolean isEmpty() {
+        return queue.isEmpty();
     }
 }

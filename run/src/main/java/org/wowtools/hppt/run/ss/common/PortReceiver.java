@@ -131,7 +131,7 @@ final class PortReceiver<CTX> implements Receiver<CTX> {
 
     private void startSendThread(ClientCell cell) {
         LoginClientService.Client client = cell.client;
-        //回复消息到客户端的现场
+        //回复消息到客户端的线程
         Thread.startVirtualThread(() -> {
             ServerTalker.Replier replier = (bytes) -> {
                 try {
@@ -159,7 +159,7 @@ final class PortReceiver<CTX> implements Receiver<CTX> {
             };
             while (cell.running) {
                 try {
-                    ServerTalker.replyToClient(ssConfig, serverSessionManager, client, -1, true, replier);
+                    ServerTalker.replyToClient(ssConfig, serverSessionManager, client, ssConfig.maxReturnBodySize, true, replier);
                 } catch (Exception e) {
                     log.warn("向用户端发送消息异常", e);
                     removeCtx(cell.ctx);

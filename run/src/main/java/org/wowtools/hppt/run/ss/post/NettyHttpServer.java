@@ -39,10 +39,15 @@ class NettyHttpServer {
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
+                    .option(ChannelOption.SO_BACKLOG, 128)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) {
+                            ch.config().setOption(ChannelOption.TCP_NODELAY, true);
+                            ch.config().setOption(ChannelOption.SO_KEEPALIVE, true);
+                            ch.config().setOption(ChannelOption.SO_RCVBUF, 1048576); // 接收缓冲区大小
+                            ch.config().setOption(ChannelOption.SO_SNDBUF, 1048576); // 发送缓冲区大小
                             ch.pipeline().addLast(new HttpServerCodec());
                             ch.pipeline().addLast(new HttpObjectAggregator(104857600)); // 100 MB
                             ch.pipeline().addLast(new HttpRequestHandler(postServerSessionService, ssConfig));
@@ -173,18 +178,13 @@ class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         }
 
         List<byte[]> bytesList = new LinkedList<>();
-        byte[] rBytes;
-        try {
-            rBytes = ctx.sendQueue.poll(waitResponseTime, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            rBytes = null;
-        }
+        byte[] rBytes = ctx.sendQueue.poll(waitResponseTime, TimeUnit.MILLISECONDS);
         if (null == rBytes) {
             return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(NettyHttpServer.emptyBytes));
         }
         bytesList.add(rBytes);
 
-        ctx.sendQueue.drainTo(bytesList);
+        ctx.sendQueue.drainToList(bytesList);
         rBytes = BytesUtil.bytesCollection2PbBytes(bytesList);
         log.debug("向客户端发送字节 bytesList {} body {}", bytesList.size(), rBytes.length);
         return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(rBytes));

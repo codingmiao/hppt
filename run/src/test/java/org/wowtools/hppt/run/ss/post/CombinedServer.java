@@ -144,7 +144,7 @@ public final class CombinedServer {
             }
             bytesList.add(rBytes);
 
-            postCtx.sendQueue.drainTo(bytesList);
+            postCtx.sendQueue.drainToList(bytesList);
             rBytes = BytesUtil.bytesCollection2PbBytes(bytesList);
             log.debug("Sending bytes to client bytesList {} body {}", bytesList.size(), rBytes.length);
 

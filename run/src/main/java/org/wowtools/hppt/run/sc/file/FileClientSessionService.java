@@ -53,7 +53,7 @@ public class FileClientSessionService extends ClientSessionService {
 
     @Override
     public void connectToServer(ScConfig config, Cb cb) throws Exception {
-        cb.end();
+        cb.end(null);
     }
 
     @Override

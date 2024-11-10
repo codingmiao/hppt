@@ -32,7 +32,7 @@ public class ClientDemo extends ClientSessionService {
             }
         };
         KafkaUtil.buildConsumer("client", KafkaUtil.ServerSendTopic, clientConsumer);
-        cb.end();//调用end方法，通知框架连接完成
+        cb.end(null);//调用end方法，通知框架连接完成
     }
 
     @Override

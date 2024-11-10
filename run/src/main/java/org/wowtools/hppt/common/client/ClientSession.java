@@ -2,10 +2,9 @@ package org.wowtools.hppt.common.client;
 
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
+import org.wowtools.hppt.common.util.BufferPool;
 import org.wowtools.hppt.common.util.BytesUtil;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -19,7 +18,7 @@ public class ClientSession {
     private final int sessionId;
     private final ChannelHandlerContext channelHandlerContext;
 
-    private final BlockingQueue<byte[]> sendToUserBytesQueue = new LinkedBlockingQueue<>();
+    private final BufferPool<byte[]> sendToUserBytesQueue = new BufferPool<>("<ClientSession-sendToUserBytesQueue");
     private volatile boolean running = true;
 
     ClientSession(int sessionId, ChannelHandlerContext channelHandlerContext, ClientSessionLifecycle lifecycle) {
@@ -27,12 +26,7 @@ public class ClientSession {
         this.channelHandlerContext = channelHandlerContext;
         Thread.startVirtualThread(() -> {
             while (running) {
-                byte[] bytes;
-                try {
-                    bytes = sendToUserBytesQueue.poll(10, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                    continue;
-                }
+                byte[] bytes = sendToUserBytesQueue.poll(10, TimeUnit.SECONDS);
                 if (null == bytes) {
                     continue;
                 }
@@ -41,9 +35,9 @@ public class ClientSession {
                     log.debug("ClientSession {} 向用户发送字节 {}", sessionId, bytes.length);
                     Throwable e = BytesUtil.writeToChannelHandlerContext(channelHandlerContext, bytes);
                     if (null != e) {
-                        log.warn("向用户发送字节异常",e);
+                        log.warn("向用户发送字节异常", e);
                         close();
-                    }else if (log.isDebugEnabled()){
+                    } else if (log.isDebugEnabled()) {
                         log.debug("ClientSession {} 向用户发送字节完成 {}", sessionId, bytes.length);
                     }
                     lifecycle.afterSendToUser(this, bytes);

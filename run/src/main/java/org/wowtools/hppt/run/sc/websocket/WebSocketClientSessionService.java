@@ -32,7 +32,12 @@ public class WebSocketClientSessionService extends ClientSessionService {
 
     @Override
     public void connectToServer(ScConfig config, Cb cb) throws Exception {
-        newWsConn(config, cb);
+        try {
+            newWsConn(config, cb);
+        } catch (Exception e) {
+            cb.end(e);
+            throw e;
+        }
     }
 
     private void newWsConn(ScConfig config, Cb cb) throws Exception {
@@ -57,7 +62,7 @@ public class WebSocketClientSessionService extends ClientSessionService {
 
                         pipeline.addLast(new WebSocketClientProtocolHandler(WebSocketClientHandshakerFactory.newHandshaker(webSocketURL, WebSocketVersion.V13, null, false, new DefaultHttpHeaders(), bodySize)));
                         pipeline.addLast(new SimpleChannelInboundHandler<BinaryWebSocketFrame>() {
-
+                            boolean inited = false;
 
                             @Override
                             protected void channelRead0(ChannelHandlerContext ctx, BinaryWebSocketFrame msg) throws Exception {
@@ -69,6 +74,9 @@ public class WebSocketClientSessionService extends ClientSessionService {
                                 super.exceptionCaught(ctx, cause);
                                 ctx.close();
                                 exit();
+                                if (!inited) {
+                                    cb.end(cause);
+                                }
                             }
 
                             @Override
@@ -93,7 +101,8 @@ public class WebSocketClientSessionService extends ClientSessionService {
                                             }
                                         });
                                     }
-                                    cb.end();
+                                    cb.end(null);
+                                    inited = true;
                                 }
                                 super.userEventTriggered(ctx, evt);
                             }

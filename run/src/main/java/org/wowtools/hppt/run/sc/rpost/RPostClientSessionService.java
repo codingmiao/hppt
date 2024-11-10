@@ -52,10 +52,11 @@ public class RPostClientSessionService extends ClientSessionService {
             ChannelFuture f = bootstrap.bind(port).sync();
             channel = f.channel();
             log.info("Netty服务端启动完成，端口 {}", port);
-            cb.end();
+            cb.end(null);
         } catch (Exception e) {
             log.warn("start err", e);
             exit();
+            cb.end(e);
         }
     }
 

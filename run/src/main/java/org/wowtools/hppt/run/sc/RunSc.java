@@ -27,8 +27,7 @@ public class RunSc {
             throw new RuntimeException("读取配置文件异常", e);
         }
         while (true) {
-            try {
-                ClientSessionService clientSessionService = ClientSessionServiceBuilder.build(config);
+            try (ClientSessionService clientSessionService = ClientSessionServiceBuilder.build(config)){
                 clientSessionService.sync();
             } catch (Exception e) {
                 log.warn("服务异常", e);

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.pojo.SendAbleSessionBytes;
 import org.wowtools.hppt.common.pojo.SessionBytes;
 import org.wowtools.hppt.common.pojo.TalkMessage;
+import org.wowtools.hppt.common.util.BufferPool;
 import org.wowtools.hppt.common.util.CommonConfig;
 import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.common.util.DebugConfig;
@@ -11,8 +12,6 @@ import org.wowtools.hppt.common.util.DebugConfig;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author liuyu
@@ -206,7 +205,8 @@ public class ServerTalker {
         }
     }
 
-    private static final BlockingQueue<SendAbleSessionBytesResult> sendAbleSessionBytesResultQueue = new LinkedBlockingQueue<>();
+    private static final BufferPool<SendAbleSessionBytesResult> sendAbleSessionBytesResultQueue
+            = new BufferPool<>("ServerTalker.sendAbleSessionBytesResultQueue");
 
     static {
         Thread.startVirtualThread(() -> {

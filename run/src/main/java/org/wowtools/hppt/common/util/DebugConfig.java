@@ -20,9 +20,17 @@ public class DebugConfig {
     //是否开启消息流水号
     public static final boolean OpenSerialNumber;
 
+    //是否开启缓冲池监控
+    public static final boolean OpenBufferPoolDetector;
+
+    //缓冲池高水位线，缓冲池中元素个数超过此值且继续向其中添加要素则触发日志
+    public static final int BufferPoolWaterline;
+
     static {
         ResourceLeakDetector.Level _NettyResourceLeakDetectorLevel = ResourceLeakDetector.Level.DISABLED;
         boolean _OpenSerialNumber = false;
+        boolean _OpenBufferPoolDetector = false;
+        int _BufferPoolWaterline = 1000;
         try {
             String str = ResourcesReader.readStr(Run.class, "debug.ini");
             Map<String, String> configs = new HashMap<>();
@@ -48,11 +56,17 @@ public class DebugConfig {
 
             _OpenSerialNumber = "1".equals(configs.get("OpenSerialNumber"));
 
+            _OpenBufferPoolDetector = "1".equals(configs.get("OpenBufferPoolDetector"));
+            _BufferPoolWaterline = Integer.parseInt(configs.getOrDefault("BufferPoolWaterline", "1000"));
+
         } catch (Exception e) {
-            log.debug("不开启调试模式，原因 {}", e.getMessage());
+            log.debug("不开启调试模式 ", e);
         }
 
         NettyResourceLeakDetectorLevel = _NettyResourceLeakDetectorLevel;
         OpenSerialNumber = _OpenSerialNumber;
+
+        OpenBufferPoolDetector = _OpenBufferPoolDetector;
+        BufferPoolWaterline = _BufferPoolWaterline;
     }
 }

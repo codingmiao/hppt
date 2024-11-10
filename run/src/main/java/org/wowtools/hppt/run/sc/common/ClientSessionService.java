@@ -4,13 +4,10 @@ import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.client.ClientSession;
 import org.wowtools.hppt.common.client.ClientSessionLifecycle;
-import org.wowtools.hppt.common.pojo.SessionBytes;
-import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -18,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2024/3/12
  */
 @Slf4j
-public abstract class ClientSessionService {
+public abstract class ClientSessionService implements AutoCloseable {
     protected final ScConfig config;
 
 
@@ -26,12 +23,18 @@ public abstract class ClientSessionService {
     protected volatile boolean running = true;
 
     private final BlockingQueue<byte[]> receiveServerBytesQueue = new ArrayBlockingQueue<>(128);
+
     /**
      * 当一个事件结束时发起的回调
      */
     @FunctionalInterface
     public interface Cb {
-        void end();
+        /**
+         * 通知框架事件结束
+         *
+         * @param e 如遇到异常传入异常，否则传入null
+         */
+        void end(Throwable e);
     }
 
     public ClientSessionService(ScConfig config) throws Exception {
@@ -43,7 +46,7 @@ public abstract class ClientSessionService {
             receiver = new SsReceiver(config, this);
             log.info("--- 中继模式");
         }
-        Thread.startVirtualThread(()->{
+        Thread.startVirtualThread(() -> {
             while (running) {
                 byte[] bytes;
                 try {
@@ -57,7 +60,7 @@ public abstract class ClientSessionService {
                 try {
                     receiver.receiveServerBytes(bytes);
                 } catch (Exception e) {
-                    log.warn("receiver.receiveServerBytes err",e);
+                    log.warn("receiver.receiveServerBytes err", e);
                     exit();
                 }
             }
@@ -70,7 +73,7 @@ public abstract class ClientSessionService {
      * 与服务端建立连接
      *
      * @param config 配置文件
-     * @param cb     请在连接完成后主动调用cb.end()
+     * @param cb     请在连接完成后主动调用cb.end(null)，或在发生异常后主动调用cb.end(exception)
      */
     public abstract void connectToServer(ScConfig config, Cb cb) throws Exception;
 
@@ -88,7 +91,7 @@ public abstract class ClientSessionService {
      * @throws Exception
      */
     public void receiveServerBytes(byte[] bytes) throws Exception {
-        if (!receiveServerBytesQueue.offer(bytes,30, TimeUnit.SECONDS)){
+        if (!receiveServerBytesQueue.offer(bytes, 30, TimeUnit.SECONDS)) {
             log.warn("缓冲区堆积过多数据，强制退出");
             exit();
         }
@@ -108,6 +111,11 @@ public abstract class ClientSessionService {
         synchronized (this) {
             this.notify();
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        exit();
     }
 
     /**
@@ -165,6 +173,7 @@ public abstract class ClientSessionService {
 
     /**
      * 是否未被用户被使用
+     *
      * @return
      */
     public boolean notUsed() {

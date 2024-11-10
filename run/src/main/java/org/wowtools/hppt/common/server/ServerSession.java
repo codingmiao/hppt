@@ -3,6 +3,7 @@ package org.wowtools.hppt.common.server;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.pojo.SessionBytes;
+import org.wowtools.hppt.common.util.BufferPool;
 import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.DebugConfig;
 import org.wowtools.hppt.common.util.RoughTimeUtil;
@@ -26,7 +27,7 @@ public class ServerSession {
 
     private final ServerSessionLifecycle lifecycle;
 
-    private final BlockingQueue<SessionBytes> sendBytesQueue = new LinkedBlockingQueue<>();
+    private final BufferPool<SessionBytes> sendBytesQueue = new BufferPool<>(">ServerSession-sendBytesQueue");
     //上次活跃时间
     private long activeTime;
 

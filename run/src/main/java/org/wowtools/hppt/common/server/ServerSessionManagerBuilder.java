@@ -10,7 +10,7 @@ import org.wowtools.hppt.common.util.NettyObjectBuilder;
 public class ServerSessionManagerBuilder {
     protected EventLoopGroup group;
     protected ServerSessionLifecycle lifecycle;
-    protected long sessionTimeout = 30000;
+    protected long sessionTimeout = 60000;
 
     public ServerSessionManagerBuilder setSessionTimeout(long sessionTimeout) {
         this.sessionTimeout = sessionTimeout;

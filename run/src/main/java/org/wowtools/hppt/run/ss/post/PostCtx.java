@@ -1,5 +1,7 @@
 package org.wowtools.hppt.run.ss.post;
 
+import org.wowtools.hppt.common.util.BufferPool;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -9,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 class PostCtx {
     final String cookie;
-    final BlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<>();
+    final BufferPool<byte[]> sendQueue = new BufferPool<>(">PostCtx-sendQueue");
 
     public PostCtx(String cookie) {
         this.cookie = cookie;

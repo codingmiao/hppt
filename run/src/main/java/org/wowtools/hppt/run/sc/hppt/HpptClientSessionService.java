@@ -89,7 +89,7 @@ public class HpptClientSessionService extends ClientSessionService {
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
             super.channelActive(ctx);
             _ctx = ctx;
-            cb.end();
+            cb.end(null);
         }
 
         @Override

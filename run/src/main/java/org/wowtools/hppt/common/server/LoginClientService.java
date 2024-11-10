@@ -3,6 +3,7 @@ package org.wowtools.hppt.common.server;
 import org.wowtools.hppt.common.pojo.SendAbleSessionBytes;
 import org.wowtools.hppt.common.pojo.SessionBytes;
 import org.wowtools.hppt.common.util.AesCipherUtil;
+import org.wowtools.hppt.common.util.BufferPool;
 import org.wowtools.hppt.common.util.BytesUtil;
 
 import java.nio.charset.StandardCharsets;
@@ -34,10 +35,10 @@ public class LoginClientService {
         public final String clientId;
         public final AesCipherUtil aesCipherUtil;
 
-        private final BlockingQueue<String> commandQueue = new LinkedBlockingQueue<>();
+        private final BufferPool<String> commandQueue = new BufferPool<>("<LoginClientService-Client-commandQueue");
 
-        private final BlockingQueue<SendAbleSessionBytes> sessionBytesQueue = new LinkedBlockingQueue<>();
-        public final BlockingQueue<byte[]> receiveClientBytes = new LinkedBlockingQueue<>();
+        private final BufferPool<SendAbleSessionBytes> sessionBytesQueue = new BufferPool<>("<LoginClientService-Client-sessionBytesQueue");
+        public final BufferPool<byte[]> receiveClientBytes = new BufferPool<>("<LoginClientService-Client-receiveClientBytes");
 
         private final HashMap<Integer, ServerSession> sessions = new HashMap<>();
 
@@ -57,12 +58,7 @@ public class LoginClientService {
 
         //取出所有需要向客户端发送的命令 无命令则返回null
         public List<String> fetchCommands() {
-            if (commandQueue.isEmpty()) {
-                return null;
-            }
-            List<String> res = new LinkedList<>();
-            commandQueue.drainTo(res);
-            return res;
+            return commandQueue.drainToList();
         }
 
         public void addSession(ServerSession session) {
@@ -99,7 +95,7 @@ public class LoginClientService {
             }
             List<SendAbleSessionBytes> bytesList = new LinkedList<>();
             if (maxReturnBodySize < 0) {
-                sessionBytesQueue.drainTo(bytesList);
+                sessionBytesQueue.drainToList(bytesList);
             } else {
                 //根据maxReturnBodySize的限制取出队列中的数据返回
                 long currentReturnBodySize = 0L;
@@ -119,12 +115,7 @@ public class LoginClientService {
         //取出所有需要向客户端发送的bytes 取出的bytes会按相同sessionId进行整合 无bytes则阻塞3秒后返回
         public List<SendAbleSessionBytes> fetchBytesBlocked(long maxReturnBodySize) {
             List<SendAbleSessionBytes> bytesList = new LinkedList<>();
-            SendAbleSessionBytes first;
-            try {
-                first = sessionBytesQueue.poll(3, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                return bytesList;
-            }
+            SendAbleSessionBytes first= sessionBytesQueue.poll(3, TimeUnit.SECONDS);
             if (null == first) {
                 return bytesList;
             }
@@ -133,7 +124,7 @@ public class LoginClientService {
                 return bytesList;
             }
             if (maxReturnBodySize < 0) {
-                sessionBytesQueue.drainTo(bytesList);
+                sessionBytesQueue.drainToList(bytesList);
                 return merge(bytesList);
             } else {
                 //根据maxReturnBodySize的限制取出队列中的数据返回
