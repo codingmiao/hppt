@@ -234,19 +234,14 @@ public class ServerSessionManager implements AutoCloseable {
             disposeServerSession(session, "channelInactive");
         }
 
-        private static final class CallBack implements SendAbleSessionBytes.CallBack {
-            private final CompletableFuture<Boolean> future;
-
-            public CallBack(CompletableFuture<Boolean> future) {
-                this.future = future;
-            }
+        private record CallBack(CompletableFuture<Boolean> future) implements SendAbleSessionBytes.CallBack {
 
             @Override
-            public void cb(boolean success) {
-                //锁住当前线程直至字节发送成功，避免缓冲区积压过多数据或后发先至问题
-                future.complete(success);
-            }
-        }
+                    public void cb(boolean success) {
+                        //锁住当前线程直至字节发送成功，避免缓冲区积压过多数据或后发先至问题
+                        future.complete(success);
+                    }
+                }
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) {

@@ -159,7 +159,7 @@ public class LoginClientService {
                 SessionBytes sessionBytes = new SessionBytes(sessionId, BytesUtil.merge(mergeCell.bytesList));
                 SendAbleSessionBytes.CallBack callBack;
                 if (mergeCell.callBacks.size() == 1) {
-                    callBack = mergeCell.callBacks.get(0);
+                    callBack = mergeCell.callBacks.getFirst();
                 } else {
                     callBack = (success) -> {
                         for (SendAbleSessionBytes.CallBack callBack1 : mergeCell.callBacks) {

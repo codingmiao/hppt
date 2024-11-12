@@ -177,33 +177,21 @@ public class ServerTalker {
     }
 
     //处理SendAbleSessionBytes的回调
-    private static final class SendAbleSessionBytesResult {
-        private final boolean success;
-        private final SendAbleSessionBytes.CallBack callBack;
-
-        public SendAbleSessionBytesResult(boolean success, SendAbleSessionBytes.CallBack callBack) {
-            this.success = success;
-            this.callBack = callBack;
-        }
+        private record SendAbleSessionBytesResult(boolean success, SendAbleSessionBytes.CallBack callBack) {
     }
 
     @Slf4j
-    private static final class CbRunnable implements Runnable {
-        private final SendAbleSessionBytesResult sendAbleSessionBytesResult;
-
-        public CbRunnable(SendAbleSessionBytesResult sendAbleSessionBytesResult) {
-            this.sendAbleSessionBytesResult = sendAbleSessionBytesResult;
-        }
+        private record CbRunnable(SendAbleSessionBytesResult sendAbleSessionBytesResult) implements Runnable {
 
         @Override
-        public void run() {
-            try {
-                sendAbleSessionBytesResult.callBack.cb(sendAbleSessionBytesResult.success);
-            } catch (Exception e) {
-                log.warn("CbRunnable err", e);
+            public void run() {
+                try {
+                    sendAbleSessionBytesResult.callBack.cb(sendAbleSessionBytesResult.success);
+                } catch (Exception e) {
+                    log.warn("CbRunnable err", e);
+                }
             }
         }
-    }
 
     private static final BufferPool<SendAbleSessionBytesResult> sendAbleSessionBytesResultQueue
             = new BufferPool<>("ServerTalker.sendAbleSessionBytesResultQueue");

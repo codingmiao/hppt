@@ -134,7 +134,7 @@ public class ClientTalker {
                         if (null != sessionIdCallBack) {
                             sessionIdCallBack.cb(sessionId);
                         } else {
-                            log.warn("没有对应的SessionIdCallBack {}", sessionIdCallBack);
+                            log.warn("没有对应的SessionIdCallBack {}", sessionId);
                         }
                     }
                     case Constant.ScCommands.CloseSession -> {

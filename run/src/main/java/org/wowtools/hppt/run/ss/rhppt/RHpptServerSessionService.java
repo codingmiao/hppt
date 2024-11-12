@@ -6,6 +6,7 @@ import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
+import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.util.BytesUtil;
 import org.wowtools.hppt.common.util.NettyObjectBuilder;
 import org.wowtools.hppt.run.ss.common.ServerSessionService;
@@ -15,6 +16,7 @@ import org.wowtools.hppt.run.ss.pojo.SsConfig;
  * @author liuyu
  * @date 2024/4/15
  */
+@Slf4j
 public class RHpptServerSessionService extends ServerSessionService<ChannelHandlerContext> {
 
     private EventLoopGroup group;
@@ -70,7 +72,11 @@ public class RHpptServerSessionService extends ServerSessionService<ChannelHandl
 
     @Override
     protected void sendBytesToClient(ChannelHandlerContext ctx, byte[] bytes) {
-        BytesUtil.writeToChannelHandlerContext(ctx, bytes);
+        Throwable e = BytesUtil.writeToChannelHandlerContext(ctx, bytes);
+        if (null != e) {
+            log.warn("sendBytesToClient err", e);
+            ctx.close();
+        }
     }
 
     @Override
