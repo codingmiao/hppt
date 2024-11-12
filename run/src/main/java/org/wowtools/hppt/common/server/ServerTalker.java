@@ -130,13 +130,13 @@ public class ServerTalker {
         if (null != fetchBytes && !fetchBytes.isEmpty()) {
             if (DebugConfig.OpenSerialNumber) {
                 for (SendAbleSessionBytes ssb : fetchBytes) {
-                    log.debug("生成向客户端回复的消息 <sessionBytes-SerialNumber {}", ssb.sessionBytes.getSerialNumber());
+                    log.debug("生成向客户端回复的消息 <sessionBytes-SerialNumber {}", ssb.sessionBytes().getSerialNumber());
                 }
             }
 
             sessionBytes = new ArrayList<>(fetchBytes.size());
             for (SendAbleSessionBytes ssb : fetchBytes) {
-                SessionBytes fetchByte = ssb.sessionBytes;
+                SessionBytes fetchByte = ssb.sessionBytes();
                 sessionBytes.add(fetchByte);
             }
             empty = false;
@@ -167,7 +167,7 @@ public class ServerTalker {
 
         if (null != fetchBytes) {
             for (SendAbleSessionBytes fetchByte : fetchBytes) {
-                sendAbleSessionBytesResultQueue.add(new SendAbleSessionBytesResult(success, fetchByte.callBack));
+                sendAbleSessionBytesResultQueue.add(new SendAbleSessionBytesResult(success, fetchByte.callBack()));
             }
         }
 

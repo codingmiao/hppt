@@ -56,6 +56,12 @@ final class PortReceiver implements Receiver {
             }
             log.info("连接建立完成");
             Thread.startVirtualThread(() -> {
+                //休眠一下等待clientSessionService初始化完成，解决native下启动时可能得空指针问题
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
                 //建立连接后，获取时间戳
                 clientSessionService.sendBytesToServer(GridAesCipherUtil.encrypt("dt".getBytes(StandardCharsets.UTF_8)));
                 //等待时间戳返回

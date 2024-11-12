@@ -105,7 +105,7 @@ public class LoginClientService {
                         break;
                     }
                     bytesList.add(next);
-                    currentReturnBodySize += next.sessionBytes.getBytes().length;
+                    currentReturnBodySize += next.sessionBytes().getBytes().length;
                 }
             }
             return merge(bytesList);
@@ -128,14 +128,14 @@ public class LoginClientService {
                 return merge(bytesList);
             } else {
                 //根据maxReturnBodySize的限制取出队列中的数据返回
-                long currentReturnBodySize = first.sessionBytes.getBytes().length;
+                long currentReturnBodySize = first.sessionBytes().getBytes().length;
                 while (currentReturnBodySize < maxReturnBodySize) {
                     SendAbleSessionBytes next = sessionBytesQueue.poll();
                     if (null == next) {
                         break;
                     }
                     bytesList.add(next);
-                    currentReturnBodySize += next.sessionBytes.getBytes().length;
+                    currentReturnBodySize += next.sessionBytes().getBytes().length;
                 }
                 return merge(bytesList);
             }
@@ -150,9 +150,9 @@ public class LoginClientService {
         private static List<SendAbleSessionBytes> merge(List<SendAbleSessionBytes> bytesList) {
             Map<Integer, MergeCell> bytesMap = new HashMap<>();
             for (SendAbleSessionBytes ssb : bytesList) {
-                MergeCell mergeCell = bytesMap.computeIfAbsent(ssb.sessionBytes.getSessionId(), (r) -> new MergeCell());
-                mergeCell.bytesList.add(ssb.sessionBytes.getBytes());
-                mergeCell.callBacks.add(ssb.callBack);
+                MergeCell mergeCell = bytesMap.computeIfAbsent(ssb.sessionBytes().getSessionId(), (r) -> new MergeCell());
+                mergeCell.bytesList.add(ssb.sessionBytes().getBytes());
+                mergeCell.callBacks.add(ssb.callBack());
             }
             List<SendAbleSessionBytes> res = new ArrayList<>(bytesMap.size());
             bytesMap.forEach((sessionId, mergeCell) -> {
