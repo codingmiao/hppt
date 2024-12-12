@@ -64,7 +64,7 @@ clients:
 
 (Note 1: For quick demonstration, the type is chosen as the simplest POST type. In this scenario, the best performing protocol is WebSocket, or you can configure the hppt protocol if you have a dedicated port.)
 
-(Note 2: In actual use, to ensure security, it is recommended to make the `clientId` more complex.)
+(Note 2: In actual use, to ensure security, it is recommended to make the `password` more complex.)
 
 Run the server-side `hppt` (choose one):
 
