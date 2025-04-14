@@ -16,6 +16,12 @@ public abstract class ServerSessionService<CTX> {
 
     private final Receiver<CTX> receiver;
 
+
+    protected boolean running = false;
+
+    /**
+     * @param ssConfig 配置信息
+     */
     public ServerSessionService(SsConfig ssConfig) {
         this.ssConfig = ssConfig;
         if (null == ssConfig.relayScConfig) {
@@ -25,14 +31,59 @@ public abstract class ServerSessionService<CTX> {
             receiver = new SsReceiver<>(ssConfig.relayScConfig, this);
             log.info("--- 中继模式");
         }
+
+        //起一个线程，定期检查服务心跳
+        if (ssConfig.heartbeatTimeout > 0) {
+            Thread.startVirtualThread(() -> {
+                while (running) {
+                    long lt = receiver.getLastHeartbeatTime();
+                    if (lt < 0 || System.currentTimeMillis() - lt < ssConfig.heartbeatTimeout) {
+                        try {
+                            Thread.sleep(ssConfig.heartbeatTimeout);
+                        } catch (InterruptedException ignored) {
+                        }
+                    } else {
+                        break;
+                    }
+
+                }
+                log.warn("服务端心跳监测超时，执行重启");
+                exit("心跳监测失败");
+            });
+        }
+
+    }
+
+    /**
+     * 启动服务 同步阻塞直到发生异常退出
+     *
+     * @param ssConfig 配置信息
+     */
+    public void syncStart(SsConfig ssConfig) {
+        log.info("syncStart {}", this);
+        running = true;
+        try {
+            init(ssConfig);
+        } catch (Exception e) {
+            log.warn("初始化失败 {}", this, e);
+            exit("init err");
+        }
+        while (running) {
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        exit("running stop");
     }
 
     /**
      * 初始化操作，允许阻塞/挂起方法
      *
-     * @param ssConfig
+     * @param ssConfig 配置信息
      */
-    public abstract void init(SsConfig ssConfig) throws Exception;
+    protected abstract void init(SsConfig ssConfig) throws Exception;
 
     /**
      * 发送字节到客户端的具体方法
@@ -77,32 +128,17 @@ public abstract class ServerSessionService<CTX> {
     /**
      * 当发生难以修复的异常等情况时，主动调用此方法结束当前服务，以便后续自动重启等操作
      */
-    public void exit() {
-        log.warn("ServerSessionService exit {}", this);
+    public void exit(String type) {
+        log.warn("ServerSessionService exit,type [{}] service {}",type, this);
         receiver.exit();
         try {
             onExit();
         } catch (Exception e) {
             log.warn("doClose error ", e);
         }
-        synchronized (this) {
-            this.notify();
-        }
+        running = false;
     }
 
-    /**
-     * 阻塞直到exit方法被调用
-     */
-    public void sync() {
-        synchronized (this) {
-            try {
-                this.wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            log.info("sync interrupted");
-        }
-    }
 
     /**
      * 移除无用的上下文，在有异常、上下文关闭等情况下主动调用
@@ -118,5 +154,7 @@ public abstract class ServerSessionService<CTX> {
         }
     }
 
-
+    public Receiver<CTX> getReceiver() {
+        return receiver;
+    }
 }

@@ -37,7 +37,7 @@ public class RPostServerSessionService extends ServerSessionService<RPostCtx> {
     }
 
     @Override
-    public void init(SsConfig ssConfig) throws Exception {
+    protected void init(SsConfig ssConfig) throws Exception {
         startSendThread();
         startReceiveThread();
     }
@@ -61,7 +61,7 @@ public class RPostServerSessionService extends ServerSessionService<RPostCtx> {
                         Thread.sleep(10000);
                     } catch (Exception ex) {
                     }
-                    exit();
+                    exit("发送线程执行异常");
                 }
             }
         });
@@ -90,7 +90,7 @@ public class RPostServerSessionService extends ServerSessionService<RPostCtx> {
                         Thread.sleep(10000);
                     } catch (Exception ex) {
                     }
-                    exit();
+                    exit("接收线程执行异常");
                 }
             }
         });

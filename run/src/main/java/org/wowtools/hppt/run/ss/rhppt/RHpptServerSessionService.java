@@ -26,7 +26,7 @@ public class RHpptServerSessionService extends ServerSessionService<ChannelHandl
     }
 
     @Override
-    public void init(SsConfig ssConfig) throws Exception {
+    protected void init(SsConfig ssConfig) throws Exception {
         group = NettyObjectBuilder.buildEventLoopGroup();
         try {
             Bootstrap bootstrap = new Bootstrap();
@@ -66,7 +66,7 @@ public class RHpptServerSessionService extends ServerSessionService<ChannelHandl
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
             super.exceptionCaught(ctx, cause);
-            exit();
+            exit("netty err:" + cause.getMessage());
         }
     }
 
@@ -82,11 +82,12 @@ public class RHpptServerSessionService extends ServerSessionService<ChannelHandl
     @Override
     protected void closeCtx(ChannelHandlerContext ctx) throws Exception {
         ctx.close();
-        exit();
+        exit("netty closeCtx");
     }
 
     @Override
-    public void onExit() {
-        group.shutdownGracefully();
+    public void onExit() throws Exception {
+        Object c = group.shutdownGracefully().sync().get();
+        log.info("onExit end {}", c);
     }
 }

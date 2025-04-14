@@ -4,7 +4,6 @@ import org.wowtools.hppt.run.ss.common.ServerSessionService;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 服务端，部署在电脑B上
@@ -29,7 +28,7 @@ public class ServerDemo extends ServerSessionService<KafkaCtx> {
     private KafkaUtil.BytesFunction clientConsumer;
 
     @Override
-    public void init(SsConfig ssConfig) throws Exception {
+    protected void init(SsConfig ssConfig) throws Exception {
         //初始化时构造好向kafka生产和消费数据的工具
         sendToClient = KafkaUtil.buildProducer(KafkaUtil.ServerSendTopic);
 
@@ -63,7 +62,6 @@ public class ServerDemo extends ServerSessionService<KafkaCtx> {
         cfg.clients = new ArrayList<>(1);
         cfg.clients.add(client);
         ServerDemo server = new ServerDemo(cfg);
-        server.init(cfg);
-        server.sync();
+        server.syncStart(cfg);
     }
 }

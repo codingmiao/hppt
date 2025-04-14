@@ -27,6 +27,9 @@ public class Constant {
 
         //保持Session活跃 SessionId
         public static final char ActiveSession = '2';
+
+        //心跳消息 后面跟任意字符串
+        public static final char Heartbeat = '3';
     }
 
     //Sc端执行的命令代码
@@ -39,6 +42,9 @@ public class Constant {
 
         //关闭客户端连接 sessionId
         public static final char CloseSession = '2';
+
+        //心跳消息 后面跟任意字符串
+        public static final char Heartbeat = '3';
     }
 
     //Cs端执行的命令代码

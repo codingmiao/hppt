@@ -43,6 +43,8 @@ public class ServerSessionManager implements AutoCloseable {
     private final ServerSessionLifecycle lifecycle;
     private final long sessionTimeout;
 
+    private long lastHeartbeatTime = System.currentTimeMillis();
+
     ServerSessionManager(ServerSessionManagerBuilder builder) {
         lifecycle = builder.lifecycle;
         sessionTimeout = builder.sessionTimeout;
@@ -304,4 +306,11 @@ public class ServerSessionManager implements AutoCloseable {
         }
     }
 
+    public long getLastHeartbeatTime() {
+        return lastHeartbeatTime;
+    }
+
+    public void setLastHeartbeatTime(long lastHeartbeatTime) {
+        this.lastHeartbeatTime = lastHeartbeatTime;
+    }
 }

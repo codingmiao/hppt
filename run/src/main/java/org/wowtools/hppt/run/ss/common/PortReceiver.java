@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2024/9/26
  */
 @Slf4j
-final class PortReceiver<CTX> implements Receiver<CTX> {
+final class PortReceiver<CTX> extends Receiver<CTX> {
     private final ServerSessionService<CTX> serverSessionService;
     private final ServerSessionManager serverSessionManager;
     private final LoginClientService loginClientService;
@@ -186,7 +186,7 @@ final class PortReceiver<CTX> implements Receiver<CTX> {
                         removeCtx(cell.ctx);
                     } catch (Throwable t) {
                         log.error("接收客户端消息错误", t);
-                        serverSessionService.exit();
+                        serverSessionService.exit("接收客户端消息错误");
                     }
                 } else if (!cell.actived) {
                     synchronized (cell.clientActiveWatcher) {
@@ -216,5 +216,10 @@ final class PortReceiver<CTX> implements Receiver<CTX> {
     @Override
     public void exit() {
         serverSessionManager.close();
+    }
+
+    @Override
+    public long getLastHeartbeatTime() {
+        return serverSessionManager.getLastHeartbeatTime();
     }
 }

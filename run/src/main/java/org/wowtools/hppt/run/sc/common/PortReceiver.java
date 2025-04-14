@@ -83,6 +83,21 @@ final class PortReceiver implements Receiver {
                 sendLoginCommand();
                 checkSessionInit();
             });
+
+            //发送心跳包
+            if (config.heartbeatPeriod > 0) {
+                Thread.startVirtualThread(() -> {
+                    while (running) {
+                        try {
+                            Thread.sleep(config.heartbeatPeriod);
+                        } catch (InterruptedException e) {
+                            continue;
+                        }
+                        sendCommandQueue.add(Constant.SsCommands.Heartbeat + ":" + System.currentTimeMillis());
+                    }
+                });
+            }
+
         });
     }
 

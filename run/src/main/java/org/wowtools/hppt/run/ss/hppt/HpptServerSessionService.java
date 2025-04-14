@@ -26,7 +26,7 @@ public class HpptServerSessionService extends ServerSessionService<ChannelHandle
     }
 
     @Override
-    public void init(SsConfig ssConfig) {
+    protected void init(SsConfig ssConfig) {
         bossGroup = NettyObjectBuilder.buildEventLoopGroup(ssConfig.hppt.bossGroupNum);
         workerGroup = NettyObjectBuilder.buildEventLoopGroup(ssConfig.hppt.workerGroupNum);
 

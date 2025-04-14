@@ -9,7 +9,6 @@ import org.wowtools.hppt.run.ss.pojo.SsConfig;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.file.Path;
 
 /**
@@ -65,7 +64,7 @@ public class FileServerSessionService extends ServerSessionService<FileCtx> {
     }
 
     @Override
-    public void init(SsConfig ssConfig) throws Exception {
+    protected void init(SsConfig ssConfig) throws Exception {
 
     }
 

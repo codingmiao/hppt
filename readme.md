@@ -199,6 +199,9 @@ clientPassword: 12345
 rhppt:
   port: 20871
 
+# 心跳包发送周期
+heartbeatPeriod: 30000
+
 forwards:
     # 把192.168.0.2的22端口代理到本机的10022端口
   - localPort: 10022
@@ -256,6 +259,9 @@ port: 20871
 rhppt:
   host: "111.222.33.44"
   port: 20871
+
+# 心跳包检查周期，多少毫秒没有客户端发来心跳包则重启服务
+heartbeatTimeout: 3600000
 
 # 允许的客户端账号和密码
 clients:

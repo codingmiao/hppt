@@ -177,4 +177,15 @@ public class ScConfig extends CommonConfig {
      * 内部字段，是否中继模式，不要尝试从配置文件中配置它
      */
     public boolean isRelay = false;
+
+
+    /**
+     * 心跳周期，若此值大于0，定期向服务端发送心跳包
+     */
+    public long heartbeatPeriod  = -1;
+
+//    /**
+//     * 心跳超时(ms) 若此值大于0，且当客户端超过这段时间没有收到任何服务端发来的心跳包时，会执行重启操作
+//     */
+//    public long heartbeatTimeout = -1;
 }

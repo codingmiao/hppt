@@ -29,6 +29,11 @@ public class SsConfig extends CommonConfig {
     public int port;
 
     /**
+     * 心跳超时(ms) 若此值大于0，且当服务端超过这段时间没有收到任何客户端发来的心跳包时，会执行重启操作
+     */
+    public long heartbeatTimeout = -1;
+
+    /**
      * 发起一个新连接，连接到真实端口并构建会话超时时限(ms)，超时还连不上会关闭session
      */
     public long initSessionTimeout = 30000;

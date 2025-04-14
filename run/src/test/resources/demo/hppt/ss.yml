@@ -7,3 +7,6 @@ clients:
     password: 12345
   - user: user2
     password: 112233
+
+# 心跳包检查周期，多少毫秒没有客户端发来心跳包则重启服务
+heartbeatTimeout: 3600000

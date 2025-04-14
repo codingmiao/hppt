@@ -22,3 +22,5 @@ forwards:
     remoteHost: "192.168.0.3"
     remotePort: 3306
 
+# 心跳包发送周期
+heartbeatPeriod: 30000

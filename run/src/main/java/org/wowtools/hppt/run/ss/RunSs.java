@@ -33,48 +33,27 @@ public class RunSs {
         } catch (Exception e) {
             throw new RuntimeException("读取配置文件异常", e);
         }
-
         while (true) {
-            ServerSessionService<?> sessionService = null;
-            try {
-                log.info("type {}", config.type);
-                sessionService = switch (config.type) {
-                    case "post" -> new PostServerSessionService(config);
-                    case "websocket" -> new WebsocketServerSessionService(config);
-                    case "hppt" -> new HpptServerSessionService(config);
-                    case "rhppt" -> new RHpptServerSessionService(config);
-                    case "rpost" -> new RPostServerSessionService(config);
-                    case "file" -> new FileServerSessionService(config);
-                    default -> throw new IllegalStateException("Unexpected config.type: " + config.type);
-                };
-                final ServerSessionService<?> fs = sessionService;
-                Thread.startVirtualThread(() -> {
-                    try {
-                        fs.init(config);
-                    } catch (Exception e) {
-                        onErr(e, fs);
-                    }
-                });
-                log.info("ServerSessionService init success {}", sessionService);
+            ServerSessionService<?> sessionService;
+            log.info("type {}", config.type);
+            sessionService = switch (config.type) {
+                case "post" -> new PostServerSessionService(config);
+                case "websocket" -> new WebsocketServerSessionService(config);
+                case "hppt" -> new HpptServerSessionService(config);
+                case "rhppt" -> new RHpptServerSessionService(config);
+                case "rpost" -> new RPostServerSessionService(config);
+                case "file" -> new FileServerSessionService(config);
+                default -> throw new IllegalStateException("Unexpected config.type: " + config.type);
+            };
+            sessionService.syncStart(config);
 
-                sessionService.sync();
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e1) {
-                }
-            } catch (Exception e) {
-                onErr(e, sessionService);
+            log.warn("ServerSessionService exit {}", sessionService);
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e1) {
             }
         }
 
     }
 
-    private static void onErr(Exception e, ServerSessionService<?> sessionService) {
-        log.info("----------------------销毁当前Service,10秒后重启", e);
-        try {
-            sessionService.exit();
-        } catch (Exception ex) {
-            log.warn("ServerSessionService exit err", ex);
-        }
-    }
 }

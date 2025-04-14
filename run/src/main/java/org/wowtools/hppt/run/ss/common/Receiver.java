@@ -1,13 +1,20 @@
 package org.wowtools.hppt.run.ss.common;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * @author liuyu
  * @date 2024/9/26
  */
-sealed interface Receiver<CTX> permits PortReceiver, SsReceiver {
-    void receiveClientBytes(CTX ctx, byte[] bytes) throws Exception;
+@Getter
+@Setter
+sealed abstract class Receiver<CTX> permits PortReceiver, SsReceiver {
+    public abstract void receiveClientBytes(CTX ctx, byte[] bytes) throws Exception;
 
-    void removeCtx(CTX ctx);
+    public abstract void removeCtx(CTX ctx);
 
-    void exit();
+    public abstract void exit();
+
+    public abstract long getLastHeartbeatTime();
 }

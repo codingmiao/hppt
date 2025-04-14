@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2024/9/26
  */
 @Slf4j
-final class SsReceiver<CTX> implements Receiver<CTX> {
+final class SsReceiver<CTX> extends Receiver<CTX> {
 
     private final class Cell implements Closeable {
         private final ClientSessionService clientSessionService;
@@ -115,5 +115,10 @@ final class SsReceiver<CTX> implements Receiver<CTX> {
     public void exit() {
         running = false;
         ctxClientSessionServiceMap.forEach((ctx, cell) -> cell.close());
+    }
+
+    @Override
+    public long getLastHeartbeatTime() {
+        return -1;
     }
 }

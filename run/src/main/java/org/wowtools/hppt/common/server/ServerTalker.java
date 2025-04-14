@@ -99,6 +99,10 @@ public class ServerTalker {
                     serverSession.activeSession();
                 }
             }
+            case Constant.SsCommands.Heartbeat -> {
+                log.debug("收到客户端心跳 {}", client.clientId);
+                serverSessionManager.setLastHeartbeatTime(System.currentTimeMillis());
+            }
         }
     }
 
@@ -177,21 +181,21 @@ public class ServerTalker {
     }
 
     //处理SendAbleSessionBytes的回调
-        private record SendAbleSessionBytesResult(boolean success, SendAbleSessionBytes.CallBack callBack) {
+    private record SendAbleSessionBytesResult(boolean success, SendAbleSessionBytes.CallBack callBack) {
     }
 
     @Slf4j
-        private record CbRunnable(SendAbleSessionBytesResult sendAbleSessionBytesResult) implements Runnable {
+    private record CbRunnable(SendAbleSessionBytesResult sendAbleSessionBytesResult) implements Runnable {
 
         @Override
-            public void run() {
-                try {
-                    sendAbleSessionBytesResult.callBack.cb(sendAbleSessionBytesResult.success);
-                } catch (Exception e) {
-                    log.warn("CbRunnable err", e);
-                }
+        public void run() {
+            try {
+                sendAbleSessionBytesResult.callBack.cb(sendAbleSessionBytesResult.success);
+            } catch (Exception e) {
+                log.warn("CbRunnable err", e);
             }
         }
+    }
 
     private static final BufferPool<SendAbleSessionBytesResult> sendAbleSessionBytesResultQueue
             = new BufferPool<>("ServerTalker.sendAbleSessionBytesResultQueue");

@@ -147,23 +147,27 @@ public class BytesUtil {
         return cause;
     }
 
-    private static void waitChannelWritable(Channel channel) {
+    private static Throwable waitChannelWritable(Channel channel) {
         int i = 0;
         while (!channel.isWritable() && channel.isOpen()) {
             i++;
             if (i > 3000) {
-                throw new RuntimeException("waitChannelWritable timeout");
+                return new RuntimeException("waitChannelWritable timeout");
             }
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
             }
         }
+        return null;
     }
 
     //把字节写入ChannelHandlerContext 如果有异常则返回异常
     public static Throwable writeToChannelHandlerContext(ChannelHandlerContext ctx, byte[] bytes) {
-        waitChannelWritable(ctx.channel());
+        Throwable e = waitChannelWritable(ctx.channel());
+        if (null != e) {
+            return e;
+        }
         if (!ctx.channel().isOpen()) {
             return new RuntimeException("channel已关闭");
         }
@@ -174,7 +178,10 @@ public class BytesUtil {
 
     //把字节写入Channel 如果有异常则返回异常
     public static Throwable writeToChannel(Channel channel, byte[] bytes) {
-        waitChannelWritable(channel);
+        Throwable e = waitChannelWritable(channel);
+        if (null != e) {
+            return e;
+        }
         if (!channel.isOpen()) {
             return new RuntimeException("channel已关闭");
         }
@@ -185,7 +192,10 @@ public class BytesUtil {
 
     //把对象写入Channel 如果有异常则返回异常
     public static Throwable writeObjToChannel(Channel channel, Object obj) {
-        waitChannelWritable(channel);
+        Throwable e = waitChannelWritable(channel);
+        if (null != e) {
+            return e;
+        }
         if (!channel.isOpen()) {
             return new RuntimeException("channel已关闭");
         }

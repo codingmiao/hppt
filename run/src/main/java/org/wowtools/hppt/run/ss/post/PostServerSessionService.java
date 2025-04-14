@@ -23,7 +23,7 @@ public class PostServerSessionService extends ServerSessionService<PostCtx> {
     }
 
     @Override
-    public void init(SsConfig ssConfig) throws Exception {
+    protected void init(SsConfig ssConfig) throws Exception {
         log.info("*********");
         server = new NettyHttpServer(ssConfig.port, this, ssConfig);
         server.start();

@@ -28,7 +28,7 @@ public class WebsocketServerSessionService extends ServerSessionService<ChannelH
     }
 
     @Override
-    public void init(SsConfig ssConfig) throws Exception {
+    protected void init(SsConfig ssConfig) throws Exception {
         log.info("*********");
         boss = NettyObjectBuilder.buildEventLoopGroup(ssConfig.websocket.bossGroupNum);
         worker = NettyObjectBuilder.buildEventLoopGroup(ssConfig.websocket.workerGroupNum);
