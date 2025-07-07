@@ -1,0 +1,10 @@
+clientSendTopic: "client-send-02"
+serverSendTopic: "server-send-02"
+tag: tt
+properties:
+  #kafka配置
+  "key.serializer": "org.apache.kafka.common.serialization.StringSerializer"
+  "value.serializer": "org.apache.kafka.common.serialization.ByteArraySerializer"
+  "key.deserializer": "org.apache.kafka.common.serialization.StringDeserializer"
+  "value.deserializer": "org.apache.kafka.common.serialization.ByteArrayDeserializer"
+  "bootstrap.servers": "wsl:9092"

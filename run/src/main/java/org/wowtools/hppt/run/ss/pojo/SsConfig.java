@@ -18,6 +18,12 @@ public class SsConfig extends CommonConfig {
      */
     public String type;
 
+
+    /**
+     * 插件目录，默认在根目录的addons下
+     */
+    public String addonsPath;
+
     /**
      * 中继模式下，配置一个ScConfig，即构造一个sc转发给下一个ss
      */

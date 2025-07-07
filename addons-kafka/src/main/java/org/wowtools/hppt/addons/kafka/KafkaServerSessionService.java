@@ -1,4 +1,4 @@
-package org.wowtools.hppt.kafkademo;
+package org.wowtools.hppt.addons.kafka;
 
 import org.wowtools.hppt.run.ss.common.ServerSessionService;
 import org.wowtools.hppt.run.ss.pojo.SsConfig;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * @author liuyu
  * @date 2024/6/15
  */
-public class ServerDemo extends ServerSessionService<KafkaCtx> {
+public class KafkaServerSessionService extends ServerSessionService<KafkaCtx> {
     //TODO 传输文件等大字节数传播的情况下，需处理kafka字节顺序消费问题
     /*
      * 注：Server类的泛型CTX用以识别客户端的唯一性，所以如果需要支持多个客户端同时访问，考虑从KafkaCtx上下手改造
@@ -19,7 +19,7 @@ public class ServerDemo extends ServerSessionService<KafkaCtx> {
      * */
     private final KafkaCtx singleCtx = new KafkaCtx();
 
-    public ServerDemo(SsConfig ssConfig) {
+    public KafkaServerSessionService(SsConfig ssConfig) {
         super(ssConfig);
     }
 
@@ -61,7 +61,7 @@ public class ServerDemo extends ServerSessionService<KafkaCtx> {
         client.password = "12345";
         cfg.clients = new ArrayList<>(1);
         cfg.clients.add(client);
-        ServerDemo server = new ServerDemo(cfg);
+        KafkaServerSessionService server = new KafkaServerSessionService(cfg);
         server.syncStart(cfg);
     }
 }

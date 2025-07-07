@@ -1,4 +1,4 @@
-package org.wowtools.hppt.kafkademo;
+package org.wowtools.hppt.addons.kafka;
 
 import org.wowtools.hppt.run.sc.common.ClientSessionService;
 import org.wowtools.hppt.run.sc.pojo.ScConfig;
@@ -10,9 +10,9 @@ import java.util.ArrayList;
  * @author liuyu
  * @date 2024/6/15
  */
-public class ClientDemo extends ClientSessionService {
+public class KafkaClientSessionService extends ClientSessionService {
     //TODO 传输文件等大字节数传播的情况下，需处理kafka字节顺序消费问题
-    public ClientDemo(ScConfig config) throws Exception {
+    public KafkaClientSessionService(ScConfig config) throws Exception {
         super(config);
     }
 
@@ -50,7 +50,7 @@ public class ClientDemo extends ClientSessionService {
         forward.remotePort = 22;
         cfg.forwards = new ArrayList<>();
         cfg.forwards.add(forward);
-        new ClientDemo(cfg).sync();
+        new KafkaClientSessionService(cfg).sync();
     }
 
 }

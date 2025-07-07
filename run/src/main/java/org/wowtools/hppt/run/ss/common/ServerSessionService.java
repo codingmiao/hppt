@@ -68,6 +68,7 @@ public abstract class ServerSessionService<CTX> {
             log.warn("初始化失败 {}", this, e);
             exit("init err");
         }
+        log.info("-------syncStart end {}", this);
         while (running) {
             try {
                 Thread.sleep(10000);

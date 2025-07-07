@@ -18,6 +18,11 @@ public class ScConfig extends CommonConfig {
     public int workerGroupNum = 0;
 
     /**
+     * 插件目录，默认在根目录的addons下
+     */
+    public String addonsPath;
+
+    /**
      * 绑定到本机的哪个ip
      */
     public String localHost;

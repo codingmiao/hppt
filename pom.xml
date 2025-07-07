@@ -15,6 +15,7 @@
         <module>_localtest</module>
         <module>kafkademo</module>
         <module>usbdemo</module>
+        <module>addons-kafka</module>
     </modules>
 
     <properties>

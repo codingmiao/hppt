@@ -1,6 +1,8 @@
 package org.wowtools.hppt.run.sc;
 
 import lombok.extern.slf4j.Slf4j;
+import org.wowtools.hppt.common.util.AddonsLoader;
+import org.wowtools.hppt.common.util.ResourcesReader;
 import org.wowtools.hppt.run.sc.common.ClientSessionService;
 import org.wowtools.hppt.run.sc.file.FileClientSessionService;
 import org.wowtools.hppt.run.sc.hppt.HpptClientSessionService;
@@ -26,7 +28,15 @@ public class ClientSessionServiceBuilder {
             case "rhppt" -> new RHpptClientSessionService(config);
             case "rpost" -> new RPostClientSessionService(config);
             case "file" -> new FileClientSessionService(config);
-            default -> throw new IllegalStateException("Unexpected config.type: " + config.type);
+            default -> {
+                String addonsPath = config.addonsPath;
+                if (null == addonsPath) {
+                    addonsPath = ResourcesReader.getRootPath(RunSc.class) + "/addons";
+                }
+                AddonsLoader addonsLoader = new AddonsLoader(addonsPath);
+                Class<?> clazz = addonsLoader.loadClass(config.type);
+                yield (ClientSessionService) clazz.getConstructor(ScConfig.class).newInstance(config);
+            }
         };
     }
 }

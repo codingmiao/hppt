@@ -1,6 +1,7 @@
 package org.wowtools.hppt.run.ss;
 
 import lombok.extern.slf4j.Slf4j;
+import org.wowtools.hppt.common.util.AddonsLoader;
 import org.wowtools.hppt.common.util.Constant;
 import org.wowtools.hppt.common.util.ResourcesReader;
 import org.wowtools.hppt.run.ss.common.ServerSessionService;
@@ -43,7 +44,17 @@ public class RunSs {
                 case "rhppt" -> new RHpptServerSessionService(config);
                 case "rpost" -> new RPostServerSessionService(config);
                 case "file" -> new FileServerSessionService(config);
-                default -> throw new IllegalStateException("Unexpected config.type: " + config.type);
+                default -> {
+                    String addonsPath = config.addonsPath;
+                    if (null == addonsPath) {
+                        addonsPath = ResourcesReader.getRootPath(RunSs.class) + "/addons";
+                    }
+                    AddonsLoader addonsLoader = new AddonsLoader(addonsPath);
+                    Class<?> clazz = addonsLoader.loadClass(config.type);
+                    ServerSessionService in = (ServerSessionService) clazz.getConstructor(SsConfig.class).newInstance(config);
+                    log.info("自定义服务启动成功 {}", clazz);
+                    yield in;
+                }
             };
             sessionService.syncStart(config);
 

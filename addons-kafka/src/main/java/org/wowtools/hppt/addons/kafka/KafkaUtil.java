@@ -1,4 +1,4 @@
-package org.wowtools.hppt.kafkademo;
+package org.wowtools.hppt.addons.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,12 +29,11 @@ public class KafkaUtil {
     static {
         try {
             config = new ObjectMapper(new YAMLFactory())
-                    .readValue(ResourcesReader.readStr(Config.class, "config.yml"), Config.class);
+                    .readValue(ResourcesReader.readStr(Config.class, "config-kafka.yml"), Config.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
-
 
 
     //基本的kafka连接配置
@@ -72,7 +71,7 @@ public class KafkaUtil {
      */
     public static void buildConsumer(String groupId, String topic, BytesFunction cb) {
         Properties props = buildProperties();
-        props.put("group.id", groupId);
+        props.put("group.id", groupId + "-" + config.tag);
         props.put("auto.offset.reset", "latest");
         KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(props);
         // 订阅主题
