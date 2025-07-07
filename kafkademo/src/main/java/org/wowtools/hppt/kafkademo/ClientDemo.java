@@ -45,8 +45,8 @@ public class ClientDemo extends ClientSessionService {
         cfg.clientUser = "user1";
         cfg.clientPassword = "12345";
         ScConfig.Forward forward = new ScConfig.Forward();
-        forward.localPort = 10022;
-        forward.remoteHost = "wsl";
+        forward.localPort = 22022;
+        forward.remoteHost = "127.0.0.1";
         forward.remotePort = 22;
         cfg.forwards = new ArrayList<>();
         cfg.forwards.add(forward);

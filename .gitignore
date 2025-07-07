@@ -39,6 +39,7 @@ logs
 
 
 /run/src/main/resources/*.yml
+/kafkademo/src/main/resources/*.yml
 
 dependency-reduced-pom.xml
 

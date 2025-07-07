@@ -102,33 +102,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- 打native包 -->
-            <plugin>
-                <groupId>org.graalvm.buildtools</groupId>
-                <artifactId>native-maven-plugin</artifactId>
-                <version>${native.maven.plugin.version}</version>
-                <configuration>
-                    <buildArgs>
-                        <arg>-H:+AddAllCharsets</arg>
-                    </buildArgs>
-                    <mainClass>org.wowtools.hppt.run.Run</mainClass>
-                    <imageName>hppt</imageName>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>graalvm-native-build-tools-snapshots</id>
-            <name>GraalVM native-build-tools Snapshots</name>
-            <url>https://raw.githubusercontent.com/graalvm/native-build-tools/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 </project>

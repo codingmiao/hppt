@@ -21,7 +21,7 @@ public class ClientSessionManagerTest {
                 System.out.println("closed");
             }
         }).build();
-        clientSessionManager.bindPort(10001);
-        clientSessionManager.bindPort(10002);
+        clientSessionManager.bindPort(null,10001);
+        clientSessionManager.bindPort(null,10002);
     }
 }

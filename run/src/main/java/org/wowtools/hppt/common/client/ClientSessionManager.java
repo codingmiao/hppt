@@ -62,11 +62,23 @@ public class ClientSessionManager {
                 });
     }
 
-    public boolean bindPort(int port) {
+    /**
+     * 绑定端口, 成功返回true
+     *
+     * @param localHost 本机绑定哪个ip，多网卡有冲突时填写，一般填null即可
+     * @param port      端口
+     * @return 绑定成功返回true
+     */
+    public boolean bindPort(String localHost, int port) {
         synchronized (channels) {
             try {
-                Channel channel = serverBootstrap.bind(port).sync().channel();
-                channel.closeFuture();
+                Channel channel;
+                if (null == localHost) {
+                    channel = serverBootstrap.bind(port).sync().channel();
+                } else {
+                    channel = serverBootstrap.bind(localHost,port).sync().channel();
+                }
+                channel.newSucceededFuture().sync();
                 channels.add(channel);
                 log.debug("bindPort {} success", port);
                 return true;

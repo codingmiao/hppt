@@ -17,7 +17,16 @@ public class ScConfig extends CommonConfig {
      */
     public int workerGroupNum = 0;
 
+    /**
+     * 绑定到本机的哪个ip
+     */
+    public String localHost;
+
     public static final class Forward {
+        /**
+         * 绑定到本机的哪个ip
+         */
+        public String localHost;
         /**
          * 本机代理端口
          */
@@ -184,8 +193,5 @@ public class ScConfig extends CommonConfig {
      */
     public long heartbeatPeriod  = -1;
 
-//    /**
-//     * 心跳超时(ms) 若此值大于0，且当客户端超过这段时间没有收到任何服务端发来的心跳包时，会执行重启操作
-//     */
-//    public long heartbeatTimeout = -1;
+
 }

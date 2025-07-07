@@ -1,5 +1,6 @@
 package org.wowtools.hppt.run.sc.util;
 
+import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.wowtools.hppt.common.client.ClientBytesSender;
 import org.wowtools.hppt.common.client.ClientSessionLifecycle;
@@ -26,7 +27,15 @@ public class ScUtil {
                 .build();
         if (null != config.forwards) {
             for (ScConfig.Forward forward : config.forwards) {
-                boolean res = clientSessionManager.bindPort(forward.localPort);
+                String localHost = forward.localHost;
+                if (StringUtil.isNullOrEmpty(localHost)) {
+                    localHost = config.localHost;
+                }
+                if (StringUtil.isNullOrEmpty(localHost)) {
+                    localHost = null;
+                }
+
+                boolean res = clientSessionManager.bindPort(localHost, forward.localPort);
                 log.info("bind port {} {} -> {}:{}", res ? "success" : "fail",
                         forward.localPort, forward.remoteHost, forward.remotePort);
             }
