@@ -104,7 +104,14 @@ final class PortReceiver implements Receiver {
     @Override
     public void receiveServerBytes(byte[] bytes) throws Exception {
         if (noLogin) {
-            bytes = GridAesCipherUtil.decrypt(bytes);
+            try {
+                bytes = GridAesCipherUtil.decrypt(bytes);
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("无效的字节，舍弃, bytes {}", new String(bytes, StandardCharsets.UTF_8), e);
+                }
+                return;
+            }
             String s = new String(bytes, StandardCharsets.UTF_8);
             String[] cmd = s.split(" ", 2);
             switch (cmd[0]) {

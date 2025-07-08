@@ -10,10 +10,13 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.TopicPartition;
 import org.wowtools.hppt.common.util.ResourcesReader;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -57,7 +60,7 @@ public class KafkaUtil {
     public static BytesFunction buildProducer(String topic) {
         Producer<String, byte[]> producer = new KafkaProducer<>(buildProperties());
         return (bytes -> {
-            ProducerRecord<String, byte[]> record = new ProducerRecord<>(topic, bytes);
+            ProducerRecord<String, byte[]> record = new ProducerRecord<>(topic,0,"x", bytes);
             producer.send(record);
         });
     }
@@ -75,7 +78,12 @@ public class KafkaUtil {
         props.put("auto.offset.reset", "latest");
         KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(props);
         // 订阅主题
-        consumer.subscribe(Collections.singletonList(topic));
+        TopicPartition partition = new TopicPartition(topic, 0);
+        try {
+            consumer.seekToEnd(List.of(partition));
+        } catch (java.lang.IllegalStateException e) {
+            consumer.assign(List.of(partition));
+        }
         {
             ConsumerRecords<String, byte[]> records = consumer.poll(Duration.ofMillis(100));
             for (ConsumerRecord<String, byte[]> record : records) {
