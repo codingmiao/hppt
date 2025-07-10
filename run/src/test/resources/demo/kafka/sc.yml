@@ -1,0 +1,15 @@
+type: 'org.wowtools.hppt.addons.kafka.KafkaClientSessionService'
+
+localHost: 127.0.0.1
+# 客户端用户名，每个sc进程用一个，不要重复
+clientUser: user1
+# 客户端密码
+clientPassword: 12345
+
+#是否启用内容加密，默认启用 需和服务端保持一致
+enableEncrypt: true
+
+forwards:
+  - localPort: 50022
+    remoteHost: "wsl"
+    remotePort: 22

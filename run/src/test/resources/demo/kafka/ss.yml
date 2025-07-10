@@ -1,0 +1,10 @@
+# 通讯协议 客户端与服务端保持一致
+type: 'org.wowtools.hppt.addons.kafka.KafkaServerSessionService'
+
+
+# 允许的客户端账号和密码
+clients:
+  - user: user1
+    password: 12345
+  - user: user2
+    password: 112233

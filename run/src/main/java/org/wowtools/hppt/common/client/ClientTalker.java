@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -18,6 +17,10 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class ClientTalker {
+
+    public interface CommandCallBack {
+        void cb(char type, String param) throws Exception;
+    }
 
     /**
      * 将缓冲区的数据转为满足向服务端发送的字节
@@ -97,7 +100,7 @@ public class ClientTalker {
     //接收服务端发来的字节并做相应处理
     public static boolean receiveServerBytes(CommonConfig config, byte[] responseBody,
                                              ClientSessionManager clientSessionManager, AesCipherUtil aesCipherUtil, BufferPool<String> sendCommandQueue,
-                                             Map<Integer, ClientBytesSender.SessionIdCallBack> sessionIdCallBackMap) throws Exception {
+                                             Map<Integer, ClientBytesSender.SessionIdCallBack> sessionIdCallBackMap, CommandCallBack commandCallBack) throws Exception {
         if (null == responseBody) {
             return true;
         }
@@ -153,6 +156,15 @@ public class ClientTalker {
                         } else {
                             //否则发送关闭消息
                             sendCommandQueue.add(String.valueOf(Constant.SsCommands.CloseSession) + sessionId);
+                        }
+                    }
+                    default -> {
+                        if (null != commandCallBack) {
+                            try {
+                                commandCallBack.cb(type, command.substring(1));
+                            } catch (Exception e) {
+                                log.warn("服务端命令处理错误 {}", command, e);
+                            }
                         }
                     }
                 }

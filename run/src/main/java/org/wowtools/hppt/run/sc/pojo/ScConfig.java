@@ -194,9 +194,9 @@ public class ScConfig extends CommonConfig {
 
 
     /**
-     * 心跳周期，若此值大于0，定期向服务端发送心跳包
+     * 心跳周期 毫秒，若此值大于0，定期向服务端发送心跳包
      */
-    public long heartbeatPeriod  = -1;
+    public long heartbeatPeriod  = 120_000;
 
 
 }

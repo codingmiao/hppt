@@ -102,6 +102,8 @@ public class ServerTalker {
             case Constant.SsCommands.Heartbeat -> {
                 log.debug("收到客户端心跳 {}", client.clientId);
                 serverSessionManager.setLastHeartbeatTime(System.currentTimeMillis());
+                //回发一个心跳包
+                client.addCommand(Constant.ScCommands.Heartbeat + ":" + System.currentTimeMillis());
             }
         }
     }

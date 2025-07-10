@@ -41,6 +41,15 @@ final class PortReceiver implements Receiver {
     private boolean noLogin = true;
 
     private volatile boolean running = true;
+    //服务端回复心跳包的时间
+    private long serverHeartbeatTime = System.currentTimeMillis();
+
+    private final ClientTalker.CommandCallBack commandCallBack = (type, param) -> {
+        if (Constant.ScCommands.Heartbeat == type) {
+            log.info("收到服务端心跳包");
+            serverHeartbeatTime = System.currentTimeMillis();
+        }
+    };
 
 
     public PortReceiver(ScConfig config, ClientSessionService clientSessionService) throws Exception {
@@ -66,7 +75,7 @@ final class PortReceiver implements Receiver {
                 clientSessionService.sendBytesToServer(GridAesCipherUtil.encrypt("dt".getBytes(StandardCharsets.UTF_8)));
                 //等待时间戳返回
                 int n = 0;
-                while (null == dt) {
+                while (null == dt && clientSessionService.running) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
@@ -84,18 +93,30 @@ final class PortReceiver implements Receiver {
                 checkSessionInit();
             });
 
-            //发送心跳包
+            //心跳检测
             if (config.heartbeatPeriod > 0) {
                 Thread.startVirtualThread(() -> {
+                    try {
+                        Thread.sleep(config.heartbeatPeriod / 3);
+                    } catch (InterruptedException e) {
+                    }
                     while (running) {
+                        //发送心跳包
+                        sendCommandQueue.add(Constant.SsCommands.Heartbeat + ":" + System.currentTimeMillis());
+                        //检测服务端心跳回复
+                        if (System.currentTimeMillis() - serverHeartbeatTime > config.heartbeatPeriod * 1.5) {
+                            log.warn("长期未收到服务端心跳，疑似故障，重启");
+                            clientSessionService.exit();
+                        }
+                        log.info("心跳检测正常");
                         try {
                             Thread.sleep(config.heartbeatPeriod);
                         } catch (InterruptedException e) {
                             continue;
                         }
-                        sendCommandQueue.add(Constant.SsCommands.Heartbeat + ":" + System.currentTimeMillis());
                     }
                 });
+
             }
 
         });
@@ -144,7 +165,7 @@ final class PortReceiver implements Receiver {
                     log.warn("未知命令 {}", s);
             }
         } else {
-            ClientTalker.receiveServerBytes(config, bytes, clientSessionManager, aesCipherUtil, sendCommandQueue, sessionIdCallBackMap);
+            ClientTalker.receiveServerBytes(config, bytes, clientSessionManager, aesCipherUtil, sendCommandQueue, sessionIdCallBackMap, commandCallBack);
         }
     }
 

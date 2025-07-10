@@ -30,13 +30,13 @@ public class KafkaServerSessionService extends ServerSessionService<KafkaCtx> {
     @Override
     protected void init(SsConfig ssConfig) throws Exception {
         //初始化时构造好向kafka生产和消费数据的工具
-        sendToClient = KafkaUtil.buildProducer(KafkaUtil.config.serverSendTopic);
+        sendToClient = KafkaUtil.buildProducer(KafkaUtil.config.serverSendTopic, true);
 
         clientConsumer = (bytes) -> {
             //消费到客户端的数据，调用receiveClientBytes方法来接收
             receiveClientBytes(singleCtx, bytes);
         };
-        KafkaUtil.buildConsumer("server", KafkaUtil.config.clientSendTopic, clientConsumer);
+        KafkaUtil.buildConsumer("server", KafkaUtil.config.clientSendTopic, clientConsumer, true);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class KafkaServerSessionService extends ServerSessionService<KafkaCtx> {
         //TODO 关闭kafka生产者和消费者
     }
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         SsConfig cfg = new SsConfig();
         SsConfig.Client client = new SsConfig.Client();
         client.user = "user1";
