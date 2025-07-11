@@ -2,49 +2,44 @@
 
 hppt，一款可通过任意协议转发tcp端口的工具。
 
+——只要两台机器间有任何通讯渠道（如http短连接、websocket、tcp，甚至kafka之类的消息队列），就能让两台机器间任意端口互通！
+
 [中文](./readme.md)&nbsp;&nbsp;&nbsp;&nbsp;[English](./readme_en.md)
 
 [github](https://github.com/codingmiao/hppt)&nbsp;&nbsp;&nbsp;&nbsp;[gitee](https://gitee.com/wowtools/hppt)
 
-
 # 简介
+
 日常工作中，我们常常因为无法访问某些远程端口而带来很多麻烦，例如下面的场景，服务器的防火墙只留了80/443端口用以web访问，
 如果你希望访问到服务器上的数据库、SSH等端口，可以借助本工具把需要的端口映射出来：
 
 ![hppt](_doc/img/1.jpg)
 
 # 快速开始
+
+项目依赖jdk21，如未安装，请先前往[jdk官网](https://jdk.java.net/archive/)下载对应你操作系统的版本。
+
 在[releases](https://github.com/codingmiao/hppt/releases)
 页面下载最新版本编译好的hppt。
 
 或自行下载源码编译：
+
 ```shell
-#jar
 mvn clean package -DskipTests
-
-#可选操作 打native包
-su graalvm
-cd run
-mvn org.graalvm.buildtools:native-maven-plugin:build
 ```
-
-本项目编译成了可执行文件及jar包。
-
-可执行文件无环境依赖、内存占用较少，但因为没有jit支持，性能略逊于jar包执行；
-
-jar包执行性能更好，但多消耗一些内存，如需jar包执行，请先前往[jdk官网](https://jdk.java.net/archive/)下载对应你操作系统版本的jdk21。
 
 ## 示例1 通过http端口，反向代理访问内部服务器SSH端口
 
-假设你有一个服务器集群，仅有一个nginx提供了80/443端口对外访问(111.222.33.44:80)，你想要访问集群中的应用服务器(192.168.0.2)的22端口，则可以按如下结构部署
+假设你有一个服务器集群，仅有一个nginx提供了80/443端口对外访问(111.222.33.44:80)，你想要访问集群中的应用服务器(192.168.0.2)
+的22端口，则可以按如下结构部署
 
 ![示例1](_doc/img/3.jpg)
 
-1、在集群中任一服务器上新建一个hppt目录，并上传hppt.jar（也可用可执行文件 hppt.exe 或 hppt）、ss.yml、logback.xml文件到此目录下:
+1、在集群中任一服务器上新建一个hppt目录，并上传hppt.jar、ss.yml、logback.xml文件到此目录下:
 
 ```
 hppt
-    - hppt.jar (or hppt.exe or hppt_linux_file)
+    - hppt.jar
     - ss.yml
     - logback.xml
 ```
@@ -64,32 +59,18 @@ clients:
     password: 112233
 
 ```
-（注1：作为快速演示，这里的type选择了最简单的post类型，此场景下可按[这篇文档](_doc/demo/websocket.md)配置websocket以获得更高性能，或是有独立端口的话可以按[这篇文档](_doc/demo/hppt.md)配置hppt协议）
+
+（注1：作为快速演示，这里的type选择了最简单的post类型，此场景下可按[这篇文档](_doc/demo/websocket.md)
+配置websocket以获得更高性能，或是有独立端口的话可以按[这篇文档](_doc/demo/hppt.md)配置hppt协议）
 
 （注2：实际应用中，为了确保安全，建议把密码设置得更复杂一些）
 
-执行如下命令运行服务端的hppt（3选1）
+执行如下命令运行服务端的hppt
 
-jar包运行
 ```shell
 cd hppt
 <jdk21_path>/bin/java -jar hppt.jar ss ss.yml
 ```
-
-windows下可执行文件运行
-```shell
-cd hppt
-chcp 65001
-hppt.exe ss ss.yml
-```
-
-linux下可执行文件运行
-```shell
-cd hppt
-./hppt ss ss.yml
-#后台运行用命令  nohup ./hppt ss ss.yml >/dev/null &
-```
-
 
 在nginx上增加一段配置指向hppt
 
@@ -106,11 +87,11 @@ server {
 
 随后，访问`http://111.222.33.44:80/xxx/` 能看到“error 404”字样即证明服务端部署成功。
 
-2、自己笔记本上，新建一个hppt目录，拷贝hppt.jar (or hppt.exe or hppt_linux_file)、sc.yml、logback.xml文件到此目录下:
+2、自己笔记本上，新建一个hppt目录，拷贝hppt.jar 、sc.yml、logback.xml文件到此目录下:
 
 ```
 hppt
-    - hppt.jar (or hppt.exe or hppt_linux_file)
+    - hppt.jar
     - sc.yml
     - logback.xml
 ```
@@ -133,7 +114,7 @@ post:
   # 人为设置的延迟（毫秒），一般填0即可，如果传文件等数据量大、延迟要求低的场景，可以设一个几百毫秒的延迟来降低post请求发送频率
   sendSleepTime: 0
 forwards:
-    # 把192.168.0.2的22端口代理到本机的10022端口
+  # 把192.168.0.2的22端口代理到本机的10022端口
   - localPort: 10022
     remoteHost: "192.168.0.2"
     remotePort: 22
@@ -145,30 +126,16 @@ forwards:
 
 ```
 
-执行如下命令启动客户端的hppt（3选1）
+执行如下命令启动客户端的hppt
 
 jar包运行
+
 ```shell
 cd hppt
 <jdk21_path>/bin/java -jar hppt.jar sc sc.yml
 ```
 
-windows下可执行文件运行
-```shell
-cd hppt
-chcp 65001
-hppt.exe sc sc.yml
-```
-
-linux下可执行文件运行
-```shell
-cd hppt
-./hppt sc sc.yml
-#后台运行用命令  nohup ./hppt ss ss.yml >/dev/null &
-```
-
 随后，你就可以在公司用linux连接工具访问localhost的10022端口，来登录应用服务器了
-
 
 ## 示例2 内网穿透，通过公网转发，访问无公网IP的服务器
 
@@ -176,11 +143,11 @@ cd hppt
 
 ![示例2](_doc/img/4.jpg)
 
-1、公网服务器上，新建一个hppt目录，拷贝hppt.jar（也可用可执行文件 hppt.exe 或 hppt）、sc.yml、logback.xml文件到此目录下:
+1、公网服务器上，新建一个hppt目录，拷贝hppt.jar、sc.yml、logback.xml文件到此目录下:
 
 ```
 hppt
-    - hppt.jar (or hppt.exe or hppt_linux_file)
+    - hppt.jar
     - sc.yml
     - logback.xml
 ```
@@ -203,7 +170,7 @@ rhppt:
 heartbeatPeriod: 30000
 
 forwards:
-    # 把192.168.0.2的22端口代理到本机的10022端口
+  # 把192.168.0.2的22端口代理到本机的10022端口
   - localPort: 10022
     remoteHost: "192.168.0.2"
     remotePort: 22
@@ -214,35 +181,20 @@ forwards:
 
 ```
 
-执行如下命令启动公网服务器上的hppt（3选1）
+执行如下命令启动公网服务器上的hppt
 
 jar包运行
+
 ```shell
 cd hppt
 <jdk21_path>/bin/java -jar hppt.jar sc sc.yml
 ```
 
-windows下可执行文件运行
-```shell
-cd hppt
-chcp 65001
-title "hppt"
-hppt.exe sc sc.yml
-pause
-```
-
-linux下可执行文件运行
-```shell
-cd hppt
-./hppt sc sc.yml
-#后台运行用命令  nohup ./hppt ss ss.yml >/dev/null &
-```
-
-2、家里的台式机上，新建一个hppt目录，拷贝hppt.jar (or hppt.exe or hppt_linux_file)、ss.yml、logback.xml文件到此目录下：
+2、家里的台式机上，新建一个hppt目录，拷贝hppt.jar、ss.yml、logback.xml文件到此目录下：
 
 ```
 hppt
-    - hppt.jar (or hppt.exe or hppt_linux_file)
+    - hppt.jar
     - ss.yml
     - logback.xml
 ```
@@ -272,53 +224,46 @@ clients:
 
 ```
 
-
-执行如下命令启动家里台式机上的hppt（3选1）
+执行如下命令启动家里台式机上的hppt
 
 jar包运行
+
 ```shell
 cd hppt
 <jdk21_path>/bin/java -jar hppt.jar ss ss.yml
 ```
 
-windows下可执行文件运行
-```shell
-cd hppt
-chcp 65001
-title "hppt"
-hppt.exe ss ss.yml
-pause
-```
-
-linux下可执行文件运行
-```shell
-cd hppt
-./hppt ss ss.yml
-#后台运行用命令  nohup ./hppt ss ss.yml >/dev/null &
-```
-
 随后，你就可以在公司用linux连接工具访问111.222.33.44的10022端口，来登录家里的台式机了
 
-
 ## 示例3 编写自定义协议
-如下图所示，A、B两台机器间无法进行通信，但他们都可以访问到机器C上的kafka，本示例演示如何通过编写自定义协议，使得A能够以C上的kafka作为桥梁访问到B上的SSH端口：
+
+下面通过一个用kafka做为“通信协议”的方式，演示如何编写自定义协议。
+
+如下图所示，A、B两台机器间无法进行通信，但他们都可以访问到机器C上的kafka，我们在kafka中做两个topic供客户端发送/消费数据，使得A能够以C上的kafka作为桥梁访问到B上的SSH端口：
 
 ![kafkademo](_doc/img/kafkademo.jpg)
+
+
+### 嵌入到java应用中
 
 首先clone本项目到本地，然后`mvn clean install`把本项目安装到maven。
 
 然后新建一个java工程，引入hppt-run以及kafka等maven依赖
+
 ```xml
-        <dependency>
-            <groupId>org.wowtools.hppt</groupId>
-            <artifactId>run</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
+
+<dependency>
+    <groupId>org.wowtools.hppt</groupId>
+    <artifactId>run</artifactId>
+    <version>1.0-SNAPSHOT</version>
+</dependency>
         <!--继续添加其他依赖-->
 ```
+
 然后就可以编写代码了：
 
 编写一个服务端实现并在机器B上运行，你需要实现如下方法:
+
 ```java
 public class ServerDemo extends ServerSessionService<T> {
 
@@ -345,10 +290,11 @@ public class ServerDemo extends ServerSessionService<T> {
     }
 }
 ```
+
 完整的示例实现请参考[这里](kafkademo/src/main/java/org/wowtools/hppt/kafkademo/ServerDemo.java)
 
-
 编写一个客户端实现并在机器B上运行，你需要实现如下方法:
+
 ```java
 public class ClientDemo extends ClientSessionService {
     public ClientDemo(ScConfig config) throws Exception {
@@ -366,9 +312,60 @@ public class ClientDemo extends ClientSessionService {
     //收到服务端的字节时，主动去调用receiveServerBytes(byte[] bytes)
 }
 ```
+
 完整的示例实现请参考[这里](kafkademo/src/main/java/org/wowtools/hppt/kafkademo/ClientDemo.java)
 
 随后，你就可以通过访问A的10022端口，来连接B上的SSH 22端口了。
+
+### 插件方式运行
+
+也可以编写成一个插件，参考[这个模块](addons-kafka)
+插件开发完后，按如下结构放置文件：
+```
+hppt
+    - addons
+        - addons.jar
+        - config files
+    - hppt.jar
+    - ss.yml or sc.yml
+    - logback.xml
+```
+
+然后在配置文件里`type`属性写上插件类:
+
+ss.yml
+```yaml
+# 通讯协议 客户端与服务端保持一致
+type: 'org.wowtools.hppt.addons.kafka.KafkaServerSessionService'
+
+# 允许的客户端账号和密码
+clients:
+  - user: user1
+    password: 12345
+  - user: user2
+    password: 112233
+```
+
+sc.yml
+```yaml
+type: 'org.wowtools.hppt.addons.kafka.KafkaClientSessionService'
+
+localHost: 127.0.0.1
+# 客户端用户名，每个sc进程用一个，不要重复
+clientUser: user1
+# 客户端密码
+clientPassword: 12345
+
+#是否启用内容加密，默认启用 需和服务端保持一致
+enableEncrypt: true
+
+forwards:
+  - localPort: 10022
+    remoteHost: "wsl"
+    remotePort: 22
+```
+
+参照前面的例子运行即可
 
 # Q&A
 
@@ -394,12 +391,9 @@ scp -P 10022 jdk-21_linux-aarch64_bin.tar.gz   root@xxx:/xxx
 必须使用指定的用户才能连接，数据传输过程中对字节进行了加密以防监听，如果你还需要更多的个性化验证，比如用户登录，可以发邮件到[liuyu@wowtools.org](liuyu@wowtools.org)
 进行定制化开发。
 
-# 后续计划
+## hppt是什么意思
+`hppt`是翻转的`http`，最初，本项目用于把http协议反转以实现两台机器的tcp通信，随着逐渐扩充和完善，本项目不仅支持http协议，而是成为了一个支持任意协议的通用的连接工具，但本项目依然保留了这个带有反转意味的名字o(*￣︶￣*)o
 
-完成rwebsocket协议，优化rpost协议的性能开销
 
-中继模式开发
-
-完善文档和demo
 
 ...(还有什么好玩的想法给我提issue或者发邮件哈)
