@@ -35,9 +35,14 @@ public abstract class ServerSessionService<CTX> {
         //起一个线程，定期检查服务心跳
         if (ssConfig.heartbeatTimeout > 0) {
             Thread.startVirtualThread(() -> {
+                try {
+                    Thread.sleep(ssConfig.heartbeatTimeout);
+                } catch (InterruptedException ignored) {
+                }
                 while (running) {
                     long lt = receiver.getLastHeartbeatTime();
-                    if (lt < 0 || System.currentTimeMillis() - lt < ssConfig.heartbeatTimeout) {
+                    if (lt < 0 || System.currentTimeMillis() - lt < ssConfig.heartbeatTimeout * 1.5) {
+                        log.info("心跳检测正常");
                         try {
                             Thread.sleep(ssConfig.heartbeatTimeout);
                         } catch (InterruptedException ignored) {
@@ -130,7 +135,7 @@ public abstract class ServerSessionService<CTX> {
      * 当发生难以修复的异常等情况时，主动调用此方法结束当前服务，以便后续自动重启等操作
      */
     public void exit(String type) {
-        log.warn("ServerSessionService exit,type [{}] service {}",type, this);
+        log.warn("ServerSessionService exit,type [{}] service {}", type, this);
         receiver.exit();
         try {
             onExit();
