@@ -195,6 +195,10 @@ cd hppt
 
 You can now SSH into your home desktop from work via `111.222.33.44:10022`.
 
+
+## more config
+[more config see this doc](_doc/config.md)
+
 ## Example 3: Custom Protocol Implementation (e.g., Kafka)
 
 If A and B cannot communicate directly but both can access a Kafka server on machine C, you can bridge them via Kafka:
